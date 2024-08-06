@@ -1,16 +1,20 @@
 <template>
-  <div class="card">
-    <h3>Bar Chart</h3>
-    <div id="barChartContainer"></div>
+  <div class="card bar-chart">
+    <div ref="barChartContainer"></div>
   </div>
 </template>
 
 <script>
-import { onMounted } from 'vue';
+import { onMounted, watch, ref } from 'vue';
 import * as d3 from 'd3';
 
 export default {
-  setup() {
+  props: {
+    selectedConstituency: String
+  },
+  setup(props) {
+    const barChartContainer = ref(null);
+
     const fetchGeoJSONData = async () => {
       try {
         const response = await fetch('/path/to/PotholeData for analysis_fileForInterns.geojson');
@@ -29,29 +33,41 @@ export default {
       const counts = geojsonData.features.reduce((acc, feature) => {
         const properties = feature.properties;
         const constituency = properties.constituency;
+        const date = new Date(properties.ComplaintReceived);
+        const month = date.toLocaleString('default', { month: 'short' }) + ' ' + date.getFullYear(); // Format: "Jan 2023"
 
         if (!acc[constituency]) {
-          acc[constituency] = { fixed: 0, unfixed: 0 };
+          acc[constituency] = { months: {}, fixed: 0, unfixed: 0 };
+        }
+
+        if (!acc[constituency].months[month]) {
+          acc[constituency].months[month] = { fixed: 0, unfixed: 0 };
         }
 
         if (properties.PWDVerifiedOn) {
+          acc[constituency].months[month].fixed += 1;
           acc[constituency].fixed += 1;
         } else {
+          acc[constituency].months[month].unfixed += 1;
           acc[constituency].unfixed += 1;
         }
 
         return acc;
       }, {});
 
-      const labels = Object.keys(counts);
-      const fixedCounts = labels.map(label => counts[label].fixed);
-      const unfixedCounts = labels.map(label => counts[label].unfixed);
+      const labels = [...new Set(Object.values(counts).flatMap(c => Object.keys(c.months)))];
+      const processedData = Object.entries(counts).map(([constituency, data]) => ({
+        constituency,
+        months: labels.map(month => data.months[month] || { fixed: 0, unfixed: 0 }),
+        fixedCounts: labels.map(month => (data.months[month] ? data.months[month].fixed : 0)),
+        unfixedCounts: labels.map(month => (data.months[month] ? data.months[month].unfixed : 0)),
+      }));
 
-      return { labels, fixedCounts, unfixedCounts };
+      return { labels, processedData };
     };
 
     const createBarChart = (data) => {
-      const container = d3.select('#barChartContainer');
+      const container = d3.select(barChartContainer.value);
       container.html(''); // Clear any existing charts
 
       const width = 400;
@@ -70,7 +86,7 @@ export default {
         .padding(0.1);
 
       const yScale = d3.scaleLinear()
-        .domain([0, d3.max([...data.fixedCounts, ...data.unfixedCounts])])
+        .domain([0, d3.max(data.processedData.flatMap(d => [...d.fixedCounts, ...d.unfixedCounts]))])
         .range([height, 0]);
 
       const xAxis = d3.axisBottom(xScale);
@@ -95,40 +111,48 @@ export default {
 
       const color = d3.scaleOrdinal()
         .domain(['Fixed Complaints', 'Unfixed Complaints'])
-        .range(['green', 'red']);
+        .range(['#007bff', '#72e5ff']);
 
-      svg.selectAll('.bar.fixed')
-        .data(data.fixedCounts)
-        .enter().append('rect')
-        .attr('class', 'bar fixed')
-        .attr('x', (d, i) => xScale(data.labels[i]))
-        .attr('y', d => yScale(d))
-        .attr('width', xScale.bandwidth() / 2)
-        .attr('height', d => height - yScale(d))
-        .attr('fill', color('Fixed Complaints'));
+      data.processedData.forEach(d => {
+        svg.selectAll(`.bar.fixed.${d.constituency}`)
+          .data(d.fixedCounts)
+          .enter().append('rect')
+          .attr('class', `bar fixed ${d.constituency}`)
+          .attr('x', (d, i) => xScale(data.labels[i]))
+          .attr('y', d => yScale(d))
+          .attr('width', xScale.bandwidth() / 2)
+          .attr('height', d => height - yScale(d))
+          .attr('fill', color('Fixed Complaints'));
 
-      svg.selectAll('.bar.unfixed')
-        .data(data.unfixedCounts)
-        .enter().append('rect')
-        .attr('class', 'bar unfixed')
-        .attr('x', (d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
-        .attr('y', d => yScale(d))
-        .attr('width', xScale.bandwidth() / 2)
-        .attr('height', d => height - yScale(d))
-        .attr('fill', color('Unfixed Complaints'));
+        svg.selectAll(`.bar.unfixed.${d.constituency}`)
+          .data(d.unfixedCounts)
+          .enter().append('rect')
+          .attr('class', `bar unfixed ${d.constituency}`)
+          .attr('x', (d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
+          .attr('y', d => yScale(d))
+          .attr('width', xScale.bandwidth() / 2)
+          .attr('height', d => height - yScale(d))
+          .attr('fill', color('Unfixed Complaints'));
+      });
     };
 
     const updateChart = async () => {
       const geojsonData = await fetchGeoJSONData();
       if (geojsonData) {
-        const processedData = processGeoJSONData(geojsonData);
+        const filteredData = props.selectedConstituency
+          ? geojsonData.features.filter(feature => feature.properties.constituency === props.selectedConstituency)
+          : geojsonData.features;
+
+        const processedData = processGeoJSONData({ features: filteredData });
         createBarChart(processedData);
       }
     };
 
+    watch(() => props.selectedConstituency, updateChart, { immediate: true });
+
     onMounted(updateChart);
 
-    return {};
+    return { barChartContainer };
   }
 };
 </script>
@@ -139,5 +163,7 @@ export default {
   border-radius: 4px;
   padding: 16px;
   margin: 16px;
+  width: 50%; /* Adjust width to fit side by side */
+  height: 50%;
 }
 </style>

@@ -1,16 +1,20 @@
 <template>
-  <div class="card">
-    <h3>Line Chart</h3>
-    <div id="lineChartContainer"></div>
+  <div class="card line-chart">
+    <div ref="lineChartContainer"></div>
   </div>
 </template>
 
 <script>
-import { onMounted } from 'vue';
+import { onMounted, watch, ref } from 'vue';
 import * as d3 from 'd3';
 
 export default {
-  setup() {
+  props: {
+    selectedConstituency: String
+  },
+  setup(props) {
+    const lineChartContainer = ref(null);
+
     const fetchGeoJSONData = async () => {
       try {
         const response = await fetch('/path/to/PotholeData for analysis_fileForInterns.geojson');
@@ -28,22 +32,23 @@ export default {
     const processGeoJSONData = (geojsonData) => {
       const counts = geojsonData.features.reduce((acc, feature) => {
         const properties = feature.properties;
-        const constituency = properties.constituency;
+        const date = new Date(properties.ComplaintReceived);
+        const month = d3.timeFormat('%B')(date);
 
-        if (!acc[constituency]) {
-          acc[constituency] = { fixed: 0, unfixed: 0 };
+        if (!acc[month]) {
+          acc[month] = { fixed: 0, unfixed: 0 };
         }
 
         if (properties.PWDVerifiedOn) {
-          acc[constituency].fixed += 1;
+          acc[month].fixed += 1;
         } else {
-          acc[constituency].unfixed += 1;
+          acc[month].unfixed += 1;
         }
 
         return acc;
       }, {});
 
-      const labels = Object.keys(counts);
+      const labels = Object.keys(counts).sort(d3.ascending);
       const fixedCounts = labels.map(label => counts[label].fixed);
       const unfixedCounts = labels.map(label => counts[label].unfixed);
 
@@ -51,7 +56,7 @@ export default {
     };
 
     const createLineChart = (data) => {
-      const container = d3.select('#lineChartContainer');
+      const container = d3.select(lineChartContainer.value);
       container.html(''); // Clear any existing charts
 
       const width = 400;
@@ -93,62 +98,42 @@ export default {
         .attr('text-anchor', 'end')
         .text('Number of Complaints');
 
-      const lineFixed = d3.line()
+      const line = d3.line()
         .x((d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
         .y(d => yScale(d));
-
-      const lineUnfixed = d3.line()
-        .x((d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
-        .y(d => yScale(d));
-
-      const color = d3.scaleOrdinal()
-        .domain(['Fixed Complaints', 'Unfixed Complaints'])
-        .range(['green', 'red']);
 
       svg.append('path')
         .datum(data.fixedCounts)
         .attr('fill', 'none')
-        .attr('stroke', color('Fixed Complaints'))
+        .attr('stroke', '#007bff')
         .attr('stroke-width', 2)
-        .attr('d', lineFixed);
+        .attr('d', line);
 
       svg.append('path')
         .datum(data.unfixedCounts)
         .attr('fill', 'none')
-        .attr('stroke', color('Unfixed Complaints'))
+        .attr('stroke', '#72e5ff')
         .attr('stroke-width', 2)
-        .attr('d', lineUnfixed);
-
-      svg.selectAll('.dot.fixed')
-        .data(data.fixedCounts)
-        .enter().append('circle')
-        .attr('class', 'dot fixed')
-        .attr('cx', (d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
-        .attr('cy', d => yScale(d))
-        .attr('r', 5)
-        .attr('fill', color('Fixed Complaints'));
-
-      svg.selectAll('.dot.unfixed')
-        .data(data.unfixedCounts)
-        .enter().append('circle')
-        .attr('class', 'dot unfixed')
-        .attr('cx', (d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
-        .attr('cy', d => yScale(d))
-        .attr('r', 5)
-        .attr('fill', color('Unfixed Complaints'));
+        .attr('d', line);
     };
 
     const updateChart = async () => {
       const geojsonData = await fetchGeoJSONData();
       if (geojsonData) {
-        const processedData = processGeoJSONData(geojsonData);
+        const filteredData = props.selectedConstituency
+          ? geojsonData.features.filter(feature => feature.properties.constituency === props.selectedConstituency)
+          : geojsonData.features;
+
+        const processedData = processGeoJSONData({ features: filteredData });
         createLineChart(processedData);
       }
     };
 
+    watch(() => props.selectedConstituency, updateChart, { immediate: true });
+
     onMounted(updateChart);
 
-    return {};
+    return { lineChartContainer };
   }
 };
 </script>
@@ -159,5 +144,7 @@ export default {
   border-radius: 4px;
   padding: 16px;
   margin: 16px;
+  width: 50%; /* Adjust width to fit side by side */
+  height: 50%;
 }
 </style>
