@@ -164,6 +164,6 @@ export default {
   padding: 16px;
   margin: 16px;
   width: 50%; /* Adjust width to fit side by side */
-  height: 50%;
+  height: 30%;
 }
 </style>
