@@ -54,7 +54,7 @@ export default {
       const container = d3.select('#barChartContainer');
       container.html(''); // Clear any existing charts
 
-      const width = 800;
+      const width = 400;
       const height = 400;
       const margin = { top: 20, right: 20, bottom: 100, left: 50 };
 
