@@ -289,4 +289,5 @@ export default {
 .unfixed {
   background-color: #89b5ff; /* Red */
 }
-</style>
+</style> 
+
