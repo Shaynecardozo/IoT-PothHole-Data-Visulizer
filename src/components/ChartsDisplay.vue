@@ -232,8 +232,8 @@ export default {
     <div class="donut-chart">
       <svg ref="donutChart"></svg>
       <div class="legend">
-        <div><span class="color-box fixed"></span> Fixed</div>
-        <div><span class="color-box unfixed"></span> Unfixed</div>
+        <!-- <div><span class="color-box fixed"></span> Fixed</div>
+        <div><span class="color-box unfixed"></span> Unfixed</div> -->
       </div>
     </div>
   </div>
