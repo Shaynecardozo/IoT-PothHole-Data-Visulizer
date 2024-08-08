@@ -1,9 +1,11 @@
 <template>
-  <div class="donut-chart">
-    <svg ref="donutChart"></svg>
-    <div class="legend">
-      <div><span class="color-box fixed"></span> Fixed</div>
-      <div><span class="color-box unfixed"></span> Unfixed</div>
+  <div class="card">
+    <div class="donut-chart">
+      <svg ref="donutChart"></svg>
+      <div class="legend">
+        <!-- <div><span class="color-box fixed"></span> Fixed</div>
+        <div><span class="color-box unfixed"></span> Unfixed</div> -->
+      </div>
     </div>
   </div>
 </template>
@@ -71,15 +73,26 @@ export default {
 </script>
 
 <style scoped>
-.donut-chart {
-  margin-top: 20px;
-  text-align: left;
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px;
+  width: 100%; /* Adjust width as needed */
+  max-width: 400px; /* Optional: Set max-width for responsiveness */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
+.donut-chart {
+  text-align: center;
+}
+
 .legend {
   display: flex;
-  justify-content: left;
+  justify-content: center;
   margin-top: 10px;
 }
+
 .legend .color-box {
   display: inline-block;
   width: 20px;
@@ -87,10 +100,12 @@ export default {
   margin-right: 10px;
   border-radius: 50%;
 }
+
 .fixed {
   background-color: #007bff;
 }
+
 .unfixed {
-  background-color: #72e5ff; /* Color */
+  background-color: #72e5ff;
 }
 </style>

@@ -71,7 +71,7 @@ export default {
       container.html(''); // Clear any existing charts
 
       const width = 400;
-      const height = 400;
+      const height = 200;
       const margin = { top: 20, right: 20, bottom: 100, left: 50 };
 
       const svg = container.append('svg')
