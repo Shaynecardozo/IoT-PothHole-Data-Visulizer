@@ -1,9 +1,14 @@
 const routes = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
+    component: () => import('pages/mainpage.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
+      { path: '', component: () => import('pages/IndexPage.vue') },
+      {
+        path:'/barchart',
+        name:'barchart',
+        component:()=>import('components/BarChart.vue')
+      }
       
     ]
   },
