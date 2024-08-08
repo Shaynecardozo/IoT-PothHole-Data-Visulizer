@@ -214,7 +214,7 @@ export default {
     </div><br>
     <div class="dashboard">
       <div class="card col-4">
-        <q-icon name="favorite" class="icon"></q-icon>
+        <q-icon name="remove_road" class="icon"></q-icon>
         <p class="count">{{ totalComplaints }}</p>
         <h4>Total Complaints</h4>
       </div>
