@@ -218,9 +218,10 @@
       </div>
     </div>
     <div v-if="selectedGauge===null" class="container">
-      <MultiLine :data="iotData" :filter="filter" class="chart" />
+      <MultiLine :data="iotData" :filter="filter1" class="chart" />
+      
       <div class="sidebar">
-        <select v-model="filter" @change="loadData">
+        <select v-model="filter1" @change="loadData">
           <option value="day">Day</option>
           <option value="month">Month</option>
           <option value="year">Year</option>
@@ -232,11 +233,34 @@
           </div>
         </div>
       </div>
+      
     </div>
+
+    <div v-if="selectedGauge===null" class="container">
+      <ComparisonBarChartComponent :data="iotData" :filter="filter2" class="chart" />
+      
+      <div class="sidebar">
+        <select v-model="filter2" @change="loadData">
+          <option value="day">Day</option>
+          <option value="month">Month</option>
+          <option value="year">Year</option>
+        </select>
+        <div class="legend">
+          <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
+            <div class="legend-color" :style="{ backgroundColor: colors(index) }"></div>
+            <span>{{ sensor }}</span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+
   </div>
 </template>
 
 <script>
+import ComparisonBarChartComponent from 'components/ComparisonBarChartComponent.vue';
 import PressureGaugeComponent from 'components/PressureGaugeComponent.vue';
 import LevelGaugeComponent from 'components/LevelGaugeComponent.vue';
 import FlowMeterGaugeComponent from 'components/FlowMeterGaugeComponent.vue';
@@ -249,6 +273,7 @@ import * as d3 from 'd3';
 
 export default {
   components: {
+    ComparisonBarChartComponent,
     PressureGaugeComponent,
     LevelGaugeComponent,
     FlowMeterGaugeComponent,
@@ -272,6 +297,8 @@ export default {
       flow3Data: [],
       flow4Data: [],
       filter: 'day',
+      filter1: 'day',
+      filter2: 'day',
       chartType: 'bar',
       iotData: [],
       sensors: ['Flowmeter 1', 'Flowmeter 2', 'Flowmeter 3', 'Flowmeter 4'],

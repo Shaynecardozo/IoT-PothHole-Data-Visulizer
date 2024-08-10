@@ -1,0 +1,236 @@
+<template>
+    <div class="chart" ref="chartRef"></div>
+  </template>
+  
+  <script setup>
+  import { ref, onMounted, watch, computed } from 'vue';
+  import * as d3 from 'd3';
+  
+  const props = defineProps(['data', 'filter']);
+  const chartRef = ref(null);
+  
+  const sensors = ref(['flowmeter1', 'flowmeter2', 'flowmeter3', 'flowmeter4']);
+  const colors = d3.scaleOrdinal(d3.schemeCategory10);
+  
+  // Compute filtered data
+  const filteredData = computed(() => {
+    if (!props.data || !props.data.length) return [];
+  
+    const parseDate = d3.timeParse("%d-%m-%Y %H:%M");
+  
+    const parsedData = props.data.map(d => {
+      const parsedDate = parseDate(d.date);
+      if (!parsedDate) return null;
+  
+      return {
+        date: parsedDate,
+        flowmeter1: +d['Flowmeter 1'],
+        flowmeter2: +d['Flowmeter 2'],
+        flowmeter3: +d['Flowmeter 3'],
+        flowmeter4: +d['Flowmeter 4'],
+      };
+    }).filter(d => d !== null);
+  
+    let groupedData = [];
+  
+    switch (props.filter) {
+      case 'day':
+        groupedData = d3.groups(parsedData, d => d3.timeDay(d.date))
+          .map(([key, values]) => aggregateSensorData(key, values));
+        break;
+      case 'month':
+        groupedData = d3.groups(parsedData, d => d3.timeMonth(d.date))
+          .map(([key, values]) => aggregateSensorData(key, values));
+        break;
+      case 'year':
+        groupedData = d3.groups(parsedData, d => d3.timeYear(d.date))
+          .map(([key, values]) => aggregateSensorData(key, values));
+        break;
+      default:
+        groupedData = parsedData;
+        break;
+    }
+  
+    return groupedData.map(d => ({
+      date: new Date(d.date),
+      flowmeter1: d.flowmeter1,
+      flowmeter2: d.flowmeter2,
+      flowmeter3: d.flowmeter3,
+      flowmeter4: d.flowmeter4
+    }));
+  });
+  
+  const aggregateSensorData = (date, values) => {
+    const average = (arr) => d3.mean(arr, v => v || 0);
+    return {
+      date: date,
+      flowmeter1: average(values.map(v => v.flowmeter1)),
+      flowmeter2: average(values.map(v => v.flowmeter2)),
+      flowmeter3: average(values.map(v => v.flowmeter3)),
+      flowmeter4: average(values.map(v => v.flowmeter4)),
+    };
+  };
+  
+  // Get axis ticks
+  const getAxisTicks = () => {
+    switch (props.filter) {
+      case 'day':
+        return d3.timeDay.every(1);
+      case 'month':
+        return d3.timeMonth.every(1);
+      case 'year':
+        return d3.timeYear.every(1);
+      default:
+        return d3.timeDay.every(1);
+    }
+  };
+  
+  // Get axis date format
+  const getAxisDateFormat = () => {
+    const getOrdinalSuffix = (day) => {
+      if (day > 3 && day < 21) return 'th';
+      switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    };
+  
+    switch (props.filter) {
+      case 'day':
+        return (date) => {
+          const day = date.getDate();
+          const suffix = getOrdinalSuffix(day);
+          return d3.timeFormat(`%d${suffix} %B`)(date);
+        };
+      case 'month':
+        return d3.timeFormat("%B %Y");
+      case 'year':
+        return d3.timeFormat("%Y");
+      default:
+        return d3.timeFormat("%d-%m-%Y");
+    }
+  };
+  
+  // Get tooltip date format
+  const getTooltipDateFormat = () => {
+    const getOrdinalSuffix = (day) => {
+      if (day > 3 && day < 21) return 'th';
+      switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    };
+  
+    switch (props.filter) {
+      case 'day':
+        return (date) => {
+          const day = date.getDate();
+          const suffix = getOrdinalSuffix(day);
+          return d3.timeFormat(`%d${suffix} %B %Y`)(date);
+        };
+      case 'month':
+        return d3.timeFormat("%B %Y");
+      case 'year':
+        return d3.timeFormat("%Y");
+      default:
+        return d3.timeFormat("%d-%m-%Y");
+    }
+  };
+  
+  // Render chart
+  const renderChart = () => {
+    d3.select(chartRef.value).selectAll('*').remove();
+  
+    if (!filteredData.value.length) return;
+  
+    const margin = { top: 20, right: 20, bottom: 50, left: 60 },
+      width = 1400 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+  
+    const svg = d3.select(chartRef.value)
+      .append('svg')
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+  
+    const x0 = d3.scaleBand().range([0, width]).padding(0.2);
+    const x1 = d3.scaleBand().padding(0.05);
+    const y = d3.scaleLinear().range([height, 0]);
+  
+    x0.domain(filteredData.value.map(d => d.date));
+    x1.domain(sensors.value).range([0, x0.bandwidth()]);
+    y.domain([0, d3.max(filteredData.value, d => d3.max(sensors.value, key => +d[key] || 0))]);
+  
+    const xAxis = svg.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', `translate(0,${height})`)
+      .call(d3.axisBottom(x0).tickFormat(getAxisDateFormat()));
+  
+    xAxis.selectAll('text')
+      .attr('transform', 'rotate(-40)')
+      .style('text-anchor', 'end');
+  
+    svg.append('g')
+      .attr('class', 'y axis')
+      .call(d3.axisLeft(y).ticks(10));
+  
+    const bars = svg.selectAll('.bar-group')
+      .data(filteredData.value)
+      .enter().append('g')
+      .attr('transform', d => `translate(${x0(d.date)},0)`);
+  
+    bars.selectAll('rect')
+      .data(d => sensors.value.map(sensor => ({ key: sensor, value: +d[sensor], date: d.date })))
+      .enter().append('rect')
+      .attr('x', d => x1(d.key))
+      .attr('y', d => y(0))
+      .attr('width', x1.bandwidth())
+      .attr('height', 0)
+      .attr('fill', d => colors(d.key))
+      .transition()
+      .duration(1000)
+      .attr('y', d => y(d.value))
+      .attr('height', d => height - y(d.value));
+  
+    bars.selectAll('rect')
+      .on('mouseover', function(event, d) {
+        d3.select(this).attr('fill', 'orange');
+        const formatDate = getTooltipDateFormat();
+        d3.select(this)
+          .append('title')
+          .text(`Value: ${d.value.toFixed(2)}\n${formatDate(d.date)}`);
+      })
+      .on('mouseout', function(event, d) {
+        d3.select(this).attr('fill', colors(d.key));
+        d3.select(this).select('title').remove();
+      });
+  };
+  
+  onMounted(renderChart);
+  watch([() => props.data, () => props.filter], renderChart);
+  </script>
+  
+  <style scoped>
+  .chart {
+    width: 100%;
+    height: 500px;
+  }
+  
+  .axis text {
+    font-size: 12px;
+  }
+  
+  .legend {
+    font-size: 12px;
+  }
+  .legend rect {
+    stroke: #000;
+    stroke-width: 1px;
+  }
+  </style>
+  
