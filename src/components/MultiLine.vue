@@ -7,7 +7,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import * as d3 from 'd3';
 
 export default {
-  props: ['data', 'filter'],
+  props: ['data', 'filter', 'startDate', 'endDate'],
   setup(props) {
     const chartRef = ref(null);
     const sensors = ref(['flowmeter1', 'flowmeter2', 'flowmeter3', 'flowmeter4']);
@@ -35,11 +35,17 @@ export default {
           };
         }).filter(d => d !== null);
 
+        // Apply date range filter
+        const startDate = props.startDate ? new Date(props.startDate) : new Date(-8640000000000000); // min date
+        const endDate = props.endDate ? new Date(props.endDate) : new Date(8640000000000000); // max date
+
+        const dateFilteredData = parsedData.filter(d => d.date >= startDate && d.date <= endDate);
+
         let groupedData = [];
 
         switch (props.filter) {
           case 'day':
-            groupedData = d3.groups(parsedData, d => d3.timeDay(d.date))
+            groupedData = d3.groups(dateFilteredData, d => d3.timeDay(d.date))
               .map(([key, values]) => ({
                 date: key,
                 flowmeter1: d3.mean(values, d => d.flowmeter1),
@@ -50,7 +56,7 @@ export default {
             break;
 
           case 'month':
-            groupedData = d3.groups(parsedData, d => d3.timeMonth(d.date))
+            groupedData = d3.groups(dateFilteredData, d => d3.timeMonth(d.date))
               .map(([key, values]) => ({
                 date: key,
                 flowmeter1: d3.mean(values, d => d.flowmeter1),
@@ -61,7 +67,7 @@ export default {
             break;
 
           case 'year':
-            groupedData = d3.groups(parsedData, d => d3.timeYear(d.date))
+            groupedData = d3.groups(dateFilteredData, d => d3.timeYear(d.date))
               .map(([key, values]) => ({
                 date: key,
                 flowmeter1: d3.mean(values, d => d.flowmeter1),
@@ -72,7 +78,7 @@ export default {
             break;
 
           default:
-            groupedData = parsedData;
+            groupedData = dateFilteredData;
             break;
         }
 
@@ -270,6 +276,7 @@ export default {
 
     watch(() => props.data, renderChart);
     watch(() => props.filter, renderChart);
+    watch(() => [props.startDate, props.endDate], renderChart);
 
     onMounted(renderChart);
 
