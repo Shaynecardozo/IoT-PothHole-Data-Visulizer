@@ -74,6 +74,7 @@ export default {
       }
       else
       {
+        store.updateLogin;
         router.push('/')
       }
     };

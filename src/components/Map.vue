@@ -1,5 +1,14 @@
 <template>
+
   <q-page style="height: 90vh">
+    <div :class="['drawer', { 'drawer-closed': !isDrawerOpen }]" style="z-index: 10;">
+      <button @click="toggleDrawer" clickable class="menu-icon">☰</button>
+      <ul v-if="isDrawerOpen" class="q-mt-xl">
+        <li clickable @click="RoutePage('/potholes')"><q-icon name="query_stats" /> Analytics</li>
+        <li clickable @click="RoutePage('/map')"><q-icon name="map" /> Map</li>
+        <li clickable @click="RoutePage('/PotholeData')"><q-icon name="edit_road" /> Pothole Dashboard</li>
+      </ul>
+    </div>
     <q-select
       class="q-px-sm"
       v-model="selectedConstituency"
@@ -33,7 +42,7 @@
         @update:model-value="updateMap"
       />
     </div>
-    <div id="map" style="height: 85%"></div>
+    <div id="map" style="height: 85%; z-index: 5;"></div>
     <q-dialog v-model="dialog" persistent>
       <q-card class="custom-dialog">
         <q-card-section>
@@ -74,6 +83,7 @@ import { onMounted, ref, watch } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.heat";
+import { useRouter } from 'vue-router';
 
 export default {
   setup() {
@@ -89,6 +99,18 @@ export default {
     const filteredData = ref(null);
     const dialog = ref(false);
     const selectedPothole = ref({});
+    const isDrawerOpen=ref(true)
+    const router=useRouter();
+
+    const toggleDrawer=()=> {
+      isDrawerOpen.value = !isDrawerOpen.value;
+    }
+
+    const RoutePage=(value)=>
+    {
+      router.push(value);
+      return;
+    }
 
     const createCustomIcon = (isFixed) => {
       return L.divIcon({
@@ -248,12 +270,16 @@ export default {
       selectedConstituency,
       constituencies,
       updateMap,
+      isDrawerOpen,
       filteredData,
       showPending,
       showHeatMap,
       showMarkers,
       selectedPothole,
       dialog,
+      toggleDrawer,
+      RoutePage,
+      router
     };
   },
 };
@@ -277,5 +303,62 @@ export default {
   max-width: 28rem;
   width:100%;
   font-size: 15px;
+}
+.drawer {
+  width: 250px;
+  height: calc(100vh - 50px); /* Adjust height to be below the navbar */
+  position: fixed;
+  top: 50px; /* Height of the navbar */
+  left: 0;
+  background-color: #f4f4f4;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+}
+
+.drawer-closed {
+  width: 60px; /* Narrow width when the drawer is closed */
+  height: fit-content;
+  border-radius:0 50% 50% 0;
+  transition: all 0.3s ease;/* Narrow width when the drawer is closed */
+}
+
+.drawer ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.drawer ul li {
+  padding: 5px 10px;
+  margin:10px 20px;
+  width:fit-content;
+}
+.drawer ul li:hover {
+  transition:all 0.5s ease;
+  cursor:pointer;
+  background-color: blue;
+  border-radius: 20px;
+  color:white
+}
+
+/* Toggle button styling */
+.menu-icon {
+  font-size: 24px;
+  margin: 10px;
+  float: right;
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Main content styling */
+.main-content {
+  margin-left: 250px; /* Adjust margin to fit drawer when it's open */
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}
+
+.shifted-content {
+  margin-left: 60px; /* Adjust margin when drawer is closed */
 }
 </style>

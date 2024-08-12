@@ -1,5 +1,16 @@
 <template>
   <div>
+    <div :class="['drawer', { 'drawer-closed': !isDrawerOpen }]" style="z-index: 10;">
+      <!-- Drawer Toggle Button -->
+      <button @click="toggleDrawer" class="menu-icon">☰</button>
+
+      <!-- Drawer Content -->
+      <ul v-if="isDrawerOpen" class="q-mt-xl">
+        <li clickable @click="RoutePage('/potholes')"><q-icon name="query_stats" /> Analytics</li>
+        <li clickable @click="RoutePage('/map')"><q-icon name="map" /> Map</li>
+        <li clickable @click="RoutePage('/PotholeData')"><q-icon name="edit_road" /> Pothole Dashboard</li>
+      </ul>
+    </div>
     <div>
       <SearchBar
         :constituencies="constituencies"
@@ -48,7 +59,8 @@
         unfixedComplaints: 0,
         data: [],
         constituencies: [],
-        selectedConstituency: ''
+        selectedConstituency: '',
+        isDrawerOpen: true, // State of the left drawer
       };
     },
     mounted() {
@@ -79,13 +91,76 @@
       handleSelectedConstituencyChange(newConstituency) {
         this.selectedConstituency = newConstituency;
         this.updateCounts();
-      }
+      },
+      toggleDrawer() {
+      this.isDrawerOpen = !this.isDrawerOpen;
+    },
+    RoutePage(value){
+      this.$router.push(value)
+    }
     }
   };
   </script>
 
   <style>
-  /* Styles for MainPage.vue if needed */
+/* Navbar styling */
+.navbar {
+  background-color: #333;
+  color: white;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+}
+
+/* Drawer styling */
+.drawer {
+  width: 250px;
+  height: calc(100vh - 50px); /* Adjust height to be below the navbar */
+  position: fixed;
+  top: 50px; /* Height of the navbar */
+  left: 0;
+  background-color: #f4f4f4;
+  overflow-x: hidden;
+  transition: all 0.3s ease;
+
+}
+
+.drawer-closed {
+  width: 60px; /* Narrow width when the drawer is closed */
+  height: fit-content;
+  border-radius:0 50% 50% 0;
+  transition: all 0.3s ease;
+}
+
+.drawer ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.drawer ul li {
+  padding: 5px 10px;
+  margin:10px 20px;
+  width:fit-content;
+}
+.drawer ul li:hover {
+  transition:all 0.5s ease;
+  cursor:pointer;
+  background-color: blue;
+  border-radius: 20px;
+  color:white
+}
+
+/* Toggle button styling */
+.menu-icon {
+  font-size: 24px;
+  margin: 10px;
+  float: right;
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+}
+
   .charts{
     display: flex;
   }
