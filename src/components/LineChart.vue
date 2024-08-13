@@ -55,6 +55,37 @@ export default {
       return { labels, fixedCounts, unfixedCounts };
     };
 
+    const createTooltip = () => {
+      return d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('position', 'absolute')
+        .style('text-align', 'center')
+        .style('width', '150px')
+        .style('height', 'auto')
+        .style('padding', '5px')
+        .style('font', '12px sans-serif')
+        .style('background', 'lightsteelblue')
+        .style('border', '0px')
+        .style('border-radius', '8px')
+        .style('pointer-events', 'none')
+        .style('opacity', 0);
+    };
+
+    const showTooltip = (tooltip, content, event) => {
+      tooltip.html(content)
+        .style('left', `${event.pageX + 5}px`)
+        .style('top', `${event.pageY - 28}px`)
+        .transition()
+        .duration(200)
+        .style('opacity', .9);
+    };
+
+    const hideTooltip = (tooltip) => {
+      tooltip.transition()
+        .duration(500)
+        .style('opacity', 0);
+    };
+
     const createLineChart = (data) => {
       const container = d3.select(lineChartContainer.value);
       container.html(''); // Clear any existing charts
@@ -76,6 +107,7 @@ export default {
 
       const yScale = d3.scaleLinear()
         .domain([0, d3.max([...data.fixedCounts, ...data.unfixedCounts])])
+        .nice()
         .range([height, 0]);
 
       const xAxis = d3.axisBottom(xScale);
@@ -85,7 +117,7 @@ export default {
         .attr('transform', `translate(0, ${height})`)
         .call(xAxis)
         .selectAll('text')
-        .attr('transform', 'rotate(-90)')
+        .attr('transform', 'rotate(-45)')
         .style('text-anchor', 'end');
 
       svg.append('g')
@@ -100,21 +132,86 @@ export default {
 
       const line = d3.line()
         .x((d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
-        .y(d => yScale(d));
+        .y(d => yScale(d))
+        .curve(d3.curveLinear);
 
+      const tooltip = createTooltip();
+
+      // Draw fixed line
       svg.append('path')
         .datum(data.fixedCounts)
         .attr('fill', 'none')
         .attr('stroke', '#007bff')
         .attr('stroke-width', 2)
-        .attr('d', line);
+        .attr('d', line)
+        .on('mousemove', function(event, d) {
+          const bisectDate = d3.bisector((d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2).left;
+          const x0 = d3.pointer(event, this)[0];
+          const i = bisectDate(data.fixedCounts, x0, 1);
+          const month = data.labels[i];
+          const fixedCount = data.fixedCounts[i];
+          const unfixedCount = data.unfixedCounts[i];
+          const content = `Month: ${month}<br>Fixed: ${fixedCount}<br>Unfixed: ${unfixedCount}`;
+          showTooltip(tooltip, content, event);
+        })
+        .on('mouseout', () => hideTooltip(tooltip));
 
+      // Draw unfixed line
       svg.append('path')
         .datum(data.unfixedCounts)
         .attr('fill', 'none')
         .attr('stroke', '#72e5ff')
         .attr('stroke-width', 2)
-        .attr('d', line);
+        .attr('d', line)
+        .on('mousemove', function(event, d) {
+          const bisectDate = d3.bisector((d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2).left;
+          const x0 = d3.pointer(event, this)[0];
+          const i = bisectDate(data.unfixedCounts, x0, 1);
+          const month = data.labels[i];
+          const fixedCount = data.fixedCounts[i];
+          const unfixedCount = data.unfixedCounts[i];
+          const content = `Month: ${month}<br>Fixed: ${fixedCount}<br>Unfixed: ${unfixedCount}`;
+          showTooltip(tooltip, content, event);
+        })
+        .on('mouseout', () => hideTooltip(tooltip));
+
+      // Draw points for fixed line
+      svg.selectAll('.dot.fixed')
+        .data(data.fixedCounts)
+        .enter().append('circle')
+        .attr('class', 'dot fixed')
+        .attr('cx', (d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
+        .attr('cy', d => yScale(d))
+        .attr('r', 3)
+        .style('fill', '#007bff')
+        .on('mousemove', function(event, d) {
+          const index = data.fixedCounts.indexOf(d);
+          const month = data.labels[index];
+          const fixedCount = data.fixedCounts[index];
+          const unfixedCount = data.unfixedCounts[index];
+          const content = `Month: ${month}<br>Fixed: ${fixedCount}<br>Unfixed: ${unfixedCount}`;
+          showTooltip(tooltip, content, event);
+        })
+        .on('mouseout', () => hideTooltip(tooltip));
+
+      // Draw points for unfixed line
+      svg.selectAll('.dot.unfixed')
+        .data(data.unfixedCounts)
+        .enter().append('circle')
+        .attr('class', 'dot unfixed')
+        .attr('cx', (d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
+        .attr('cy', d => yScale(d))
+        .attr('r', 3)
+        .style('fill', '#72e5ff')
+        .on('mousemove', function(event, d) {
+          const index = data.unfixedCounts.indexOf(d);
+          const month = data.labels[index];
+          const fixedCount = data.fixedCounts[index];
+          const unfixedCount = data.unfixedCounts[index];
+          const content = `Month: ${month}<br>Fixed: ${fixedCount}<br>Unfixed: ${unfixedCount}`;
+          showTooltip(tooltip, content, event);
+        })
+        .on('mouseout', () => hideTooltip(tooltip));
     };
 
     const updateChart = async () => {
@@ -146,5 +243,32 @@ export default {
   margin: 16px;
   width: 50%; /* Adjust width to fit side by side */
   height: 50%;
+}
+
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 150px;
+  height: auto;
+  padding: 5px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.dot {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.dot.fixed {
+  fill: #007bff;
+}
+
+.dot.unfixed {
+  fill: #72e5ff;
 }
 </style>
