@@ -67,6 +67,37 @@ export default {
       return { labels, processedData };
     };
 
+    const createTooltip = () => {
+      return d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('position', 'absolute')
+        .style('text-align', 'center')
+        .style('width', '120px')
+        .style('height', 'auto')
+        .style('padding', '2px')
+        .style('font', '12px sans-serif')
+        .style('background', 'lightsteelblue')
+        .style('border', '0px')
+        .style('border-radius', '8px')
+        .style('pointer-events', 'none')
+        .style('opacity', 0);
+    };
+
+    const showTooltip = (tooltip, content, event) => {
+      tooltip.html(content)
+        .style('left', `${event.pageX + 5}px`)
+        .style('top', `${event.pageY - 28}px`)
+        .transition()
+        .duration(200)
+        .style('opacity', .9);
+    };
+
+    const hideTooltip = (tooltip) => {
+      tooltip.transition()
+        .duration(500)
+        .style('opacity', 0);
+    };
+
     const createBarChart = (data) => {
       const container = d3.select(barChartContainer.value);
       container.html(''); // Clear any existing charts
@@ -114,6 +145,9 @@ export default {
         .domain(['Fixed Complaints', 'Unfixed Complaints'])
         .range(['#b56727', '#ed7117']);
 
+      // Create and position the tooltip
+      const tooltip = createTooltip();
+
       data.processedData.forEach(d => {
         svg.selectAll(`.bar.fixed.${d.constituency}`)
           .data(d.fixedCounts)
@@ -123,7 +157,9 @@ export default {
           .attr('y', d => yScale(d))
           .attr('width', xScale.bandwidth() / 2)
           .attr('height', d => height - yScale(d))
-          .attr('fill', color('Fixed Complaints'));
+          .attr('fill', color('Fixed Complaints'))
+          .on('mouseover', (event, d) => showTooltip(tooltip, `Fixed: ${d}`, event))
+          .on('mouseout', () => hideTooltip(tooltip));
 
         svg.selectAll(`.bar.unfixed.${d.constituency}`)
           .data(d.unfixedCounts)
@@ -133,7 +169,9 @@ export default {
           .attr('y', d => yScale(d))
           .attr('width', xScale.bandwidth() / 2)
           .attr('height', d => height - yScale(d))
-          .attr('fill', color('Unfixed Complaints'));
+          .attr('fill', color('Unfixed Complaints'))
+          .on('mouseover', (event, d) => showTooltip(tooltip, `Unfixed: ${d}`, event))
+          .on('mouseout', () => hideTooltip(tooltip));
       });
     };
 
@@ -165,7 +203,21 @@ export default {
   padding: 16px;
   margin: 16px;
   width: 50%; /* Adjust width to fit side by side */
-  height: 30%;
+  height: 50%;
+}
+
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 120px;
+  height: auto;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
 }
 p2{
   text-align: center;
