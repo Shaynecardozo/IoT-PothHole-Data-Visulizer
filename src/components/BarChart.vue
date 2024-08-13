@@ -1,19 +1,38 @@
 <template>
   <div class="card bar-chart">
+    <!-- Icon with click event to open popup -->
+    <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
     <div ref="barChartContainer"></div>
+
+    <!-- Popup Dialog -->
+    <q-dialog v-model="dialog" persistent>
+      <q-card class="popup-card">
+        <q-card-section>
+          <!-- Larger version of the bar chart -->
+          <div ref="popupBarChartContainer" class="popup-chart-container"></div>
+        </q-card-section>
+        <q-card-actions>
+          <q-btn flat label="Close" @click="dialog = false"></q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script>
 import { onMounted, watch, ref } from 'vue';
 import * as d3 from 'd3';
+import { QDialog, QCard, QCardSection, QCardActions, QBtn, QIcon } from 'quasar';
 
 export default {
+  components: { QDialog, QCard, QCardSection, QCardActions, QBtn, QIcon },
   props: {
     selectedConstituency: String
   },
   setup(props) {
     const barChartContainer = ref(null);
+    const popupBarChartContainer = ref(null);
+    const dialog = ref(false);
 
     const fetchGeoJSONData = async () => {
       try {
@@ -34,7 +53,7 @@ export default {
         const properties = feature.properties;
         const constituency = properties.constituency;
         const date = new Date(properties.ComplaintReceived);
-        const month = date.toLocaleString('default', { month: 'short' }) + ' ' + date.getFullYear(); // Format: "Jan 2023"
+        const month = new Date(properties.ComplaintReceived).toLocaleString('default', { month: 'short' }) + ' ' + date.getFullYear(); // Format: "Jan 2023"
 
         if (!acc[constituency]) {
           acc[constituency] = { months: {}, fixed: 0, unfixed: 0 };
@@ -97,15 +116,15 @@ export default {
         .style('opacity', 0);
     };
 
-    const createBarChart = (data) => {
-      const container = d3.select(barChartContainer.value);
-      container.html(''); // Clear any existing charts
+    const createBarChart = (data, container) => {
+      const containerSelection = d3.select(container);
+      containerSelection.html(''); // Clear any existing charts
 
-      const width = 400;
-      const height = 200;
+      const width = container === barChartContainer.value ? 400 : window.innerWidth * 0.75;
+      const height = container === barChartContainer.value ? 200 : window.innerHeight * 0.75;
       const margin = { top: 20, right: 20, bottom: 100, left: 50 };
 
-      const svg = container.append('svg')
+      const svg = containerSelection.append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
         .append('g')
@@ -182,15 +201,22 @@ export default {
           : geojsonData.features;
 
         const processedData = processGeoJSONData({ features: filteredData });
-        createBarChart(processedData);
+        createBarChart(processedData, barChartContainer.value);
       }
+    };
+
+    const openPopup = async () => {
+      dialog.value = true;
+      // Ensure the popup chart is drawn after the dialog opens
+      await updateChart(); // Optional: Fetch and process data again for the popup
+      createBarChart(await fetchGeoJSONData().then(data => processGeoJSONData({ features: props.selectedConstituency ? data.features.filter(feature => feature.properties.constituency === props.selectedConstituency) : data.features })), popupBarChartContainer.value);
     };
 
     watch(() => props.selectedConstituency, updateChart, { immediate: true });
 
     onMounted(updateChart);
 
-    return { barChartContainer };
+    return { barChartContainer, popupBarChartContainer, dialog, openPopup };
   }
 };
 </script>
@@ -203,6 +229,14 @@ export default {
   margin: 16px;
   width: 50%; /* Adjust width to fit side by side */
   height: 50%;
+  position: relative;
+}
+
+.icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
 }
 
 .tooltip {
@@ -217,5 +251,17 @@ export default {
   border-radius: 8px;
   pointer-events: none;
   opacity: 0;
+}
+
+/* Style for the popup card */
+.popup-card {
+  width: 75vw;
+  height: 75vh;
+  position: relative;
+}
+
+.popup-chart-container {
+  width: 100%;
+  height: 100%;
 }
 </style>
