@@ -1,16 +1,13 @@
 <template>
   <div>
-    <div :class="['drawer', { 'drawer-closed': !isDrawerOpen }]" style="z-index: 10;">
-      <!-- Drawer Toggle Button -->
+    <!-- <div :class="['drawer', { 'drawer-closed': !isDrawerOpen }]" style="z-index: 10;">
       <button @click="toggleDrawer" class="menu-icon">☰</button>
-
-      <!-- Drawer Content -->
       <ul v-if="isDrawerOpen" class="q-mt-xl">
         <li clickable @click="RoutePage('/potholes')"><q-icon name="query_stats" /> Analytics</li>
         <li clickable @click="RoutePage('/map')"><q-icon name="map" /> Map</li>
         <li clickable @click="RoutePage('/PotholeData')"><q-icon name="edit_road" /> Pothole Dashboard</li>
       </ul>
-    </div>
+    </div> -->
     <div>
       <SearchBar
         :constituencies="constituencies"

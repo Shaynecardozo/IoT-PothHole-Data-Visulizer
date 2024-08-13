@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="flex justify-center items-center bg-grey-2">
+  <q-page padding style="width:100%" class="flex justify-center items-center bg-grey-2">
     <q-card class="row fullLogin">
       <q-card-section class="col-12 col-md-6 column items-center q-mt-md">
         <q-icon

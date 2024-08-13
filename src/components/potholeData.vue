@@ -1,13 +1,13 @@
 <template>
   <q-page :style-fn="myTweak" padding>
-    <div :class="['drawer', { 'drawer-closed': !isDrawerOpen }]" style="z-index: 10;">
+    <!-- <div :class="['drawer', { 'drawer-closed': !isDrawerOpen }]" style="z-index: 10;">
       <button @click="toggleDrawer" clickable class="menu-icon">☰</button>
       <ul v-if="isDrawerOpen" class="q-mt-xl">
         <li clickable @click="RoutePage('/potholes')"><q-icon name="query_stats" /> Analytics</li>
         <li clickable @click="RoutePage('/map')"><q-icon name="map" /> Map</li>
         <li clickable @click="RoutePage('/PotholeData')"><q-icon name="edit_road" /> Pothole Dashboard</li>
       </ul>
-    </div>
+    </div> -->
     <div class="row q-my-xl">
       <div class="column flex content-center justify-center col-4">
         <q-knob

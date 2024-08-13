@@ -1,45 +1,116 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header class="row justify-between items-center">
-      <q-toolbar>
-        <q-toolbar-title> Pothole Map </q-toolbar-title>
-        <div class="row">
-          <div
-            class="q-mx-sm tabs q-px-md q-py-xs"
-            v-if="checklogin()"
-            clickable
-            @click="handleroute('home')"
-          >
-            Home
-          </div>
-          <div
-            class="q-mx-sm tabs q-px-md q-py-xs"
-            v-if="checklogin()"
-            clickable
-            @click="handleroute('potholes')"
-          >
-            Potholes
-          </div>
-          <div
-            class="q-mx-sm tabs q-px-md q-py-xs"
-            v-if="checklogin()"
-            clickable
-            @click="handleroute('flowmeter')"
-          >
-            Flow Meter
-          </div>
-          <div
-            class="q-mx-sm tabs q-px-md q-py-xs"
-            v-if="checklogin()"
-            clickable
-            @click="handleroute('logout')"
-          >
-            Logout
-          </div>
-        </div>
-      </q-toolbar>
+  <q-layout view="hHh lpR fFf">
+    <!-- Header with Three-Dot Button -->
+    <q-header style="height: 50px;" class="bg-drawer text-white row items-center">
+      <q-btn v-if="checklogin" flat dense round icon="menu" @click="drawer = !drawer" class="text-white" />
+      <div class="q-ml-sm text-h6">Iot Pothole</div>
     </q-header>
 
+    <!-- Drawer/Sidebar -->
+    <q-drawer v-if="checklogin" v-model="drawer" :width="220" side="left" overlay  content-class="bg-drawer">
+      <q-list>
+        <!-- Landing Section with Dropdown -->
+
+          <q-list>
+            <q-item
+              clickable
+              style="gap:32px; font-weight: bold"
+              class="rounded-item row justify-start items-center"
+              @click="navigateTo('/landing')"
+              :class="{ 'bg-active text-active': isActiveRoute('/landing') }"
+            >
+              <q-icon name="home" size="sm" :color="isActiveRoute('/landing') ? 'white' : 'black'" />
+              <q-item-section >Home</q-item-section>
+            </q-item>
+          </q-list>
+
+        <!-- Flowmeter Section with Dropdown -->
+        <q-expansion-item
+          label="Flowmeter"
+          icon="water"
+          :default-opened="false"
+          class="text-bold"
+        >
+          <q-list >
+            <q-item
+              clickable
+              @click="navigateTo('/flowmeter')"
+              :class="{ 'bg-active text-active': isActiveRoute('/flowmeter') }"
+                  style="gap:10px"
+              class="rounded-item q-ml-md row justify-start items-center"
+            >
+              <q-icon name="speed" size="xs" :color="isActiveRoute('/flowmeter') ? 'white' : 'black'" />
+              <q-item-section>Sensors</q-item-section>
+            </q-item>
+          </q-list>
+          <q-list>
+            <q-item
+              clickable
+              @click="navigateTo('/flowmeter')"
+              :class="{ 'bg-active text-active': isActiveRoute('/flowmeter') }"
+                  style="gap:10px"
+              class="rounded-item row q-ml-md row justify-start items-center"
+            >
+              <q-icon name="stacked_bar_chart" size="xs" :color="isActiveRoute('/flowmeter') ? 'white' : 'black'" />
+              <q-item-section>Bar Chart</q-item-section>
+            </q-item>
+          </q-list>
+          <q-list>
+            <q-item
+              clickable
+              @click="navigateTo('/flowmeter')"
+              :class="{ 'bg-active text-active': isActiveRoute('/flowmeter') }"
+                  style="gap:10px"
+              class="rounded-item row q-ml-md row justify-start items-center"
+            >
+              <q-icon name="stacked_line_chart" size="xs" :color="isActiveRoute('/flowmeter') ? 'white' : 'black'" />
+              <q-item-section>Line Graph</q-item-section>
+            </q-item>
+          </q-list>
+        </q-expansion-item>
+        <q-expansion-item
+          label="Potholes"
+          icon="edit_road"
+          class="text-bold"
+          :default-opened="false"
+        >
+          <q-list>
+            <q-item
+              clickable
+              @click="navigateTo('/potholes')"
+              :class="{ 'bg-active text-active': isActiveRoute('/potholes') }"
+                   style="gap:10px"
+              class="rounded-item q-ml-md row row justify-start items-center"
+            >
+              <q-icon name="query_stats" :color="isActiveRoute('/potholes') ? 'white' : 'black'" />
+              <q-item-section>Analytics</q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              @click="navigateTo('/map')"
+              :class="{ 'bg-active text-active': isActiveRoute('/map') }"
+                   style="gap:10px"
+              class="rounded-item q-ml-md row row justify-start items-center"
+            >
+              <q-icon name="map" :color="isActiveRoute('/map') ? 'white' : 'black'" />
+              <q-item-section>Map</q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              @click="navigateTo('/PotholeData')"
+              :class="{ 'bg-active text-active': isActiveRoute('/PotholeData') }"
+                   style="gap:10px"
+              class="rounded-item q-ml-md row row justify-start items-center"
+            >
+              <q-icon name="edit_road" :color="isActiveRoute('/PotholeData') ? 'white' : 'black'" />
+              <q-item-section>Pothole Dashboard</q-item-section>
+            </q-item>
+          </q-list>
+        </q-expansion-item>
+      </q-list>
+    </q-drawer>
+
+    <!-- Page Content -->
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -47,57 +118,81 @@
 </template>
 
 <script>
-import { useLoginStore } from "src/stores/loginStore";
-import { onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useLoginStore } from 'src/stores/loginStore';
 
 export default {
-  name: "layout",
+  name: 'MainLayout',
   setup() {
-    const store = useLoginStore();
+    const drawer = ref(true);
     const router = useRouter();
-    const checklogin = () => {
-      return store.checklogin();
-    };
-    const handleroute = (value) => {
-      if (checklogin() === false) {
-        router.push("/");
+    const route = useRoute();
+    const store = useLoginStore();
+
+    const checklogin = computed(() => {
+      const loggedIn = store.checklogin();
+      if (!loggedIn) {
+        router.push('/'); // Redirect to login page if not logged in
       }
-      else if (value === "home") {
-        router.push("/landing");
-      } else if (value === "potholes") {
-        router.push("/potholes");
-      } else if (value === "flowmeter") {
-        router.push("/flowmeter");
-      } else {
-        store.updateLogin;
-        router.push("/");
-      }
+      return loggedIn;
+    });
+
+    const isActiveRoute = (path) => {
+      return route.path === path;
     };
-    onMounted(
-      () => {
-      handleroute();
-    }
-    )
+
+    const navigateTo = (path) => {
+      router.push(path);
+    };
+
     return {
-      store,
-      router,
+      drawer,
+      isActiveRoute,
+      navigateTo,
       checklogin,
-      handleroute,
     };
   },
 };
 </script>
 
-<style>
-.tabs:hover {
-  transition: all;
-  transition-duration: 0.3s;
-  background-color: black;
-  text-decoration: underline;
-  cursor: pointer;
+<style scoped>
+/* Styles for the q-drawer and its contents */
+.q-drawer {
+  transition: all 0.3s ease; /* Smooth transition for opening and closing drawer */
 }
-.tabs {
-  border-radius: 20px;
+
+.q-item-section {
+  font-weight: bold;
+  color: white; /* Makes the text inside the drawer white */
 }
+
+.bg-drawer {
+
+  background-color: green !important; /* Green background */
+}
+
+.text-active {
+  color: white!important; /* Text color for selected items */
+}
+
+.rounded-item {
+  border-top-left-radius: 50px; /* Customize the radius for rounded corners */
+  border-bottom-left-radius: 50px;
+}
+
+.bg-active {
+  background-color: rgb(57, 168, 83) !important; /* Background for active items */
+}
+
+.q-item {
+  color: black; /* Text color for items */
+  background-color: transparent; /* Transparent background by default */
+  font-weight: normal;
+}
+
+.q-item:hover {
+  background-color: rgb(114, 171, 140) !important; /* Highlight background on hover */
+}
+
 </style>

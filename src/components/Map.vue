@@ -1,6 +1,6 @@
 <template>
   <q-page style="height: 90vh">
-    <div
+    <!-- <div
       :class="['drawer', { 'drawer-closed': !isDrawerOpen }]"
       style="z-index: 10"
     >
@@ -14,7 +14,7 @@
           <q-icon name="edit_road" /> Pothole Dashboard
         </li>
       </ul>
-    </div>
+    </div> -->
     <div class="Mapdrawer">
       <h4
         class="text-center flex items-center justify-center text-bold"
@@ -367,8 +367,6 @@ export default {
 }
 .custom-dialog {
   position: absolute;
-  top: 10%;
-  right: 0;
   max-width: 28rem;
   width: 100%;
   font-size: 15px;
@@ -387,6 +385,7 @@ export default {
 .drawer-closed {
   width: 60px;
   height: fit-content;
+  top:150px;
   border-radius: 0 50% 50% 0;
   transition: all 0.3s ease;
 }
