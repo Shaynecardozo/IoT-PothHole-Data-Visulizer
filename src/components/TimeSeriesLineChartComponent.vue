@@ -6,10 +6,29 @@
 import * as d3 from 'd3';
 
 export default {
-  props: ['data', 'filter'],
+  props: {
+    data: {
+      type: Array,
+      required: true
+    },
+    filter: {
+      type: String,
+      default: 'day'
+    },
+    startDate: {
+      type: Date,
+      default: () => new Date(-8640000000000000) // Very early date if not specified
+    },
+    endDate: {
+      type: Date,
+      default: () => new Date(8640000000000000) // Very late date if not specified
+    }
+  },
   watch: {
     data: 'renderChart',
-    filter: 'renderChart'
+    filter: 'renderChart',
+    startDate: 'renderChart',
+    endDate: 'renderChart'
   },
   mounted() {
     this.renderChart();
@@ -112,6 +131,8 @@ export default {
       if (!this.data || !this.data.length) return [];
 
       const parseDate = d3.timeParse("%d-%m-%Y %H:%M");
+      const start = new Date(this.startDate);
+      const end = new Date(this.endDate);
 
       try {
         const parsedData = this.data.map(d => {
@@ -126,11 +147,14 @@ export default {
           };
         }).filter(d => d !== null);
 
+        // Filter data within the custom range
+        const filteredData = parsedData.filter(d => d.date >= start && d.date <= end);
+
         let groupedData = [];
 
         switch (this.filter) {
           case 'day':
-            groupedData = d3.groups(parsedData, d => d3.timeDay(d.date))
+            groupedData = d3.groups(filteredData, d => d3.timeDay(d.date))
               .map(([key, values]) => ({
                 date: key,
                 value: d3.mean(values, d => d.value)
@@ -138,15 +162,18 @@ export default {
             break;
 
           case 'month':
-            groupedData = d3.groups(parsedData, d => d3.timeMonth(d.date))
-              .map(([key, values]) => ({
-                date: key,
-                value: d3.mean(values, d => d.value)
-              }));
+            groupedData = d3.groups(filteredData, d => {
+              const month = d3.timeMonth(d.date);
+              return new Date(month.getFullYear(), month.getMonth(), 1);
+            })
+            .map(([key, values]) => ({
+              date: key,
+              value: d3.mean(values, d => d.value)
+            }));
             break;
 
           case 'year':
-            groupedData = d3.groups(parsedData, d => d3.timeYear(d.date))
+            groupedData = d3.groups(filteredData, d => d3.timeYear(d.date))
               .map(([key, values]) => ({
                 date: key,
                 value: d3.mean(values, d => d.value)
@@ -154,7 +181,7 @@ export default {
             break;
 
           default:
-            groupedData = parsedData;
+            groupedData = filteredData;
             break;
         }
 

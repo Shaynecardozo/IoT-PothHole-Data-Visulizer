@@ -1,48 +1,63 @@
 <template>
-
   <q-page style="height: 90vh">
-    <div :class="['drawer', { 'drawer-closed': !isDrawerOpen }]" style="z-index: 10;">
+    <div
+      :class="['drawer', { 'drawer-closed': !isDrawerOpen }]"
+      style="z-index: 10"
+    >
       <button @click="toggleDrawer" clickable class="menu-icon">☰</button>
       <ul v-if="isDrawerOpen" class="q-mt-xl">
-        <li clickable @click="RoutePage('/potholes')"><q-icon name="query_stats" /> Analytics</li>
+        <li clickable @click="RoutePage('/potholes')">
+          <q-icon name="query_stats" /> Analytics
+        </li>
         <li clickable @click="RoutePage('/map')"><q-icon name="map" /> Map</li>
-        <li clickable @click="RoutePage('/PotholeData')"><q-icon name="edit_road" /> Pothole Dashboard</li>
+        <li clickable @click="RoutePage('/PotholeData')">
+          <q-icon name="edit_road" /> Pothole Dashboard
+        </li>
       </ul>
     </div>
-    <q-select
-      class="q-px-sm"
-      v-model="selectedConstituency"
-      :options="constituencies"
-      label="Filter by Constituency"
-      clearable
-      @update:model-value="updateMap"
-      multiple
-      use-chips
-    />
-    <div class="row">
-      <q-checkbox
-        class="col-4"
-        style="border: 1px solid black"
-        v-model="showMarkers"
-        label="Markers"
+    <div class="Mapdrawer">
+      <h4
+        class="text-center flex items-center justify-center text-bold"
+        style="margin: 10px 0px"
+      >
+        <q-icon name="settings" />Settings
+      </h4>
+      <div class="column">
+        <q-toggle
+          v-model="showMarkers"
+          color="blue"
+          class="col-4 q-my-sm"
+          label="Markers"
+          @update:model-value="updateMap"
+        />
+        <q-toggle
+          v-model="showHeatMap"
+          color="blue"
+          class="col-4 q-my-sm"
+          label="Heatmap"
+          @update:model-value="updateMap"
+        />
+        <q-toggle
+          v-model="showPending"
+          color="blue"
+          class="col-4 q-my-sm"
+          label="Unfixed Potholes"
+          @update:model-value="updateMap"
+        />
+      </div>
+      <q-select
+        class="q-px-sm"
+        style="border-top: 1px solid black"
+        v-model="selectedConstituency"
+        :options="constituencies"
+        label="Filter by Constituency"
+        clearable
         @update:model-value="updateMap"
-      />
-      <q-checkbox
-        style="border: 1px solid black"
-        class="col-4"
-        v-model="showHeatMap"
-        label="Heatmap"
-        @update:model-value="updateMap"
-      />
-      <q-checkbox
-        class="col-4"
-        style="border: 1px solid black"
-        v-model="showPending"
-        label="Unfixed Potholes"
-        @update:model-value="updateMap"
+        multiple
+        use-chips
       />
     </div>
-    <div id="map" style="height: 85%; z-index: 5;"></div>
+    <div id="map" style="height: 100%; z-index: 5"></div>
     <q-dialog v-model="dialog" persistent>
       <q-card class="custom-dialog">
         <q-card-section>
@@ -55,19 +70,60 @@
         >
           <div class="row">
             <strong class="col-6"><q-icon name="edit_road" /> Id</strong
-            ><span class="q-pl-sm">: {{ selectedPothole.id ? selectedPothole.id : "NA" }}</span>
+            ><span class="q-pl-sm"
+              >: {{ selectedPothole.id ? selectedPothole.id : "NA" }}</span
+            >
             <strong class="col-6"><q-icon name="area_chart" /> Area</strong
-            ><span class="q-pl-sm">: {{ selectedPothole.area ? selectedPothole.area : "NA" }}</span>
+            ><span class="q-pl-sm"
+              >: {{ selectedPothole.area ? selectedPothole.area : "NA" }}</span
+            >
             <strong class="col-6"><q-icon name="build" /> FIxed On</strong
-            ><span class=" q-pl-sm">: {{ selectedPothole.FixedOn ? selectedPothole.FixedOn : "NA" }}</span>
-            <strong class="col-6"><q-icon name="location_on" /> Constituency</strong
-            ><span class=" q-pl-sm">: {{ selectedPothole.constituency ? selectedPothole.constituency : "NA" }}</span>
-            <strong class="col-6"><q-icon name="verified" /> PWD verified on</strong
-            ><span class="q-pl-sm">: {{ selectedPothole.PWDVerifiedOn? selectedPothole.PWDVerifiedOn : "NA" }}</span>
-            <strong class="col-6"><q-icon name="priority_high" /> Complaint Recieved on</strong
-            ><span class="q-pl-sm">: {{ selectedPothole.ComplaintReceived ? selectedPothole.ComplaintReceived : "NA" }}</span>
-            <strong class="col-6"><q-icon name="assignment_ind" /> Assigned to Contractor</strong
-            ><span class="q-pl-sm">: {{ selectedPothole.AssignedToContractor ? selectedPothole.AssignedToContractor : "NA" }}</span>
+            ><span class="q-pl-sm"
+              >:
+              {{
+                selectedPothole.FixedOn ? selectedPothole.FixedOn : "NA"
+              }}</span
+            >
+            <strong class="col-6"
+              ><q-icon name="location_on" /> Constituency</strong
+            ><span class="q-pl-sm"
+              >:
+              {{
+                selectedPothole.constituency
+                  ? selectedPothole.constituency
+                  : "NA"
+              }}</span
+            >
+            <strong class="col-6"
+              ><q-icon name="verified" /> PWD verified on</strong
+            ><span class="q-pl-sm"
+              >:
+              {{
+                selectedPothole.PWDVerifiedOn
+                  ? selectedPothole.PWDVerifiedOn
+                  : "NA"
+              }}</span
+            >
+            <strong class="col-6"
+              ><q-icon name="priority_high" /> Complaint Recieved on</strong
+            ><span class="q-pl-sm"
+              >:
+              {{
+                selectedPothole.ComplaintReceived
+                  ? selectedPothole.ComplaintReceived
+                  : "NA"
+              }}</span
+            >
+            <strong class="col-6"
+              ><q-icon name="assignment_ind" /> Assigned to Contractor</strong
+            ><span class="q-pl-sm"
+              >:
+              {{
+                selectedPothole.AssignedToContractor
+                  ? selectedPothole.AssignedToContractor
+                  : "NA"
+              }}</span
+            >
           </div>
         </q-card-section>
         <q-card-actions align="center">
@@ -83,7 +139,7 @@ import { onMounted, ref, watch } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.heat";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 export default {
   setup() {
@@ -99,18 +155,17 @@ export default {
     const filteredData = ref(null);
     const dialog = ref(false);
     const selectedPothole = ref({});
-    const isDrawerOpen=ref(true)
-    const router=useRouter();
+    const isDrawerOpen = ref(true);
+    const router = useRouter();
 
-    const toggleDrawer=()=> {
+    const toggleDrawer = () => {
       isDrawerOpen.value = !isDrawerOpen.value;
-    }
+    };
 
-    const RoutePage=(value)=>
-    {
+    const RoutePage = (value) => {
       router.push(value);
       return;
-    }
+    };
 
     const createCustomIcon = (isFixed) => {
       return L.divIcon({
@@ -134,8 +189,10 @@ export default {
           features: geoJSONData.value.features.filter(
             (feature) =>
               selectedConstituency.value === null ||
-              selectedConstituency.value.includes(feature.properties.constituency)||
-              selectedConstituency.value.length===0
+              selectedConstituency.value.includes(
+                feature.properties.constituency
+              ) ||
+              selectedConstituency.value.length === 0
           ),
         };
       } else {
@@ -143,13 +200,18 @@ export default {
           type: "FeatureCollection",
           features: geoJSONData.value.features.filter(
             (feature) =>
-            ((selectedConstituency.value === null && !feature.properties.FixedOn) ||
-              (selectedConstituency.value.includes(feature.properties.constituency) && !feature.properties.FixedOn) ||
-              (selectedConstituency.value.length===0) && !feature.properties.FixedOn)
-             // (selectedConstituency.value === null &&
-               // !feature.properties.FixedOn) ||
-              //(feature.properties.constituency === selectedConstituency.value &&
-                //!feature.properties.FixedOn)
+              (selectedConstituency.value === null &&
+                !feature.properties.FixedOn) ||
+              (selectedConstituency.value.includes(
+                feature.properties.constituency
+              ) &&
+                !feature.properties.FixedOn) ||
+              (selectedConstituency.value.length === 0 &&
+                !feature.properties.FixedOn)
+            // (selectedConstituency.value === null &&
+            // !feature.properties.FixedOn) ||
+            //(feature.properties.constituency === selectedConstituency.value &&
+            //!feature.properties.FixedOn)
           ),
         };
       }
@@ -240,9 +302,11 @@ export default {
             type: "FeatureCollection",
             features: geoJSONData.value.features.filter(
               (feature) =>
-              selectedConstituency.value === null ||
-              selectedConstituency.value.includes(feature.properties.constituency)||
-              selectedConstituency.value.length===0
+                selectedConstituency.value === null ||
+                selectedConstituency.value.includes(
+                  feature.properties.constituency
+                ) ||
+                selectedConstituency.value.length === 0
             ),
           };
         } else {
@@ -250,9 +314,14 @@ export default {
             type: "FeatureCollection",
             features: geoJSONData.value.features.filter(
               (feature) =>
-              ((selectedConstituency.value === null && !feature.properties.FixedOn) ||
-              (selectedConstituency.value.includes(feature.properties.constituency) && !feature.properties.FixedOn) ||
-              (selectedConstituency.value.length===0) && !feature.properties.FixedOn)
+                (selectedConstituency.value === null &&
+                  !feature.properties.FixedOn) ||
+                (selectedConstituency.value.includes(
+                  feature.properties.constituency
+                ) &&
+                  !feature.properties.FixedOn) ||
+                (selectedConstituency.value.length === 0 &&
+                  !feature.properties.FixedOn)
             ),
           };
         }
@@ -279,7 +348,7 @@ export default {
       dialog,
       toggleDrawer,
       RoutePage,
-      router
+      router,
     };
   },
 };
@@ -301,7 +370,7 @@ export default {
   top: 10%;
   right: 0;
   max-width: 28rem;
-  width:100%;
+  width: 100%;
   font-size: 15px;
 }
 .drawer {
@@ -316,10 +385,10 @@ export default {
 }
 
 .drawer-closed {
-  width: 60px; /* Narrow width when the drawer is closed */
+  width: 60px;
   height: fit-content;
-  border-radius:0 50% 50% 0;
-  transition: all 0.3s ease;/* Narrow width when the drawer is closed */
+  border-radius: 0 50% 50% 0;
+  transition: all 0.3s ease;
 }
 
 .drawer ul {
@@ -329,36 +398,35 @@ export default {
 
 .drawer ul li {
   padding: 5px 10px;
-  margin:10px 20px;
-  width:fit-content;
+  margin: 10px 20px;
+  width: fit-content;
 }
 .drawer ul li:hover {
-  transition:all 0.5s ease;
-  cursor:pointer;
+  transition: all 0.5s ease;
+  cursor: pointer;
   background-color: blue;
   border-radius: 20px;
-  color:white
+  color: white;
 }
 
-/* Toggle button styling */
+.Mapdrawer {
+  width: 250px;
+  height: calc(100vh - 50px); /* Adjust height to be below the navbar */
+  position: fixed;
+  top: 50px; /* Height of the navbar */
+  right: 0;
+  z-index: 10;
+  background-color: white;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+}
 .menu-icon {
   font-size: 24px;
-  margin: 10px;
   float: right;
+  margin: 10px 10px;
   background: none;
   border: none;
   color: #333;
   cursor: pointer;
-}
-
-/* Main content styling */
-.main-content {
-  margin-left: 250px; /* Adjust margin to fit drawer when it's open */
-  padding: 20px;
-  transition: margin-left 0.3s ease;
-}
-
-.shifted-content {
-  margin-left: 60px; /* Adjust margin when drawer is closed */
 }
 </style>

@@ -7,7 +7,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import * as d3 from 'd3';
 
 export default {
-  props: ['data', 'filter'],
+  props: ['data', 'filter', 'startDate', 'endDate'],
   setup(props) {
     const chartRef = ref(null);
     const sensors = ref(['flowmeter1', 'flowmeter2', 'flowmeter3', 'flowmeter4']);
@@ -22,7 +22,7 @@ export default {
         const parsedData = props.data.map(d => {
           const parsedDate = parseDate(d.date);
           if (!parsedDate) {
-            console.warn(`Invalid date format for value: ${d.date}`);
+            // console.warn(`Invalid date format for value: ${d.date}`);
             return null;
           }
           return {
@@ -35,11 +35,17 @@ export default {
           };
         }).filter(d => d !== null);
 
+        // Apply date range filter
+        const startDate = props.startDate ? new Date(props.startDate) : new Date(-8640000000000000); // min date
+        const endDate = props.endDate ? new Date(props.endDate) : new Date(8640000000000000); // max date
+
+        const dateFilteredData = parsedData.filter(d => d.date >= startDate && d.date <= endDate);
+
         let groupedData = [];
 
         switch (props.filter) {
           case 'day':
-            groupedData = d3.groups(parsedData, d => d3.timeDay(d.date))
+            groupedData = d3.groups(dateFilteredData, d => d3.timeDay(d.date))
               .map(([key, values]) => ({
                 date: key,
                 flowmeter1: d3.mean(values, d => d.flowmeter1),
@@ -50,7 +56,7 @@ export default {
             break;
 
           case 'month':
-            groupedData = d3.groups(parsedData, d => d3.timeMonth(d.date))
+            groupedData = d3.groups(dateFilteredData, d => d3.timeMonth(d.date))
               .map(([key, values]) => ({
                 date: key,
                 flowmeter1: d3.mean(values, d => d.flowmeter1),
@@ -61,7 +67,7 @@ export default {
             break;
 
           case 'year':
-            groupedData = d3.groups(parsedData, d => d3.timeYear(d.date))
+            groupedData = d3.groups(dateFilteredData, d => d3.timeYear(d.date))
               .map(([key, values]) => ({
                 date: key,
                 flowmeter1: d3.mean(values, d => d.flowmeter1),
@@ -72,7 +78,7 @@ export default {
             break;
 
           default:
-            groupedData = parsedData;
+            groupedData = dateFilteredData;
             break;
         }
 
@@ -157,128 +163,121 @@ export default {
     };
 
     const renderChart = () => {
-  console.log('Render chart called');
-  d3.select(chartRef.value).selectAll("*").remove();
+      // console.log('Render chart called');
+      d3.select(chartRef.value).selectAll("*").remove();
 
-  if (filteredData.value.length === 0) return;
+      if (filteredData.value.length === 0) return;
 
-  const margin = { top: 20, right: 20, bottom: 50, left: 40 },
-    width = 1400 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+      const margin = { top: 20, right: 20, bottom: 50, left: 40 },
+        width = 1400 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
 
-  const svg = d3.select(chartRef.value)
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+      const svg = d3.select(chartRef.value)
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const x = d3.scaleTime().range([0, width]),
-    y = d3.scaleLinear().range([height, 0]);
+      const x = d3.scaleTime().range([0, width]),
+        y = d3.scaleLinear().range([height, 0]);
 
-  x.domain(d3.extent(filteredData.value, d => d.date));
-  y.domain([0, d3.max(filteredData.value, d => Math.max(d.flowmeter1, d.flowmeter2, d.flowmeter3, d.flowmeter4))]);
+      x.domain(d3.extent(filteredData.value, d => d.date));
+      y.domain([0, d3.max(filteredData.value, d => Math.max(d.flowmeter1, d.flowmeter2, d.flowmeter3, d.flowmeter4))]);
 
-  const xAxis = svg.append("g")
-    .attr("class", "x axis")
-    .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x).ticks(getAxisTicks()).tickFormat(getAxisDateFormat()));
+      const xAxis = svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(getAxisTicks()).tickFormat(getAxisDateFormat()));
 
-  xAxis.selectAll("text")
-    .attr("transform", "rotate(-40)")
-    .style("text-anchor", "end");
+      xAxis.selectAll("text")
+        .attr("transform", "rotate(-40)")
+        .style("text-anchor", "end");
 
-  svg.append("g")
-    .attr("class", "y axis")
-    .call(d3.axisLeft(y).ticks(10));
+      svg.append("g")
+        .attr("class", "y axis")
+        .call(d3.axisLeft(y).ticks(10));
 
-  svg.append("text")
-    .attr("class", "x label")
-    .attr("text-anchor", "middle")
-    .attr("x", width / 2)
-    .attr("y", height + margin.bottom)
-    .text("Date");
+      // Add X axis label
+      svg.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "middle")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom)
+        .text("Date");
 
-  svg.append("text")
-    .attr("class", "y label")
-    .attr("text-anchor", "middle")
-    .attr("transform", "rotate(-90)")
-    .attr("y", -margin.left + 9.5)
-    .attr("x", -height / 2)
-    .text("Flow Rate (m³/hr)");
+      // Add Y axis label
+      svg.append("text")
+        .attr("class", "y label")
+        .attr("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -margin.left + 9.5)
+        .attr("x", -height / 2)
+        .text("Flow Rate (m³/hr)");
 
-  sensors.value.forEach((sensor, index) => {
-    const sensorLine = d3.line()
-      .x(d => {
-        const xValue = x(d.date);
-        return isNaN(xValue) ? null : xValue;
-      })
-      .y(d => {
-        const yValue = y(d[sensor]);
-        return isNaN(yValue) ? null : yValue;
+      sensors.value.forEach((sensor, index) => {
+        const sensorLine = d3.line()
+          .x(d => x(d.date))
+          .y(d => y(d[sensor]));
+
+        const path = svg.append("path")
+          .datum(filteredData.value)
+          .attr("class", "line")
+          .attr("d", sensorLine)
+          .attr('fill', 'none')
+          .attr('stroke', colors(index))
+          .attr('stroke-width', 2.5);
+
+        const length = path.node().getTotalLength();
+
+        path
+          .attr("stroke-dasharray", length + " " + length)
+          .attr("stroke-dashoffset", length)
+          .transition()
+          .duration(3000)
+          .attr("stroke-dashoffset", 0);
       });
 
-    svg.append("path")
-      .datum(filteredData.value.filter(d => !isNaN(x(d.date)) && !isNaN(y(d[sensor]))))
-      .attr("class", "line")
-      .attr("d", sensorLine)
-      .attr('fill', 'none')
-      .attr('stroke', colors(index))
-      .attr('stroke-width', 2.5)
-      .attr("stroke-dasharray", function() {
-        const length = this.getTotalLength();
-        return `${length} ${length}`;
-      })
-      .attr("stroke-dashoffset", function() {
-        return this.getTotalLength();
-      })
-      .transition()
-      .duration(3000)
-      .attr("stroke-dashoffset", 0);
-  });
-
-  sensors.value.forEach((sensor, index) => {
-    svg.selectAll(`.dot-${sensor}`)
-      .data(filteredData.value)
-      .enter().append("circle")
-      .attr("class", `dot-${sensor}`)
-      .attr("cx", d => x(d.date))
-      .attr("cy", d => y(d[sensor]))
-      .attr("r", 0)
-      .style("fill", colors(index))
-      .transition()
-      .duration(2000)
-      .attr("r", 4);
-
-    svg.selectAll(`.dot-${sensor}`)
-      .on("mouseover", function(event, d) {
-        d3.select(this)
+      sensors.value.forEach((sensor, index) => {
+        svg.selectAll(`.dot-${sensor}`)
+          .data(filteredData.value)
+          .enter().append("circle")
+          .attr("class", `dot-${sensor}`)
+          .attr("cx", d => x(d.date))
+          .attr("cy", d => y(d[sensor]))
+          .attr("r", 0)
+          .style("fill", colors(index))
           .transition()
-          .duration(200)
-          .attr("r", 6)
-          .style("fill", "orange");
-      })
-      .on("mouseout", function() {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .attr("r", 3)
-          .style("fill", colors(index));
-      })
-      .append("title")
-      .text(d => {
-        const formatDate = getTooltipDateFormat();
-        const value = d[sensor];
-        return value !== undefined && !isNaN(value)
-          ? `Value: ${value.toFixed(2)}\n${formatDate(d.date)}`
-          : `Value: N/A\n${formatDate(d.date)}`;
+          .duration(2000)
+          .attr("r", 4);
+
+        svg.selectAll(`.dot-${sensor}`)
+          .on("mouseover", function (event, d) {
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .attr("r", 6)
+              .style("fill", "orange");
+          })
+          .on("mouseout", function () {
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .attr("r", 3)
+              .style("fill", colors(index));
+          })
+          .append("title")
+          .text(d => {
+            const formatDate = getTooltipDateFormat();
+            const value = d[sensor] !== undefined && d[sensor] !== null ? d[sensor].toFixed(2) : 'N/A';
+            return `Value: ${value}\n${formatDate(d.date)}`;
+          });
       });
-  });
-};
-
+    };
 
     watch(() => props.data, renderChart);
     watch(() => props.filter, renderChart);
+    watch(() => [props.startDate, props.endDate], renderChart);
 
     onMounted(renderChart);
 

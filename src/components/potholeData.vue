@@ -439,7 +439,6 @@ export default {
   color:white
 }
 
-/* Toggle button styling */
 .menu-icon {
   font-size: 24px;
   float:right;
@@ -450,14 +449,5 @@ export default {
   cursor: pointer;
 }
 
-/* Main content styling */
-.main-content {
-  margin-left: 250px; /* Adjust margin to fit drawer when it's open */
-  padding: 20px;
-  transition: margin-left 0.3s ease;
-}
 
-.shifted-content {
-  margin-left: 60px; /* Adjust margin when drawer is closed */
-}
 </style>

@@ -4,12 +4,12 @@
       <!-- Pressure Sensor -->
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'pressure'">
         <h3 v-if="selectedGauge === 'pressure' || selectedGauge === null">Pressure Sensor 1</h3>
-        <PressureGaugeComponent 
-          v-if="selectedGauge === 'pressure' || selectedGauge === null" 
-          :pressureAvg="pressureAvg" 
-          @gauge-clicked="handleGaugeClick('pressure')" 
+        <PressureGaugeComponent
+          v-if="selectedGauge === 'pressure' || selectedGauge === null"
+          :pressureAvg="pressureAvg"
+          @gauge-clicked="handleGaugeClick('pressure')"
         />
-        
+
         <!-- Filter Controls for Pressure Gauge -->
         <div v-if="selectedGauge === 'pressure'" class="filter-controls">
           <label for="filter">Select Filter:</label>
@@ -18,33 +18,45 @@
             <option value="month">Month</option>
             <option value="year">Year</option>
           </select>
-         
+
+
+          <div class="date-range-controls">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" v-model="startDate" />
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" v-model="endDate" />
+          </div>
           <!-- back button -->
           <div class="q-pa-md">
               <button @click="goBack" class="back-button">Back to Main Page</button>
           </div>
         </div>
-        <BarChartComponent 
-          v-if="selectedGauge === 'pressure'" 
-          :data="pressureData" 
-          :filter="filter" 
+        <BarChartComponent
+          v-if="selectedGauge === 'pressure'"
+          :data="pressureData"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'pressure'" 
-          :data="pressureData" 
-          :filter="filter" 
+        <TimeSeriesLineChartComponent
+          v-if="selectedGauge === 'pressure'"
+          :data="pressureData"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
       </div>
 
       <!-- Level Sensor -->
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'level'">
         <h3 v-if="selectedGauge === 'level' || selectedGauge === null">Level Sensor 1</h3>
-        <LevelGaugeComponent 
-          v-if="selectedGauge === 'level' || selectedGauge === null" 
-          :levelAvg="levelAvg" 
-          @gauge-clicked="handleGaugeClick('level')" 
+        <LevelGaugeComponent
+          v-if="selectedGauge === 'level' || selectedGauge === null"
+          :levelAvg="levelAvg"
+          @gauge-clicked="handleGaugeClick('level')"
         />
-        
+
         <!-- Filter Controls for Level Gauge -->
         <div v-if="selectedGauge === 'level'" class="filter-controls">
           <label for="filter">Select Filter:</label>
@@ -53,34 +65,45 @@
             <option value="month">Month</option>
             <option value="year">Year</option>
           </select>
-        
+
+          <div class="date-range-controls">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" v-model="startDate" />
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" v-model="endDate" />
+          </div>
           <!-- back button -->
           <div class="q-pa-md">
               <button @click="goBack" class="back-button">Back to Main Page</button>
           </div>
         </div>
-        <BarChartComponent 
-          v-if="selectedGauge === 'level'" 
-          :data="levelData" 
-          :filter="filter" 
+        <BarChartComponent
+          v-if="selectedGauge === 'level'"
+          :data="levelData"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'level'" 
-          :data="levelData" 
-          :filter="filter" 
+        <TimeSeriesLineChartComponent
+          v-if="selectedGauge === 'level'"
+          :data="levelData"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
       </div>
 
       <!-- Flowmeter 1 -->
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'flow1'">
         <h3 v-if="selectedGauge === 'flow1' || selectedGauge === null">Flowmeter 1</h3>
-        <FlowMeterGaugeComponent 
-          v-if="selectedGauge === 'flow1' || selectedGauge === null" 
-          :flowAvg="flowAvg1" 
-          :maxValue="1500" 
-          @gauge-clicked="handleGaugeClick('flow1')" 
+        <FlowMeterGaugeComponent
+          v-if="selectedGauge === 'flow1' || selectedGauge === null"
+          :flowAvg="flowAvg1"
+          :maxValue="1500"
+          @gauge-clicked="handleGaugeClick('flow1')"
         />
-        
+
         <!-- Filter Controls for Flowmeter 1 -->
         <div v-if="selectedGauge === 'flow1'" class="filter-controls">
           <label for="filter">Select Filter:</label>
@@ -89,21 +112,32 @@
             <option value="month">Month</option>
             <option value="year">Year</option>
           </select>
-        
+
+          <div class="date-range-controls">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" v-model="startDate" />
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" v-model="endDate" />
+          </div>
           <!-- back button -->
           <div class="q-pa-md">
               <button @click="goBack" class="back-button">Back to Main Page</button>
           </div>
         </div>
-        <BarChartComponent 
-          v-if="selectedGauge === 'flow1'" 
-          :data="flow1Data" 
-          :filter="filter" 
+        <BarChartComponent
+          v-if="selectedGauge === 'flow1'"
+          :data="flow1Data"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'flow1'" 
-          :data="flow1Data" 
-          :filter="filter" 
+        <TimeSeriesLineChartComponent
+          v-if="selectedGauge === 'flow1'"
+          :data="flow1Data"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
       </div>
     </div>
@@ -112,13 +146,13 @@
       <!-- Flowmeter 2 -->
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'flow2'">
         <h3 v-if="selectedGauge === 'flow2' || selectedGauge === null">Flowmeter 2</h3>
-        <FlowMeterGaugeComponent 
-          v-if="selectedGauge === 'flow2' || selectedGauge === null" 
-          :flowAvg="flowAvg2" 
-          :maxValue="2000" 
-          @gauge-clicked="handleGaugeClick('flow2')" 
+        <FlowMeterGaugeComponent
+          v-if="selectedGauge === 'flow2' || selectedGauge === null"
+          :flowAvg="flowAvg2"
+          :maxValue="2000"
+          @gauge-clicked="handleGaugeClick('flow2')"
         />
-        
+
         <!-- Filter Controls for Flowmeter 2 -->
         <div v-if="selectedGauge === 'flow2'" class="filter-controls">
           <label for="filter">Select Filter:</label>
@@ -127,34 +161,45 @@
             <option value="month">Month</option>
             <option value="year">Year</option>
           </select>
-         
+
+          <div class="date-range-controls">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" v-model="startDate" />
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" v-model="endDate" />
+          </div>
           <!-- back button -->
           <div class="q-pa-md">
               <button @click="goBack" class="back-button">Back to Main Page</button>
           </div>
         </div>
-        <BarChartComponent 
-          v-if="selectedGauge === 'flow2'" 
-          :data="flow2Data" 
-          :filter="filter" 
+        <BarChartComponent
+          v-if="selectedGauge === 'flow2'"
+          :data="flow2Data"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'flow2'" 
-          :data="flow2Data" 
-          :filter="filter" 
+        <TimeSeriesLineChartComponent
+          v-if="selectedGauge === 'flow2'"
+          :data="flow2Data"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
       </div>
 
       <!-- Flowmeter 3 -->
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'flow3'">
         <h3 v-if="selectedGauge === 'flow3' || selectedGauge === null">Flowmeter 3</h3>
-        <FlowMeterGaugeComponent 
-          v-if="selectedGauge === 'flow3' || selectedGauge === null" 
-          :flowAvg="flowAvg3" 
-          :maxValue="600" 
-          @gauge-clicked="handleGaugeClick('flow3')" 
+        <FlowMeterGaugeComponent
+          v-if="selectedGauge === 'flow3' || selectedGauge === null"
+          :flowAvg="flowAvg3"
+          :maxValue="600"
+          @gauge-clicked="handleGaugeClick('flow3')"
         />
-        
+
         <!-- Filter Controls for Flowmeter 3 -->
         <div v-if="selectedGauge === 'flow3'" class="filter-controls">
           <label for="filter">Select Filter:</label>
@@ -163,34 +208,45 @@
             <option value="month">Month</option>
             <option value="year">Year</option>
           </select>
-          
+
+          <div class="date-range-controls">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" v-model="startDate" />
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" v-model="endDate" />
+          </div>
           <!-- back button -->
           <div class="q-pa-md">
               <button @click="goBack" class="back-button">Back to Main Page</button>
           </div>
         </div>
-        <BarChartComponent 
-          v-if="selectedGauge === 'flow3'" 
-          :data="flow3Data" 
-          :filter="filter" 
+        <BarChartComponent
+          v-if="selectedGauge === 'flow3'"
+          :data="flow3Data"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'flow3'" 
-          :data="flow3Data" 
-          :filter="filter" 
+        <TimeSeriesLineChartComponent
+          v-if="selectedGauge === 'flow3'"
+          :data="flow3Data"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
       </div>
 
       <!-- Flowmeter 4 -->
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'flow4'">
         <h3 v-if="selectedGauge === 'flow4' || selectedGauge === null">Flowmeter 4</h3>
-        <FlowMeterGaugeComponent 
-          v-if="selectedGauge === 'flow4' || selectedGauge === null" 
-          :flowAvg="flowAvg4" 
-          :maxValue="600" 
-          @gauge-clicked="handleGaugeClick('flow4')" 
+        <FlowMeterGaugeComponent
+          v-if="selectedGauge === 'flow4' || selectedGauge === null"
+          :flowAvg="flowAvg4"
+          :maxValue="600"
+          @gauge-clicked="handleGaugeClick('flow4')"
         />
-        
+
         <!-- Filter Controls for Flowmeter 4 -->
         <div v-if="selectedGauge === 'flow4'" class="filter-controls">
           <label for="filter">Select Filter:</label>
@@ -199,33 +255,52 @@
             <option value="month">Month</option>
             <option value="year">Year</option>
           </select>
-         
+
+          <div class="date-range-controls">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" v-model="startDate" />
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" v-model="endDate" />
+          </div>
           <!-- back button -->
           <div class="q-pa-md">
               <button @click="goBack" class="back-button">Back to Main Page</button>
           </div>
         </div>
-        <BarChartComponent 
-          v-if="selectedGauge === 'flow4' " 
-          :data="flow4Data" 
-          :filter="filter" 
+        <BarChartComponent
+          v-if="selectedGauge === 'flow4' "
+          :data="flow4Data"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'flow4' " 
-          :data="flow4Data" 
-          :filter="filter" 
+        <TimeSeriesLineChartComponent
+          v-if="selectedGauge === 'flow4' "
+          :data="flow4Data"
+          :filter="filter"
+          :startDate="startDate"
+          :endDate="endDate"
         />
       </div>
     </div>
     <div v-if="selectedGauge===null" class="container">
-      <MultiLine :data="iotData" :filter="filter1" class="chart" />
-      
+      <MultiLine :data="iotData" :filter="filter1" :startDate="startDate1" :endDate="endDate1"  class="chart" />
+
       <div class="sidebar">
         <select v-model="filter1" @change="loadData">
           <option value="day">Day</option>
           <option value="month">Month</option>
           <option value="year">Year</option>
         </select>
+        <div class="date-range-controls">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" v-model="startDate1" />
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" v-model="endDate1" />
+          </div>
+
         <div class="legend">
           <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
             <div class="legend-color" :style="{ backgroundColor: colors(index) }"></div>
@@ -233,18 +308,26 @@
           </div>
         </div>
       </div>
-      
+
     </div>
 
     <div v-if="selectedGauge===null" class="container">
-      <ComparisonBarChartComponent :data="iotData" :filter="filter2" class="chart" />
-      
+      <ComparisonBarChartComponent :data="iotData" :filter="filter2" :startDate="startDate2" :endDate="endDate2" class="chart" />
+
       <div class="sidebar">
         <select v-model="filter2" @change="loadData">
           <option value="day">Day</option>
           <option value="month">Month</option>
           <option value="year">Year</option>
         </select>
+        <div class="date-range-controls">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" v-model="startDate2" />
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" v-model="endDate2" />
+          </div>
+
         <div class="legend">
           <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
             <div class="legend-color" :style="{ backgroundColor: colors(index) }"></div>
@@ -252,7 +335,7 @@
           </div>
         </div>
       </div>
-      
+
     </div>
 
 
@@ -260,26 +343,28 @@
 </template>
 
 <script>
-import ComparisonBarChartComponent from 'components/ComparisonBarChartComponent.vue';
+
 import PressureGaugeComponent from 'components/PressureGaugeComponent.vue';
 import LevelGaugeComponent from 'components/LevelGaugeComponent.vue';
 import FlowMeterGaugeComponent from 'components/FlowMeterGaugeComponent.vue';
 import BarChartComponent from 'components/BarChartComponent.vue';
 import TimeSeriesLineChartComponent from 'components/TimeSeriesLineChartComponent.vue';
 import MultiLine from 'components/MultiLine.vue';
+import ComparisonBarChartComponent from 'components/ComparisonBarChartComponent.vue';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import * as d3 from 'd3';
 
 export default {
   components: {
-    ComparisonBarChartComponent,
     PressureGaugeComponent,
     LevelGaugeComponent,
     FlowMeterGaugeComponent,
     BarChartComponent,
+    ComparisonBarChartComponent,
     TimeSeriesLineChartComponent,
     MultiLine,
+
   },
   data() {
     return {
@@ -300,6 +385,12 @@ export default {
       filter1: 'day',
       filter2: 'day',
       chartType: 'bar',
+      startDate: new Date(-8640000000000000),
+      endDate: new Date(8640000000000000),
+      startDate1: new Date(-8640000000000000),
+      endDate1: new Date(8640000000000000),
+      startDate2: new Date(-8640000000000000),
+      endDate2: new Date(8640000000000000),
       iotData: [],
       sensors: ['Flowmeter 1', 'Flowmeter 2', 'Flowmeter 3', 'Flowmeter 4'],
       colors: d3.scaleOrdinal(d3.schemeCategory10),
@@ -362,12 +453,24 @@ export default {
         console.error('Error loading Excel file:', error);
       }
     },
-    handleGaugeClick(gauge) {
-      this.selectedGauge = this.selectedGauge === gauge ? null : gauge;
-    },
-    goBack() {
-      this.selectedGauge = null;
-    },
+    resetDateRanges() {
+    const defaultStartDate = new Date(-8640000000000000);
+    const defaultEndDate = new Date(8640000000000000);
+    this.startDate = defaultStartDate;
+    this.endDate = defaultEndDate;
+    this.startDate1 = defaultStartDate;
+    this.endDate1 = defaultEndDate;
+    this.startDate2 = defaultStartDate;
+    this.endDate2 = defaultEndDate;
+  },
+  handleGaugeClick(gauge) {
+    this.selectedGauge = this.selectedGauge === gauge ? null : gauge;
+    this.resetDateRanges();
+  },
+  goBack() {
+    this.selectedGauge = null;
+    this.resetDateRanges();
+  },
   },
 };
 </script>
@@ -455,5 +558,15 @@ select {
 
 .chart {
   flex-grow: 1;
+}
+.date-range-controls {
+  margin-top: 10px;
+}
+.filter-controls {
+  margin-bottom: 20px;
+}
+.back-button {
+  background-color: #f0f0f0;
+  cursor: pointer;
 }
 </style>

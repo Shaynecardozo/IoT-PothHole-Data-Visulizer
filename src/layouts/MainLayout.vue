@@ -32,7 +32,6 @@
             class="q-mx-sm tabs q-px-md q-py-xs"
             v-if="checklogin()"
             clickable
-
             @click="handleroute('logout')"
           >
             Logout
@@ -49,6 +48,7 @@
 
 <script>
 import { useLoginStore } from "src/stores/loginStore";
+import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
@@ -60,24 +60,25 @@ export default {
       return store.checklogin();
     };
     const handleroute = (value) => {
-      console.log('funtion called')
-      console.log(value)
-      console.log(value==='home')
-      if (value ==='home') {
-        router.push("/landing")
+      if (checklogin() === false) {
+        router.push("/");
       }
-      else if (value ==="potholes") {
-        router.push("/potholes")
-      }
-      else if (value === "flowmeter") {
-        router.push("/flowmeter")
-      }
-      else
-      {
+      else if (value === "home") {
+        router.push("/landing");
+      } else if (value === "potholes") {
+        router.push("/potholes");
+      } else if (value === "flowmeter") {
+        router.push("/flowmeter");
+      } else {
         store.updateLogin;
-        router.push('/')
+        router.push("/");
       }
     };
+    onMounted(
+      () => {
+      handleroute();
+    }
+    )
     return {
       store,
       router,
