@@ -1,5 +1,14 @@
 <template>
-  <div ref="chart"></div>
+  <div>
+    <!-- Threshold Input and Button -->
+    <input v-model.number="userThreshold" type="number" class="threshold-input" placeholder="Set Threshold Value" />
+    <button @click="toggleThreshold" class="threshold-button">
+      Threshold Value is {{ thresholdEnabled ? 'Enabled' : 'Disabled' }} ({{ userThreshold }})
+    </button>
+
+    <!-- Bar Chart -->
+    <div ref="chart"></div>
+  </div>
 </template>
 
 <script>
@@ -17,23 +26,38 @@ export default {
     },
     startDate: {
       type: Date,
-      default: () => new Date(-8640000000000000) // Very early date if not specified
+      default: () => new Date(-8640000000000000) // Minimum possible date
     },
     endDate: {
       type: Date,
-      default: () => new Date(8640000000000000) // Very late date if not specified
+      default: () => new Date(8640000000000000) // Maximum possible date
+    },
+    initialThreshold: {
+      type: Number,
+      default: 6 // Default threshold value
     }
+  },
+  data() {
+    return {
+      thresholdEnabled: false, // State to control threshold visibility
+      userThreshold: this.initialThreshold // State for user-defined threshold
+    };
   },
   watch: {
     data: 'renderChart',
     filter: 'renderChart',
     startDate: 'renderChart',
-    endDate: 'renderChart'
+    endDate: 'renderChart',
+    thresholdEnabled: 'renderChart', // Re-render chart when threshold is toggled
+    userThreshold: 'renderChart' // Re-render chart when user changes the threshold value
   },
   mounted() {
     this.renderChart();
   },
   methods: {
+    toggleThreshold() {
+      this.thresholdEnabled = !this.thresholdEnabled;
+    },
     renderChart() {
       d3.select(this.$refs.chart).selectAll("*").remove();
 
@@ -53,7 +77,7 @@ export default {
         y = d3.scaleLinear().rangeRound([height, 0]);
 
       x.domain(filteredData.map(d => d.date));
-      y.domain([0, d3.max(filteredData, d => d.value)]);
+      y.domain([0, Math.max(d3.max(filteredData, d => d.value), this.userThreshold)]);
 
       const xAxis = svg.append("g")
         .attr("class", "x axis")
@@ -68,10 +92,42 @@ export default {
         .attr("class", "y axis")
         .call(d3.axisLeft(y).ticks(10));
 
-      const colorScale = d3.scaleSequential(d3.interpolateBlues)
+        const colorScale = d3.scaleSequential(d3.interpolateBlues)
         .domain([-20, d3.max(filteredData, d => d.value)]);
 
-      const bars = svg.selectAll(".bar")
+      if (this.thresholdEnabled) {
+        // Add threshold line
+        svg.append("line")
+          .attr("class", "threshold-line")
+          .attr("x1", 0)
+          .attr("y1", y(this.userThreshold))
+          .attr("x2", width)
+          .attr("y2", y(this.userThreshold))
+          .attr("stroke", "red")
+          .attr("stroke-width", 2)
+          .attr("stroke-dasharray", "4,4");
+
+        // Add bars with conditional color and transparency for above-threshold bars
+        svg.selectAll(".bar")
+        .data(filteredData)
+    .enter().append("rect")
+    .attr("class", "bar")
+    .attr("x", d => x(d.date))
+    .attr("y", height) // Start the bars from the bottom of the chart
+    .attr("width", x.bandwidth())
+    .style("fill", d => d.value > this.userThreshold ? "transparent" : colorScale(d.value))
+    .style("opacity", d => d.value > this.userThreshold ? 0.2 : 1)
+    .transition()
+    .duration(2000)
+    .attr("y", d => y(Math.min(d.value, this.userThreshold))) // Animate to the final position
+    .attr("height", d => height - y(Math.min(d.value, this.userThreshold)));
+
+
+
+          
+      } else {
+        // Display all bars as normal
+        svg.selectAll(".bar")
         .data(filteredData)
         .enter().append("rect")
         .attr("class", "bar")
@@ -85,26 +141,31 @@ export default {
         .attr("y", d => y(d.value))
         .attr("height", d => height - y(d.value));
 
-      // Add hover effect
+      }
+
       svg.selectAll(".bar")
         .on("mouseover", (event, d) => {
-          const formatDate = this.getTooltipDateFormat();
-          d3.select(event.currentTarget)
-            .style("fill", "orange")
-            .append("title")
-            .text(`Value: ${d.value.toFixed(2)}\n${formatDate(d.date)}`);
+          if (!this.thresholdEnabled || d.value <= this.userThreshold) {
+            const formatDate = this.getTooltipDateFormat();
+            d3.select(event.currentTarget)
+              .style("fill", "orange")
+              .append("title")
+              .text(`Value: ${d.value.toFixed(2)}\n${formatDate(d.date)}`);
+          }
         })
-        .on("mouseout", function () {
-          d3.select(this)
-            .style("fill", d => colorScale(d.value))
-            .select("title").remove();
+        .on("mouseout", (event, d) => {
+          if (!this.thresholdEnabled || d.value <= this.userThreshold) {
+            d3.select(event.currentTarget)
+              .style("fill",  d => colorScale(d.value))
+              .select("title").remove();
+          }
         });
     },
 
     filterData() {
       if (!this.data || !this.data.length) return [];
 
-      const parseDate = d3.timeParse("%d-%m-%Y %H:%M"); // Date format in the ODS file
+      const parseDate = d3.timeParse("%d-%m-%Y %H:%M");
 
       let groupedData = [];
 
@@ -112,23 +173,21 @@ export default {
         const parsedData = this.data.map(d => {
           const parsedDate = parseDate(d.date);
           if (!parsedDate) {
-            // console.warn(`Invalid date format for value: ${d.date}`);
-            return null; // Filter out invalid dates
+            console.warn(`Invalid date format for value: ${d.date}`);
+            return null;
           }
           return {
             ...d,
             date: parsedDate
           };
-        }).filter(d => d !== null); // Remove any null entries
+        }).filter(d => d !== null);
 
-        // Filter data within the custom range
         const start = new Date(this.startDate);
         const end = new Date(this.endDate);
         const filteredData = parsedData.filter(d => d.date >= start && d.date <= end);
 
         switch (this.filter) {
           case 'day':
-            // Group by day
             groupedData = d3.groups(filteredData, d => d3.timeDay(d.date))
               .map(([key, values]) => ({
                 date: key,
@@ -137,7 +196,6 @@ export default {
             break;
 
           case 'month':
-            // Group by month
             groupedData = d3.groups(filteredData, d => d3.timeMonth(d.date))
               .map(([key, values]) => ({
                 date: key,
@@ -146,7 +204,6 @@ export default {
             break;
 
           case 'year':
-            // Group by year
             groupedData = d3.groups(filteredData, d => d3.timeYear(d.date))
               .map(([key, values]) => ({
                 date: key,
@@ -211,11 +268,11 @@ export default {
             return d3.timeFormat(`%d${suffix} %B %Y`)(date);
           };
         case 'month':
-          return d3.timeFormat("%B %Y"); // May 2023
+          return d3.timeFormat("%B %Y");
         case 'year':
-          return d3.timeFormat("%Y"); // 2023
+          return d3.timeFormat("%Y");
         default:
-          return d3.timeFormat("%d-%m-%Y"); // Default format
+          return d3.timeFormat("%d-%m-%Y");
       }
     }
   }
@@ -233,5 +290,34 @@ export default {
 
 .axis--x path {
   display: none;
+}
+
+.threshold-line {
+  stroke: red;
+  stroke-width: 2;
+  stroke-dasharray: 4,4;
+}
+
+.threshold-input {
+  margin-right: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  width: 150px;
+}
+
+.threshold-button {
+  padding: 10px 20px;
+  background-color: #000000;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.threshold-button:hover {
+  background-color: #333333;
 }
 </style>

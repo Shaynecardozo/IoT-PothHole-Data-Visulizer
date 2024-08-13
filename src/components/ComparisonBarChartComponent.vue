@@ -1,16 +1,28 @@
 <template>
-  <div class="chart" ref="chartRef"></div>
+  <div>
+    <!-- Threshold Input and Button -->
+    <input v-model.number="userThreshold" type="number" class="threshold-input" placeholder="Set Threshold Value" />
+    <button @click="toggleThreshold" class="threshold-button">
+      Threshold Value is {{ thresholdEnabled ? 'Enabled' : 'Disabled' }} ({{ userThreshold }})
+    </button>
+
+    <!-- Bar Chart -->
+    <div class="chart" ref="chartRef"></div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
 import * as d3 from 'd3';
 
-const props = defineProps(['data', 'filter', 'startDate', 'endDate']);
+const props = defineProps(['data', 'filter', 'startDate', 'endDate', 'initialThreshold']);
 const chartRef = ref(null);
 
 const sensors = ref(['flowmeter1', 'flowmeter2', 'flowmeter3', 'flowmeter4']);
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+const thresholdEnabled = ref(false); // State to control threshold visibility
+const userThreshold = ref(props.initialThreshold || 0); // State for user-defined threshold
 
 // Compute filtered data
 const filteredData = computed(() => {
@@ -147,6 +159,11 @@ const getTooltipDateFormat = () => {
   }
 };
 
+const toggleThreshold = () => {
+  thresholdEnabled.value = !thresholdEnabled.value;
+  renderChart();
+};
+
 // Render chart
 const renderChart = () => {
   d3.select(chartRef.value).selectAll('*').remove();
@@ -170,7 +187,9 @@ const renderChart = () => {
 
   x0.domain(filteredData.value.map(d => d.date));
   x1.domain(sensors.value).range([0, x0.bandwidth()]);
-  y.domain([0, d3.max(filteredData.value, d => d3.max(sensors.value, key => +d[key] || 0))]);
+
+  // Set the y-axis domain based on the maximum value, considering the threshold
+  y.domain([0, Math.max(d3.max(filteredData.value, d => d3.max(sensors.value, key => +d[key] || 0)), userThreshold.value)]);
 
   const xAxis = svg.append('g')
     .attr('class', 'x axis')
@@ -191,7 +210,11 @@ const renderChart = () => {
     .attr('transform', d => `translate(${x0(d.date)},0)`);
 
   bars.selectAll('rect')
-    .data(d => sensors.value.map(sensor => ({ key: sensor, value: +d[sensor], date: d.date })))
+    .data(d => sensors.value.map(sensor => {
+      const value = +d[sensor];
+      // Only include bars with values less than or equal to the threshold
+      return thresholdEnabled.value && value > userThreshold.value ? null : { key: sensor, value, date: d.date };
+    }).filter(d => d !== null))  // Filter out null values
     .enter().append('rect')
     .attr('x', d => x1(d.key))
     .attr('y', d => y(0))
@@ -215,10 +238,26 @@ const renderChart = () => {
       d3.select(this).attr('fill', colors(d.key));
       d3.select(this).select('title').remove();
     });
+
+  if (thresholdEnabled.value) {
+    // Add threshold line
+    svg.append("line")
+      .attr("class", "threshold-line")
+      .attr("x1", 0)
+      .attr("y1", y(userThreshold.value))
+      .attr("x2", width)
+      .attr("y2", y(userThreshold.value))
+      .attr("stroke", "red")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "4,4");
+  }
 };
 
+
+
 onMounted(renderChart);
-watch([() => props.data, () => props.filter, () => props.startDate, () => props.endDate], renderChart);
+watch([() => props.data, () => props.filter, () => props.startDate, () => props.endDate, userThreshold, thresholdEnabled], renderChart);
+
 </script>
 
 <style scoped>
@@ -231,11 +270,32 @@ watch([() => props.data, () => props.filter, () => props.startDate, () => props.
   font-size: 12px;
 }
 
-.legend {
-  font-size: 12px;
+.threshold-input {
+  margin-right: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  width: 150px;
 }
-.legend rect {
-  stroke: #000;
-  stroke-width: 1px;
+
+.threshold-button {
+  padding: 10px 20px;
+  background-color: #000000;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.threshold-button:hover {
+  background-color: #333333;
+}
+
+.threshold-line {
+  stroke: red;
+  stroke-width: 2;
+  stroke-dasharray: 4,4;
 }
 </style>
