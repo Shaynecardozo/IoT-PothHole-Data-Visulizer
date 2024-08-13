@@ -112,7 +112,7 @@ export default {
         const parsedData = this.data.map(d => {
           const parsedDate = parseDate(d.date);
           if (!parsedDate) {
-            console.warn(`Invalid date format for value: ${d.date}`);
+            // console.warn(`Invalid date format for value: ${d.date}`);
             return null; // Filter out invalid dates
           }
           return {

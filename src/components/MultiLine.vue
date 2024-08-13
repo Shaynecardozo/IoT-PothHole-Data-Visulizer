@@ -22,7 +22,7 @@ export default {
         const parsedData = props.data.map(d => {
           const parsedDate = parseDate(d.date);
           if (!parsedDate) {
-            console.warn(`Invalid date format for value: ${d.date}`);
+            // console.warn(`Invalid date format for value: ${d.date}`);
             return null;
           }
           return {
@@ -163,7 +163,7 @@ export default {
     };
 
     const renderChart = () => {
-      console.log('Render chart called');
+      // console.log('Render chart called');
       d3.select(chartRef.value).selectAll("*").remove();
 
       if (filteredData.value.length === 0) return;
@@ -252,14 +252,14 @@ export default {
           .attr("r", 4);
 
         svg.selectAll(`.dot-${sensor}`)
-          .on("mouseover", function(event, d) {
+          .on("mouseover", function (event, d) {
             d3.select(this)
               .transition()
               .duration(200)
               .attr("r", 6)
               .style("fill", "orange");
           })
-          .on("mouseout", function() {
+          .on("mouseout", function () {
             d3.select(this)
               .transition()
               .duration(200)
@@ -269,7 +269,8 @@ export default {
           .append("title")
           .text(d => {
             const formatDate = getTooltipDateFormat();
-            return `Value: ${d[sensor].toFixed(2)}\n${formatDate(d.date)}`;
+            const value = d[sensor] !== undefined && d[sensor] !== null ? d[sensor].toFixed(2) : 'N/A';
+            return `Value: ${value}\n${formatDate(d.date)}`;
           });
       });
     };

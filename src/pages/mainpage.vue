@@ -343,26 +343,28 @@
 </template>
 
 <script>
-import ComparisonBarChartComponent from 'components/ComparisonBarChartComponent.vue';
+
 import PressureGaugeComponent from 'components/PressureGaugeComponent.vue';
 import LevelGaugeComponent from 'components/LevelGaugeComponent.vue';
 import FlowMeterGaugeComponent from 'components/FlowMeterGaugeComponent.vue';
 import BarChartComponent from 'components/BarChartComponent.vue';
 import TimeSeriesLineChartComponent from 'components/TimeSeriesLineChartComponent.vue';
 import MultiLine from 'components/MultiLine.vue';
+import ComparisonBarChartComponent from 'components/ComparisonBarChartComponent.vue';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import * as d3 from 'd3';
 
 export default {
   components: {
-    ComparisonBarChartComponent,
     PressureGaugeComponent,
     LevelGaugeComponent,
     FlowMeterGaugeComponent,
     BarChartComponent,
+    ComparisonBarChartComponent,
     TimeSeriesLineChartComponent,
     MultiLine,
+    
   },
   data() {
     return {
@@ -451,12 +453,24 @@ export default {
         console.error('Error loading Excel file:', error);
       }
     },
-    handleGaugeClick(gauge) {
-      this.selectedGauge = this.selectedGauge === gauge ? null : gauge;
-    },
-    goBack() {
-      this.selectedGauge = null;
-    },
+    resetDateRanges() {
+    const defaultStartDate = new Date(-8640000000000000);
+    const defaultEndDate = new Date(8640000000000000);
+    this.startDate = defaultStartDate;
+    this.endDate = defaultEndDate;
+    this.startDate1 = defaultStartDate;
+    this.endDate1 = defaultEndDate;
+    this.startDate2 = defaultStartDate;
+    this.endDate2 = defaultEndDate;
+  },
+  handleGaugeClick(gauge) {
+    this.selectedGauge = this.selectedGauge === gauge ? null : gauge;
+    this.resetDateRanges();
+  },
+  goBack() {
+    this.selectedGauge = null;
+    this.resetDateRanges();
+  },
   },
 };
 </script>
