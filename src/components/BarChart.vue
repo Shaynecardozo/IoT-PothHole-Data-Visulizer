@@ -1,5 +1,6 @@
 <template>
   <div class="card bar-chart">
+    <p2 style="color:#b56727;">Fixed</p2>
     <div ref="barChartContainer"></div>
   </div>
 </template>
@@ -71,7 +72,7 @@ export default {
       container.html(''); // Clear any existing charts
 
       const width = 400;
-      const height = 400;
+      const height = 200;
       const margin = { top: 20, right: 20, bottom: 100, left: 50 };
 
       const svg = container.append('svg')
@@ -111,7 +112,7 @@ export default {
 
       const color = d3.scaleOrdinal()
         .domain(['Fixed Complaints', 'Unfixed Complaints'])
-        .range(['#007bff', '#72e5ff']);
+        .range(['#b56727', '#ed7117']);
 
       data.processedData.forEach(d => {
         svg.selectAll(`.bar.fixed.${d.constituency}`)
@@ -165,5 +166,8 @@ export default {
   margin: 16px;
   width: 50%; /* Adjust width to fit side by side */
   height: 30%;
+}
+p2{
+  text-align: center;
 }
 </style>

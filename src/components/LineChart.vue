@@ -60,7 +60,7 @@ export default {
       container.html(''); // Clear any existing charts
 
       const width = 400;
-      const height = 400;
+      const height = 200;
       const margin = { top: 20, right: 20, bottom: 100, left: 50 };
 
       const svg = container.append('svg')
@@ -105,14 +105,14 @@ export default {
       svg.append('path')
         .datum(data.fixedCounts)
         .attr('fill', 'none')
-        .attr('stroke', '#007bff')
+        .attr('stroke', '#b56727')
         .attr('stroke-width', 2)
         .attr('d', line);
 
       svg.append('path')
         .datum(data.unfixedCounts)
         .attr('fill', 'none')
-        .attr('stroke', '#72e5ff')
+        .attr('stroke', '#ed7117')
         .attr('stroke-width', 2)
         .attr('d', line);
     };
