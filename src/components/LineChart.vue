@@ -169,7 +169,6 @@ export default {
       // Create and position the tooltip
       const tooltip = createTooltip();
 
-<<<<<<< HEAD
       data.processedData.forEach(d => {
         const line = d3.line()
           .x((d, i) => xScale(new Date(data.labels[i])))
@@ -183,45 +182,6 @@ export default {
           .attr('stroke', color('Fixed Complaints'))
           .on('mouseover', (event) => showTooltip(tooltip, `Fixed Complaints`, event))
           .on('mouseout', () => hideTooltip(tooltip));
-=======
-      // Draw fixed line
-      svg.append('path')
-        .datum(data.fixedCounts)
-        .attr('fill', 'none')
-        .attr('stroke', '#b56727')
-        .attr('stroke-width', 2)
-        .attr('d', line)
-        .on('mousemove', function(event, d) {
-          const bisectDate = d3.bisector((d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2).left;
-          const x0 = d3.pointer(event, this)[0];
-          const i = bisectDate(data.fixedCounts, x0, 1);
-          const month = data.labels[i];
-          const fixedCount = data.fixedCounts[i];
-          const unfixedCount = data.unfixedCounts[i];
-          const content = `Month: ${month}<br>Fixed: ${fixedCount}<br>Unfixed: ${unfixedCount}`;
-          showTooltip(tooltip, content, event);
-        })
-        .on('mouseout', () => hideTooltip(tooltip));
-
-      // Draw unfixed line
-      svg.append('path')
-        .datum(data.unfixedCounts)
-        .attr('fill', 'none')
-        .attr('stroke', '#ed7117')
-        .attr('stroke-width', 2)
-        .attr('d', line)
-        .on('mousemove', function(event, d) {
-          const bisectDate = d3.bisector((d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2).left;
-          const x0 = d3.pointer(event, this)[0];
-          const i = bisectDate(data.unfixedCounts, x0, 1);
-          const month = data.labels[i];
-          const fixedCount = data.fixedCounts[i];
-          const unfixedCount = data.unfixedCounts[i];
-          const content = `Month: ${month}<br>Fixed: ${fixedCount}<br>Unfixed: ${unfixedCount}`;
-          showTooltip(tooltip, content, event);
-        })
-        .on('mouseout', () => hideTooltip(tooltip));
->>>>>>> f6c27e08b662ff2dc9a0a1e3e83a29440cfe1744
 
         svg.append('path')
           .datum(d.unfixedCounts)
@@ -343,5 +303,4 @@ export default {
   width: 100vw;
   height: 90vh;
 }
-
 </style>

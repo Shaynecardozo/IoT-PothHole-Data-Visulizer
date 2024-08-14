@@ -1,11 +1,7 @@
 <template>
   <div class="card bar-chart">
-<<<<<<< HEAD
     <!-- Icon with click event to open popup -->
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
-=======
-    <p2 style="color:#b56727;">Fixed</p2>
->>>>>>> f6c27e08b662ff2dc9a0a1e3e83a29440cfe1744
     <div ref="barChartContainer"></div>
 
     <!-- Popup Dialog -->
@@ -256,7 +252,6 @@ export default {
   pointer-events: none;
   opacity: 0;
 }
-<<<<<<< HEAD
 
 /* Style for the popup card */
 .popup-card {
@@ -276,9 +271,4 @@ export default {
   height: 90vh;
 }
 
-=======
-p2{
-  text-align: center;
-}
->>>>>>> f6c27e08b662ff2dc9a0a1e3e83a29440cfe1744
 </style>
