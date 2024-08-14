@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <MultiLine :data="iotData" :filter="filter" :startDate="startDate1" :endDate="endDate1" class="chart" />
     <div class="sidebar">
       <select v-model="filter" @change="loadData">
         <option value="day">Day</option>
@@ -8,12 +7,12 @@
         <option value="year">Year</option>
       </select>
       <div class="date-range-controls">
-            <label for="startDate">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate1" />
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" v-model="startDate1" />
 
-            <label for="endDate">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate1" />
-          </div>
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" v-model="endDate1" />
+      </div>
 
       <div class="legend">
         <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
@@ -22,6 +21,7 @@
         </div>
       </div>
     </div>
+    <MultiLine :data="iotData" :filter="filter" :startDate="startDate1" :endDate="endDate1" class="chart" />
   </div>
 </template>
 
@@ -45,9 +45,10 @@ export default {
       "#32CD32", // LimeGreen
       "#8FBC8F", // DarkSeaGreen
       "#ADFF2F", // GreenYellow
-      ]);
-    const startDate1= ref(new Date(-8640000000000000))
-    const endDate1= ref(new Date(8640000000000000))
+    ]);
+    const startDate1 = ref(new Date(-8640000000000000));
+    const endDate1 = ref(new Date(8640000000000000));
+    
     const loadData = async () => {
       try {
         const response = await axios.get('/IOTData for analysis_fileForInterns.ods', { responseType: 'arraybuffer' });
@@ -87,34 +88,52 @@ export default {
 <style scoped>
 .container {
   display: flex;
+  flex-direction: column; /* Stack children vertically */
   margin-left: 110px;
   margin-right: 110px;
-  margin-top: 5%;
 }
 
 .sidebar {
-  width: 160px;
-  height: 350px;
-  padding: 20px;
+  flex: 1;
   background-color: #e3faea;
-  margin-top: 150px;
-  margin-right: 20px;
-  margin-left: 20px;
-  border-radius: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  margin-top:5% ;
+  margin-left:40% ;
+  max-width: 300px;
 }
-
 select {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   padding: 5px;
   font-size: 16px;
   border-radius: 8px;
-  margin-left: 19px;
+  border-color: #a0eab6;
+}
+
+
+
+.date-range-controls label {
+  display: block;
+  text-align: center; /* Center label text */
+  font-size: 14px;
+  margin-bottom: 5px; /* Add space below labels */
+}
+.date-range-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  /* Space between controls */
+}
+
+.date-range-controls input {
+  border-radius: 8px;
   border-color: #a0eab6;
 }
 
 .legend {
   margin-top: 20px;
-  /* color: #ffffff; */
 }
 
 .legend-item {
@@ -130,14 +149,8 @@ select {
   border-radius: 2px;
 }
 
+
 .chart {
   flex-grow: 1;
-}
-
-
-.date-range-controls input {
-  border-radius: 8px;
-  border-color: #a0eab6;
-  margin-bottom: 15px;
 }
 </style>

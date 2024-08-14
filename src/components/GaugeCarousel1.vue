@@ -14,7 +14,8 @@
       >
         <q-carousel-slide v-for="(sensor, index) in sensors" :key="index" :name="index + 1">
           <div class="carousel-content">
-            <h3>{{ sensor.title }}</h3>
+            <h3
+            style="color: #0e5b20; font-size: 36px;">{{ sensor.title }}</h3>
             <component :is="sensor.component" v-bind="sensor.props" />
           </div>
         </q-carousel-slide>
@@ -44,8 +45,8 @@
       onMounted(() => {
         loadData().then(() => {
           sensors.value = [
-            { title: 'Pressure Sensor 1', component: PressureGaugeComponent, props: { pressureAvg: pressureAvg.value } },
-            { title: 'Level Sensor 1', component: LevelGaugeComponent, props: { levelAvg: levelAvg.value } },
+            { title: 'Pressure Sensor', component: PressureGaugeComponent, props: { pressureAvg: pressureAvg.value } },
+            { title: 'Level Sensor', component: LevelGaugeComponent, props: { levelAvg: levelAvg.value } },
             { title: 'Flowmeter 1', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg1.value, maxValue: 1500 } },
             { title: 'Flowmeter 2', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg2.value, maxValue: 2000 } },
             { title: 'Flowmeter 3', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg3.value, maxValue: 600 } },

@@ -1,28 +1,29 @@
 <template>
     <div class="container">
-      <ComparisonBarChartComponent :data="iotData" :filter="filter" :startDate="startDate" :endDate="endDate" class="chart" />
       
       <div class="sidebar">
-        <select v-model="filter" @change="loadData">
-          <option value="day">Day</option>
-          <option value="month">Month</option>
-          <option value="year">Year</option>
-        </select>
-        <div class="date-range-controls">
-          <label for="startDate">Start Date:</label>
-          <input type="date" id="startDate" v-model="startDate" />
-  
-          <label for="endDate">End Date:</label>
-          <input type="date" id="endDate" v-model="endDate" />
-        </div>
-  
-        <div class="legend">
-          <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
-            <div class="legend-color" :style="{ backgroundColor: colors(index) }"></div>
-            <span>{{ sensor }}</span>
-          </div>
+      <select v-model="filter" @change="loadData">
+        <option value="day">Day</option>
+        <option value="month">Month</option>
+        <option value="year">Year</option>
+      </select>
+      <div class="date-range-controls">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" v-model="startDate" />
+
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" v-model="endDate" />
+      </div>
+
+      <div class="legend">
+        <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
+          <div class="legend-color" :style="{ backgroundColor: colors(index) }"></div>
+          <span>{{ sensor }}</span>
         </div>
       </div>
+    </div>
+      <ComparisonBarChartComponent :data="iotData" :filter="filter" :startDate="startDate" :endDate="endDate" class="chart" />
+
     </div>
   </template>
   
@@ -80,63 +81,73 @@
   };
   </script>
   
-  <style scoped>
-  .container {
-    display: flex;
-    margin-left: 110px;
-    margin-right: 110px;
-    margin-top: 5%;
-  }
   
-  .sidebar {
-    width: 160px;
-    height: 350px;
-    padding: 20px;
-    background-color: #e3faea;
-    margin-top: 150px;
-    margin-right: 20px;
-    margin-left: 20px;
-    border-radius: 20px;
-  }
-  
-  select {
-    margin-bottom: 20px;
-    padding: 5px;
-    font-size: 16px;
-    border-radius: 8px;
-    border-color: #a0eab6;
-    margin-left: 19px;
-  }
-  
-  .date-range-controls {
-    margin-bottom: 20px;
-  }
-  
-  .legend {
-    margin-top: 20px;
-  }
-  
-  .legend-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  
-  .legend-color {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-    border-radius: 2px;
-  }
-
-  .date-range-controls input {
-  border-radius: 8px;
-  border-color: #a0eab6;
-  margin-bottom: 15px;
+<style scoped>
+.container {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  margin-left: 110px;
+  margin-right: 110px;
 }
 
-  .chart {
-    flex: 1;
-  }
-  </style>
-  
+.sidebar {
+  flex: 1;
+  background-color: #e3faea;
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  margin-top:5% ;
+  margin-left:40% ;
+  max-width: 300px;
+}
+select {
+  margin-bottom: 10px;
+  padding: 5px;
+  font-size: 16px;
+  border-radius: 8px;
+  border-color: #a0eab6;
+}
+
+
+
+.date-range-controls label {
+  display: block;
+  text-align: center; /* Center label text */
+  font-size: 14px;
+  margin-bottom: 5px; /* Add space below labels */
+}
+.date-range-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  /* Space between controls */
+}
+
+.date-range-controls input {
+  border-radius: 8px;
+  border-color: #a0eab6;
+}
+
+.legend {
+  margin-top: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border-radius: 2px;
+}
+
+
+.chart {
+  flex-grow: 1;
+}
+</style>

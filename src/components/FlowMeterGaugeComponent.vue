@@ -161,7 +161,7 @@ export default {
 <style scoped>
 .gauge-container {
   display: flex;
-  margin-top: 0px;
+  margin-top: -20px;
   justify-content: center;
   align-items: center;
   max-width: 100%; /* Ensure it fits within its container */

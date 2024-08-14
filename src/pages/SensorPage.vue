@@ -2,8 +2,10 @@
   <div id="app">
 
     <div class="q-pa-md back" v-if="selectedGauge !== null">
-      <button @click="goBack" class="back-button"> Back </button>
-    </div>
+    <button @click="goBack" class="back-button">
+      <q-icon name="arrow_back" /> Back
+    </button>
+  </div>
 
     <div class="row">
       <!-- Pressure Sensor -->
@@ -12,7 +14,7 @@
           <div class="gauge-and-filter">
             <div class="gauge-container card">
               <h3 v-if="selectedGauge === 'pressure' || selectedGauge === null"
-                style="color: #0e5b20; font-size: 36px;">Pressure Sensor 1</h3>
+                style="color: #0e5b20; font-size: 36px;">Pressure Sensor</h3>
               <PressureGaugeComponent v-if="selectedGauge === 'pressure' || selectedGauge === null"
                 :pressureAvg="pressureAvg" @gauge-clicked="handleGaugeClick('pressure')" />
             </div>
@@ -60,7 +62,7 @@
           <div class="gauge-and-filter">
             <div class="gauge-container card">
               <h3 v-if="selectedGauge === 'level' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
-                Level Sensor 1</h3>
+                Level Sensor</h3>
               <LevelGaugeComponent v-if="selectedGauge === 'level' || selectedGauge === null" :levelAvg="levelAvg"
                 @gauge-clicked="handleGaugeClick('level')" />
             </div>
@@ -575,7 +577,10 @@ select {
   border-radius: 8px;
   border-color: #a0eab6;
 }
+.q-icon{
+ margin-bottom:4px ;
 
+}
 .back {
   display: flex;
   justify-content: flex-start;
