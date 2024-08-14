@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <template>
   <div class="dropdown full-width row justify-center">
     <!-- <label for="constituency">Select Constituency:</label> -->
@@ -57,57 +56,3 @@ export default {
   font-size: 1em;
 }
 </style>
-=======
-<template>
-  <div class="dropdown">
-    <label for="constituency">Select Constituency:</label>
-    <select v-model="internalSelectedConstituency" @change="emitUpdateCounts">
-      <option v-for="constituency in constituencies" :key="constituency" :value="constituency">
-        {{ constituency }}
-      </option>
-    </select>
-  </div>
-</template>
-
-<script>
-export default {
-  props: {
-    constituencies: Array,
-    selectedConstituency: String
-  },
-  data() {
-    return {
-      internalSelectedConstituency: this.selectedConstituency
-    };
-  },
-  watch: {
-    selectedConstituency(newVal) {
-      this.internalSelectedConstituency = newVal;
-    },
-    internalSelectedConstituency(newVal) {
-      this.$emit('update:selectedConstituency', newVal);
-    }
-  },
-  methods: {
-    emitUpdateCounts() {
-      this.$emit('updateCounts');
-    }
-  }
-};
-</script>
-
-<style scoped>
-.dropdown {
-  margin-top: 20px;
-  text-align: center;
-}
-.dropdown label {
-  margin-right: 10px;
-  font-size: 1.2em;
-}
-.dropdown select {
-  padding: 5px;
-  font-size: 1em;
-}
-</style>
->>>>>>> 705830440d4df675cf602c678e3d184c68ab2c17

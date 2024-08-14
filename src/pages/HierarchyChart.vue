@@ -56,7 +56,7 @@
             </div>
           </q-card-section>
           <q-card-actions align="center">
-            <q-btn label="Close" color="blue" v-close-popup />
+            <q-btn label="Close" style="background-color: green; color: white;" v-close-popup />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -153,6 +153,48 @@ export default {
         .attr("ry", "15")
         .style("cursor", "pointer")
         .style("opacity", 0)
+        .on("mouseover", function (event, d) {
+          d3.select(this)
+            .transition()
+            .attr("width", 90)
+            .attr("height", 50);
+
+          d3.select(this.parentNode.querySelector(`text.label[data-node-id="${d.data.id}"]`))
+            .transition()
+            .duration(200)
+            .attr("x", (d) => d.y + 7)
+            .attr("y", (d) => d.x + 10)
+            .style("font-size", "14px"); // Increase font size on hover
+
+          d3.select(this.parentNode.querySelector(`text.label[data-node-name="${d.data.name}"]`))
+            .transition()
+            .duration(200)
+            .attr("x", (d) => d.y + 7)
+            .attr("y", (d) => d.x + 10)
+            .style("font-size", "14px"); // Increase font size on hover
+        })
+        .on("mouseout", function (event, d) {
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("width", 75)
+            .attr("height", 40);
+
+          d3.select(this.parentNode.querySelector(`text.label[data-node-id="${d.data.id}"]`))
+            .transition()
+            .duration(200)
+            .attr("x", (d) => d.y)
+            .attr("y", (d) => d.x + 7)
+            .style("font-size", "12px"); // Restore font size on mouseout
+
+          d3.select(this.parentNode.querySelector(`text.label[data-node-name="${d.data.name}"]`))
+            .transition()
+            .duration(200)
+            .attr("x", (d) => d.y)
+            .attr("y", (d) => d.x + 7)
+            .style("font-size", "12px"); // Restore font size on mouseout
+          
+        })
         .on("click", (event, d) => {
           if (d.depth > 0) {
             // Only show popup for non-main nodes
@@ -169,19 +211,21 @@ export default {
         .append("text")
         .attr("class", "label")
         .attr("x", (d) => d.y)
-        .attr("y", (d) => d.x + 10)
+        .attr("y", (d) => d.x + 7)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "azure")
         .style("cursor", "pointer")
         .style("opacity", 0)
+        .attr("data-node-id", (d) => d.data.id)
+        .attr("data-node-name", (d) => d.data.name)
         .text((d) => {
           if (d.depth === 0) {
             return d.data.name; // Principal root node (Flowmeter)
           } else if (d.depth === 1) {
             return d.data.name; // Root nodes of each flowmeter
           } else {
-            return d.data.position.split(".").pop(); // Other nodes show their level
+            return d.data.id; // Other nodes show their level
           }
         })
         .on("click", (event, d) => {
