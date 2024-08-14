@@ -23,8 +23,8 @@
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'pressure'">
         <div class="row">
           <div class="gauge-and-filter">
-            <div class="gauge-container">
-              <h3 v-if="selectedGauge === 'pressure' || selectedGauge === null" style="color: #0e5b20;">Pressure Sensor 1</h3>
+            <div class="gauge-container card">
+              <h3 v-if="selectedGauge === 'pressure' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Pressure Sensor 1</h3>
               <PressureGaugeComponent 
                 v-if="selectedGauge === 'pressure' || selectedGauge === null" 
                 :pressureAvg="pressureAvg" 
@@ -73,8 +73,8 @@
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'level'">
         <div class="row">
           <div class="gauge-and-filter">
-            <div class="gauge-container">
-              <h3 v-if="selectedGauge === 'level' || selectedGauge === null" style="color: #0e5b20;">Level Sensor 1</h3>
+            <div class="gauge-container card">
+              <h3 v-if="selectedGauge === 'level' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Level Sensor 1</h3>
               <LevelGaugeComponent 
                 v-if="selectedGauge === 'level' || selectedGauge === null" 
                 :levelAvg="levelAvg" 
@@ -120,8 +120,8 @@
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'flow1'">
         <div class="row">
           <div class="gauge-and-filter">
-            <div class="gauge-container">
-              <h3 v-if="selectedGauge === 'flow1' || selectedGauge === null" style="color: #0e5b20;">Flowmeter 1</h3>
+            <div class="gauge-container card">
+              <h3 v-if="selectedGauge === 'flow1' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Flowmeter 1</h3>
               <FlowMeterGaugeComponent 
                 v-if="selectedGauge === 'flow1' || selectedGauge === null" 
                 :flowAvg="flowAvg1" 
@@ -170,8 +170,8 @@
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'flow2'">
         <div class="row">
           <div class="gauge-and-filter">
-            <div class="gauge-container">
-              <h3 v-if="selectedGauge === 'flow2' || selectedGauge === null" style="color: #0e5b20;">Flowmeter 2</h3>
+            <div class="gauge-container card">
+              <h3 v-if="selectedGauge === 'flow2' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Flowmeter 2</h3>
               <FlowMeterGaugeComponent 
                 v-if="selectedGauge === 'flow2' || selectedGauge === null" 
                 :flowAvg="flowAvg2" 
@@ -218,8 +218,8 @@
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'flow3'">
         <div class="row">
           <div class="gauge-and-filter">
-            <div class="gauge-container">
-              <h3 v-if="selectedGauge === 'flow3' || selectedGauge === null" style="color: #0e5b20;">Flowmeter 3</h3>
+            <div class="gauge-container card">
+              <h3 v-if="selectedGauge === 'flow3' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Flowmeter 3</h3>
               <FlowMeterGaugeComponent 
                 v-if="selectedGauge === 'flow3' || selectedGauge === null" 
                 :flowAvg="flowAvg3" 
@@ -266,8 +266,8 @@
       <div class="column" v-if="selectedGauge === null || selectedGauge === 'flow4'">
         <div class="row">
           <div class="gauge-and-filter">
-            <div class="gauge-container">
-        <h3 v-if="selectedGauge === 'flow4' || selectedGauge === null" style="color: #0e5b20;">Flowmeter 4</h3>
+            <div class="gauge-container card">
+        <h3 v-if="selectedGauge === 'flow4' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Flowmeter 4</h3>
         <FlowMeterGaugeComponent 
           v-if="selectedGauge === 'flow4' || selectedGauge === null" 
           :flowAvg="flowAvg4" 
@@ -417,7 +417,8 @@ export default {
       iotData: [],
       sensors: ['Flowmeter 1', 'Flowmeter 2', 'Flowmeter 3', 'Flowmeter 4'],
       colors: d3.scaleOrdinal(d3.schemeCategory10),
-      isDrawerOpen: true
+      isDrawerOpen: true,
+      threshold: 6
     };
   },
   mounted() {
@@ -519,7 +520,11 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #040c6e;
-  margin-top: 5%;
+  margin-top: 3%;
+}
+
+h3 {
+  margin-bottom: 0px;
 }
 
 .row {
@@ -529,20 +534,12 @@ export default {
 }
 
 .row + .row {
-  margin-top: -10px;
+  margin-top: -25px;
 }
 
 .column {
   flex: 1;
   text-align: center;
-}
-
-.filter-controls {
-  margin: auto;
-  padding: 5px;
-  background-color: #f0f0f0;
-  border-radius: 5px;
-  width: 200px;
 }
 
 .filter-container label {
@@ -658,21 +655,23 @@ select {
 .gauge-and-filter {
   display: flex;
   align-items: flex-start; /* Align items to the top */
-  gap: 80px; /* Space between gauge and filter components */
+  gap: 150px; /* Space between gauge and filter components */
+  margin-bottom: 50px;
 }
 
 .gauge-container {
   flex: 1; /* Gauge takes available space */
+  width: 500px;
 }
 
 .filter-container {
   flex: 1; /* Filter takes available space */
-  margin-top: 10%;
+  margin-top: 13%;
   background-color: #e3faea;
   height: 250px;
   width: 200px;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 20px;
 }
 
 /* Ensure the date range controls fit well */
@@ -693,6 +692,23 @@ select {
   margin-left: 15%;
   
 }
+
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(3, 201, 36, 0.548);
+  margin: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+}
+
+.card:hover {
+  transform: scale(1.05); /* Enlarge the card by 5% */
+  box-shadow: 0 4px 20px rgba(3, 201, 36, 0.548); /* Enhance the shadow on hover */
+}
+
 
 
 </style>

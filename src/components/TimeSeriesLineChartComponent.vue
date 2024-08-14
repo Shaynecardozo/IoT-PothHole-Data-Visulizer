@@ -1,13 +1,22 @@
 <template>
   <div>
     <!-- Threshold Input and Button -->
-    <input v-model.number="userThreshold" type="number" class="threshold-input" placeholder="Set Threshold Value" />
-    <button @click="toggleThreshold" class="threshold-button">
-      Threshold Value is {{ thresholdEnabled ? 'Enabled' : 'Disabled' }} ({{ userThreshold }})
-    </button>
-
-    <!-- Line Chart -->
+    <div class="threshold column">
+      <div class="threshold-label">
+        <p>Set threshold:</p>
+      </div>
+      <div class="q-mb-xl q-ml-xl">
+        <input v-model.number="userThreshold" type="number" class="threshold-input" placeholder="Set Threshold Value" />
+        <button @click="toggleThreshold" class="threshold-button">
+          {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
+        </button>
+      </div>
+    </div>
+    <div>
+      <!-- Line Chart -->
     <div ref="chart"></div>
+    </div>
+    
   </div>
 </template>
 
@@ -34,7 +43,7 @@ export default {
     },
     initialThreshold: {
       type: Number,
-      default: 6 // Default threshold value
+      default: 0 // Default threshold value
     }
   },
   data() {
@@ -103,7 +112,7 @@ export default {
         .attr("class", "line")
         .attr("d", line)
         .attr('fill', 'none')
-        .attr('stroke', 'steelblue')
+        .attr('stroke', 'green')
         .attr('stroke-width', 2.5);
 
       // Get the length of the line path for animation
@@ -303,7 +312,7 @@ export default {
 <style scoped>
 .line {
   fill: none;
-  stroke: steelblue;
+  stroke: green;
   stroke-width: 2.5px;
 }
 
@@ -322,6 +331,12 @@ export default {
   stroke-dasharray: 4,4;
 }
 
+p{
+  font-weight: 500;
+  font-size: 18px;
+  color: black;
+}
+
 .threshold-input {
   margin-right: 10px;
   padding: 10px;
@@ -333,7 +348,7 @@ export default {
 
 .threshold-button {
   padding: 10px 20px;
-  background-color: #000000;
+  background-color: #1d6e34;
   color: white;
   border: none;
   border-radius: 5px;
@@ -342,6 +357,22 @@ export default {
 }
 
 .threshold-button:hover {
-  background-color: #333333;
+  background-color: #0d4221;
+}
+
+.threshold {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end; /* Align the content to the right */
+  margin-bottom: 20px; /* Add some space below */
+  margin-right: 10%;
+}
+
+.threshold-label {
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  text-align: right;
 }
 </style>

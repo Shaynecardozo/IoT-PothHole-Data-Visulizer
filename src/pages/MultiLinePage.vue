@@ -98,6 +98,8 @@ export default {
   padding: 20px;
   background-color: #e3faea;
   margin-top: 150px;
+  margin-right: 20px;
+  margin-left: 20px;
   border-radius: 20px;
 }
 
@@ -130,7 +132,6 @@ select {
 
 .chart {
   flex-grow: 1;
-  margin-left: 100px;
 }
 
 

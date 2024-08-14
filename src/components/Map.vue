@@ -16,12 +16,12 @@
       </ul>
     </div> -->
     <div class="Mapdrawer">
-      <h4
+      <h5
         class="text-center flex items-center justify-center text-bold"
         style="margin: 10px 0px"
       >
         <q-icon name="settings" />Settings
-      </h4>
+      </h5>
       <div class="column">
         <q-toggle
           v-model="showMarkers"
