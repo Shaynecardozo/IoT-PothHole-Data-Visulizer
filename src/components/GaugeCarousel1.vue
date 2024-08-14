@@ -24,85 +24,86 @@
   </template>
   
   <script>
-  import { ref, onMounted } from 'vue';
-  import PressureGaugeComponent from 'components/PressureGaugeComponent.vue';
-  import LevelGaugeComponent from 'components/LevelGaugeComponent.vue';
-  import FlowMeterGaugeComponent from 'components/FlowMeterGaugeComponent.vue';
-  import axios from 'axios';
-  import * as XLSX from 'xlsx';
-  import * as d3 from 'd3';
-  
-  export default {
-    components: {
-      PressureGaugeComponent,
-      LevelGaugeComponent,
-      FlowMeterGaugeComponent,
-    },
-    setup() {
-      const slide = ref(1);
-      const sensors = ref([]);
-  
-      onMounted(() => {
-        loadData().then(() => {
-          sensors.value = [
-            { title: 'Pressure Sensor', component: PressureGaugeComponent, props: { pressureAvg: pressureAvg.value } },
-            { title: 'Level Sensor', component: LevelGaugeComponent, props: { levelAvg: levelAvg.value } },
-            { title: 'Flowmeter 1', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg1.value, maxValue: 1500 } },
-            { title: 'Flowmeter 2', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg2.value, maxValue: 2000 } },
-            { title: 'Flowmeter 3', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg3.value, maxValue: 600 } },
-            { title: 'Flowmeter 4', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg4.value, maxValue: 600 } }
-          ];
-        });
+ import { ref, onMounted, markRaw } from 'vue';
+import PressureGaugeComponent from 'components/PressureGaugeComponent.vue';
+import LevelGaugeComponent from 'components/LevelGaugeComponent.vue';
+import FlowMeterGaugeComponent from 'components/FlowMeterGaugeComponent.vue';
+import axios from 'axios';
+import * as XLSX from 'xlsx';
+import * as d3 from 'd3';
+
+export default {
+  components: {
+    PressureGaugeComponent: markRaw(PressureGaugeComponent),
+    LevelGaugeComponent: markRaw(LevelGaugeComponent),
+    FlowMeterGaugeComponent: markRaw(FlowMeterGaugeComponent),
+  },
+  setup() {
+    const slide = ref(1);
+    const sensors = ref([]);
+
+    onMounted(() => {
+      loadData().then(() => {
+        sensors.value = [
+          { title: 'Pressure Sensor', component: PressureGaugeComponent, props: { pressureAvg: pressureAvg.value } },
+          { title: 'Level Sensor', component: LevelGaugeComponent, props: { levelAvg: levelAvg.value } },
+          { title: 'Flowmeter 1', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg1.value, maxValue: 1500 } },
+          { title: 'Flowmeter 2', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg2.value, maxValue: 2000 } },
+          { title: 'Flowmeter 3', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg3.value, maxValue: 600 } },
+          { title: 'Flowmeter 4', component: FlowMeterGaugeComponent, props: { flowAvg: flowAvg4.value, maxValue: 600 } }
+        ];
       });
-  
-      const pressureAvg = ref(0);
-      const levelAvg = ref(0);
-      const flowAvg1 = ref(0);
-      const flowAvg2 = ref(0);
-      const flowAvg3 = ref(0);
-      const flowAvg4 = ref(0);
-  
-      async function loadData() {
-        try {
-          const response = await axios.get('/IOTData for analysis_fileForInterns.ods', { responseType: 'arraybuffer' });
-          const data = new Uint8Array(response.data);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const sheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  
-          // Process sensor data
-          const flowData1 = jsonData.slice(1).map(row => row[1]);
-          const flowData2 = jsonData.slice(1).map(row => row[3]);
-          const flowData3 = jsonData.slice(1).map(row => row[5]);
-          const flowData4 = jsonData.slice(1).map(row => row[7]);
-          const pressureData = jsonData.slice(1).map(row => row[9]);
-          const levelData = jsonData.slice(1).map(row => row[11]);
-  
-          // Calculate averages
-          flowAvg1.value = d3.mean(flowData1);
-          flowAvg2.value = d3.mean(flowData2);
-          flowAvg3.value = d3.mean(flowData3);
-          flowAvg4.value = d3.mean(flowData4);
-          pressureAvg.value = d3.mean(pressureData);
-          levelAvg.value = d3.mean(levelData);
-        } catch (error) {
-          console.error('Error loading Excel file:', error);
-        }
+    });
+
+    const pressureAvg = ref(0);
+    const levelAvg = ref(0);
+    const flowAvg1 = ref(0);
+    const flowAvg2 = ref(0);
+    const flowAvg3 = ref(0);
+    const flowAvg4 = ref(0);
+
+    async function loadData() {
+      try {
+        const response = await axios.get('/IOTData for analysis_fileForInterns.ods', { responseType: 'arraybuffer' });
+        const data = new Uint8Array(response.data);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Process sensor data
+        const flowData1 = jsonData.slice(1).map(row => row[1]);
+        const flowData2 = jsonData.slice(1).map(row => row[3]);
+        const flowData3 = jsonData.slice(1).map(row => row[5]);
+        const flowData4 = jsonData.slice(1).map(row => row[7]);
+        const pressureData = jsonData.slice(1).map(row => row[9]);
+        const levelData = jsonData.slice(1).map(row => row[11]);
+
+        // Calculate averages
+        flowAvg1.value = d3.mean(flowData1);
+        flowAvg2.value = d3.mean(flowData2);
+        flowAvg3.value = d3.mean(flowData3);
+        flowAvg4.value = d3.mean(flowData4);
+        pressureAvg.value = d3.mean(pressureData);
+        levelAvg.value = d3.mean(levelData);
+      } catch (error) {
+        console.error('Error loading Excel file:', error);
       }
-  
-      return {
-        slide,
-        sensors,
-        pressureAvg,
-        levelAvg,
-        flowAvg1,
-        flowAvg2,
-        flowAvg3,
-        flowAvg4,
-      };
     }
-  };
+
+    return {
+      slide,
+      sensors,
+      pressureAvg,
+      levelAvg,
+      flowAvg1,
+      flowAvg2,
+      flowAvg3,
+      flowAvg4,
+    };
+  }
+};
+
   </script>
   
   <style scoped>
