@@ -2,7 +2,7 @@
   <div id="app">
 
     <div class="q-pa-md back" v-if="selectedGauge !== null">
-        <button @click="goBack" class="back-button"> Back </button>
+      <button @click="goBack" class="back-button"> Back </button>
     </div>
 
     <div class="row">
@@ -11,49 +11,47 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'pressure' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Pressure Sensor 1</h3>
-              <PressureGaugeComponent 
-                v-if="selectedGauge === 'pressure' || selectedGauge === null" 
-                :pressureAvg="pressureAvg" 
-                @gauge-clicked="handleGaugeClick('pressure')" 
-              />
+              <h3 v-if="selectedGauge === 'pressure' || selectedGauge === null"
+                style="color: #0e5b20; font-size: 36px;">Pressure Sensor 1</h3>
+              <PressureGaugeComponent v-if="selectedGauge === 'pressure' || selectedGauge === null"
+                :pressureAvg="pressureAvg" @gauge-clicked="handleGaugeClick('pressure')" />
             </div>
             <!-- Filter Controls for Pressure Gauge -->
             <div v-if="selectedGauge === 'pressure'" class="filter-container">
-            <!-- <label for="filter">Select Filter:</label> -->
-            <select id="filter" v-model="filter">
-              <option value="day">Day</option>
-              <option value="month">Month</option>
-              <option value="year">Year</option>
-            </select>
-         
+              <!-- <label for="filter">Select Filter:</label> -->
+              <select id="filter" v-model="filter">
+                <option value="day">Day</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
 
-           <div class="date-range-controls">
-            <label for="startDate" style="color: black;">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate" />
 
-            <label for="endDate" style="color: black;">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate" />
-           </div>
-           
+              <div class="date-range-controls">
+                <label for="startDate" style="color: black;">Start Date:</label>
+                <input type="date" id="startDate" v-model="startDate" />
+
+                <label for="endDate" style="color: black;">End Date:</label>
+                <input type="date" id="endDate" v-model="endDate" />
+              </div>
+              <div class="threshold-controls">
+                <div class="threshold-label">
+                  <p>Set threshold:</p>
+                </div>
+                <input v-model.number="userThreshold" type="number" class="threshold-input"
+                  placeholder="Set Threshold Value" />
+                <button @click="toggleThreshold" class="threshold-button">
+                  {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
+                </button>
+              </div>
+            </div>
+
           </div>
-          </div>  
         </div>
-        
-        <BarChartComponent 
-          v-if="selectedGauge === 'pressure'" 
-          :data="pressureData" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'pressure'" 
-          :data="pressureData" 
-          :filter="filter"
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
+
+        <BarChartComponent v-if="selectedGauge === 'pressure'" :data="pressureData" :filter="filter"
+          :startDate="startDate" :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled" />
+        <TimeSeriesLineChartComponent v-if="selectedGauge === 'pressure'" :data="pressureData" :filter="filter"
+          :startDate="startDate" :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled" />
       </div>
 
       <!-- Level Sensor -->
@@ -61,46 +59,44 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'level' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Level Sensor 1</h3>
-              <LevelGaugeComponent 
-                v-if="selectedGauge === 'level' || selectedGauge === null" 
-                :levelAvg="levelAvg" 
-                @gauge-clicked="handleGaugeClick('level')" 
-              />
+              <h3 v-if="selectedGauge === 'level' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+                Level Sensor 1</h3>
+              <LevelGaugeComponent v-if="selectedGauge === 'level' || selectedGauge === null" :levelAvg="levelAvg"
+                @gauge-clicked="handleGaugeClick('level')" />
             </div>
-        
-         <!-- Filter Controls for Level Gauge -->
-         <div v-if="selectedGauge === 'level'" class="filter-container">
-          <select id="filter" v-model="filter">
-            <option value="day">Day</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-          </select>
-        
-          <div class="date-range-controls">
-            <label for="startDate" style="color: black;">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate" />
 
-            <label for="endDate" style="color: black;">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate" />
+            <!-- Filter Controls for Level Gauge -->
+            <div v-if="selectedGauge === 'level'" class="filter-container">
+              <select id="filter" v-model="filter">
+                <option value="day">Day</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
+
+              <div class="date-range-controls">
+                <label for="startDate" style="color: black;">Start Date:</label>
+                <input type="date" id="startDate" v-model="startDate" />
+
+                <label for="endDate" style="color: black;">End Date:</label>
+                <input type="date" id="endDate" v-model="endDate" />
+              </div>
+              <div class="threshold-controls">
+                <div class="threshold-label">
+                  <p>Set threshold:</p>
+                </div>
+                <input v-model.number="userThreshold" type="number" class="threshold-input"
+                  placeholder="Set Threshold Value" />
+                <button @click="toggleThreshold" class="threshold-button">
+                  {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
+                </button>
+              </div>
+            </div>
           </div>
-         </div>
-         </div>  
         </div>
-        <BarChartComponent 
-          v-if="selectedGauge === 'level'" 
-          :data="levelData" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'level'" 
-          :data="levelData" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
+        <BarChartComponent v-if="selectedGauge === 'level'" :data="levelData" :filter="filter" :startDate="startDate"
+          :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled" />
+        <TimeSeriesLineChartComponent v-if="selectedGauge === 'level'" :data="levelData" :filter="filter"
+          :startDate="startDate" :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled"/>
       </div>
 
       <!-- Flowmeter 1 -->
@@ -108,47 +104,44 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'flow1' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Flowmeter 1</h3>
-              <FlowMeterGaugeComponent 
-                v-if="selectedGauge === 'flow1' || selectedGauge === null" 
-                :flowAvg="flowAvg1" 
-                :maxValue="1500" 
-                @gauge-clicked="handleGaugeClick('flow1')" 
-              />
+              <h3 v-if="selectedGauge === 'flow1' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+                Flowmeter 1</h3>
+              <FlowMeterGaugeComponent v-if="selectedGauge === 'flow1' || selectedGauge === null" :flowAvg="flowAvg1"
+                :maxValue="1500" @gauge-clicked="handleGaugeClick('flow1')" />
             </div>
-        
-        <!-- Filter Controls for Flowmeter 1 -->
-        <div v-if="selectedGauge === 'flow1'" class="filter-container">
-          <select id="filter" v-model="filter">
-            <option value="day">Day</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-          </select>
-        
-          <div class="date-range-controls">
-            <label for="startDate" style="color: black;">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate" />
 
-            <label for="endDate" style="color: black;">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate" />
+            <!-- Filter Controls for Flowmeter 1 -->
+            <div v-if="selectedGauge === 'flow1'" class="filter-container">
+              <select id="filter" v-model="filter">
+                <option value="day">Day</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
+
+              <div class="date-range-controls">
+                <label for="startDate" style="color: black;">Start Date:</label>
+                <input type="date" id="startDate" v-model="startDate" />
+
+                <label for="endDate" style="color: black;">End Date:</label>
+                <input type="date" id="endDate" v-model="endDate" />
+              </div>
+              <div class="threshold-controls">
+                <div class="threshold-label">
+                  <p>Set threshold:</p>
+                </div>
+                <input v-model.number="userThreshold" type="number" class="threshold-input"
+                  placeholder="Set Threshold Value" />
+                <button @click="toggleThreshold" class="threshold-button">
+                  {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        </div>
-        </div>
-        <BarChartComponent 
-          v-if="selectedGauge === 'flow1'" 
-          :data="flow1Data" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'flow1'" 
-          :data="flow1Data" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
+        <BarChartComponent v-if="selectedGauge === 'flow1'" :data="flow1Data" :filter="filter" :startDate="startDate"
+          :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled"/>
+        <TimeSeriesLineChartComponent v-if="selectedGauge === 'flow1'" :data="flow1Data" :filter="filter"
+          :startDate="startDate" :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled"/>
       </div>
     </div>
 
@@ -158,47 +151,44 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'flow2' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Flowmeter 2</h3>
-              <FlowMeterGaugeComponent 
-                v-if="selectedGauge === 'flow2' || selectedGauge === null" 
-                :flowAvg="flowAvg2" 
-                :maxValue="2000" 
-                @gauge-clicked="handleGaugeClick('flow2')" 
-              />
-           </div>
-          <!-- Filter Controls for Flowmeter 2 -->
-          <div v-if="selectedGauge === 'flow2'" class="filter-container">
-          <select id="filter" v-model="filter">
-            <option value="day">Day</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-          </select>
-         
-          <div class="date-range-controls">
-            <label for="startDate" style="color: black;">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate" />
+              <h3 v-if="selectedGauge === 'flow2' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+                Flowmeter 2</h3>
+              <FlowMeterGaugeComponent v-if="selectedGauge === 'flow2' || selectedGauge === null" :flowAvg="flowAvg2"
+                :maxValue="2000" @gauge-clicked="handleGaugeClick('flow2')" />
+            </div>
+            <!-- Filter Controls for Flowmeter 2 -->
+            <div v-if="selectedGauge === 'flow2'" class="filter-container">
+              <select id="filter" v-model="filter">
+                <option value="day">Day</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
 
-            <label for="endDate" style="color: black;">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate" />
+              <div class="date-range-controls">
+                <label for="startDate" style="color: black;">Start Date:</label>
+                <input type="date" id="startDate" v-model="startDate" />
+
+                <label for="endDate" style="color: black;">End Date:</label>
+                <input type="date" id="endDate" v-model="endDate" />
+              </div>
+              <div class="threshold-controls">
+                <div class="threshold-label">
+                  <p>Set threshold:</p>
+                </div>
+                <input v-model.number="userThreshold" type="number" class="threshold-input"
+                  placeholder="Set Threshold Value" />
+                <button @click="toggleThreshold" class="threshold-button">
+                  {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
+                </button>
+              </div>
+            </div>
           </div>
-         </div>
-        </div>
         </div>
 
-        <BarChartComponent 
-          v-if="selectedGauge === 'flow2'" 
-          :data="flow2Data" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'flow2'" 
-          :data="flow2Data" 
-          :filter="filter"
-          :startDate="startDate"
-          :endDate="endDate"  
-        />
+        <BarChartComponent v-if="selectedGauge === 'flow2'" :data="flow2Data" :filter="filter" :startDate="startDate"
+          :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled"/>
+        <TimeSeriesLineChartComponent v-if="selectedGauge === 'flow2'" :data="flow2Data" :filter="filter"
+          :startDate="startDate" :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled"/>
       </div>
 
       <!-- Flowmeter 3 -->
@@ -206,47 +196,44 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'flow3' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Flowmeter 3</h3>
-              <FlowMeterGaugeComponent 
-                v-if="selectedGauge === 'flow3' || selectedGauge === null" 
-                :flowAvg="flowAvg3" 
-                :maxValue="600" 
-                @gauge-clicked="handleGaugeClick('flow3')" 
-              />
-            </div> 
-        <!-- Filter Controls for Flowmeter 3 -->
-        <div v-if="selectedGauge === 'flow3'" class="filter-container">
-          <select id="filter" v-model="filter">
-            <option value="day">Day</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-          </select>
-          
-          <div class="date-range-controls">
-            <label for="startDate" style="color: black;">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate" />
+              <h3 v-if="selectedGauge === 'flow3' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+                Flowmeter 3</h3>
+              <FlowMeterGaugeComponent v-if="selectedGauge === 'flow3' || selectedGauge === null" :flowAvg="flowAvg3"
+                :maxValue="600" @gauge-clicked="handleGaugeClick('flow3')" />
+            </div>
+            <!-- Filter Controls for Flowmeter 3 -->
+            <div v-if="selectedGauge === 'flow3'" class="filter-container">
+              <select id="filter" v-model="filter">
+                <option value="day">Day</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
 
-            <label for="endDate" style="color: black;">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate" />
+              <div class="date-range-controls">
+                <label for="startDate" style="color: black;">Start Date:</label>
+                <input type="date" id="startDate" v-model="startDate" />
+
+                <label for="endDate" style="color: black;">End Date:</label>
+                <input type="date" id="endDate" v-model="endDate" />
+              </div>
+              <div class="threshold-controls">
+                <div class="threshold-label">
+                  <p>Set threshold:</p>
+                </div>
+                <input v-model.number="userThreshold" type="number" class="threshold-input"
+                  placeholder="Set Threshold Value" />
+                <button @click="toggleThreshold" class="threshold-button">
+                  {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        </div>
-        </div>
 
-        <BarChartComponent 
-          v-if="selectedGauge === 'flow3'" 
-          :data="flow3Data" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'flow3'" 
-          :data="flow3Data" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
+        <BarChartComponent v-if="selectedGauge === 'flow3'" :data="flow3Data" :filter="filter" :startDate="startDate"
+          :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled"/>
+        <TimeSeriesLineChartComponent v-if="selectedGauge === 'flow3'" :data="flow3Data" :filter="filter"
+          :startDate="startDate" :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled"/>
       </div>
 
       <!-- Flowmeter 4 -->
@@ -254,50 +241,47 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-        <h3 v-if="selectedGauge === 'flow4' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">Flowmeter 4</h3>
-        <FlowMeterGaugeComponent 
-          v-if="selectedGauge === 'flow4' || selectedGauge === null" 
-          :flowAvg="flowAvg4" 
-          :maxValue="600" 
-          @gauge-clicked="handleGaugeClick('flow4')" 
-        />
-      </div>
-        
-        <!-- Filter Controls for Flowmeter 4 -->
-        <div v-if="selectedGauge === 'flow4'" class="filter-container">
-          <select id="filter" v-model="filter">
-            <option value="day">Day</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-          </select>
-         
-          <div class="date-range-controls">
-            <label for="startDate" style="color: black;">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate" />
+              <h3 v-if="selectedGauge === 'flow4' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+                Flowmeter 4</h3>
+              <FlowMeterGaugeComponent v-if="selectedGauge === 'flow4' || selectedGauge === null" :flowAvg="flowAvg4"
+                :maxValue="600" @gauge-clicked="handleGaugeClick('flow4')" />
+            </div>
 
-            <label for="endDate" style="color: black;">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate" />
+            <!-- Filter Controls for Flowmeter 4 -->
+            <div v-if="selectedGauge === 'flow4'" class="filter-container">
+              <select id="filter" v-model="filter">
+                <option value="day">Day</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
+
+              <div class="date-range-controls">
+                <label for="startDate" style="color: black;">Start Date:</label>
+                <input type="date" id="startDate" v-model="startDate" />
+
+                <label for="endDate" style="color: black;">End Date:</label>
+                <input type="date" id="endDate" v-model="endDate" />
+              </div>
+              <div class="threshold-controls">
+                <div class="threshold-label">
+                  <p>Set threshold:</p>
+                </div>
+                <input v-model.number="userThreshold" type="number" class="threshold-input"
+                  placeholder="Set Threshold Value" />
+                <button @click="toggleThreshold" class="threshold-button">
+                  {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        </div>
-        </div>
-        <BarChartComponent 
-          v-if="selectedGauge === 'flow4' " 
-          :data="flow4Data" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
-        <TimeSeriesLineChartComponent 
-          v-if="selectedGauge === 'flow4' " 
-          :data="flow4Data" 
-          :filter="filter" 
-          :startDate="startDate"
-          :endDate="endDate" 
-        />
+        <BarChartComponent v-if="selectedGauge === 'flow4'" :data="flow4Data" :filter="filter" :startDate="startDate"
+          :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled"/>
+        <TimeSeriesLineChartComponent v-if="selectedGauge === 'flow4'" :data="flow4Data" :filter="filter"
+          :startDate="startDate" :endDate="endDate" :threshold="userThreshold" :threshold-enabled="thresholdEnabled"/>
       </div>
     </div>
-   
+
   </div>
 </template>
 
@@ -339,19 +323,19 @@ export default {
       flow3Data: [],
       flow4Data: [],
       filter: 'day',
-      filter1: 'day',
-      filter2: 'day',
-      chartType: 'bar',
+      // filter1: 'day',
+      // filter2: 'day',
+      // chartType: 'bar',
       startDate: new Date(-8640000000000000),
       endDate: new Date(8640000000000000),
-      
-      startDate2: new Date(-8640000000000000),
-      endDate2: new Date(8640000000000000),
-      iotData: [],
-      sensors: ['Flowmeter 1', 'Flowmeter 2', 'Flowmeter 3', 'Flowmeter 4'],
-      colors: d3.scaleOrdinal(d3.schemeCategory10),
-      isDrawerOpen: true,
-      threshold: 6
+
+      // iotData: [],
+      // sensors: ['Flowmeter 1', 'Flowmeter 2', 'Flowmeter 3', 'Flowmeter 4'],
+      // colors: d3.scaleOrdinal(d3.schemeCategory10),
+      // isDrawerOpen: true,
+      // threshold: 6,
+      userThreshold: 0,
+      thresholdEnabled: false,
     };
   },
   mounted() {
@@ -399,44 +383,48 @@ export default {
         this.levelData = dates6.map((date, index) => ({ date, value: levelData[index] }));
 
         // Update the multiline data
-        this.iotData = jsonData.slice(1).map(row => ({
-          date: row[0],
-          'Flowmeter 1': row[1],
-          'Flowmeter 2': row[3],
-          'Flowmeter 3': row[5],
-          'Flowmeter 4': row[7],
-        }));
+        // this.iotData = jsonData.slice(1).map(row => ({
+        //   date: row[0],
+        //   'Flowmeter 1': row[1],
+        //   'Flowmeter 2': row[3],
+        //   'Flowmeter 3': row[5],
+        //   'Flowmeter 4': row[7],
+        // }));
 
       } catch (error) {
         console.error('Error loading Excel file:', error);
       }
     },
-   
-    resetDateRanges() {
-    const defaultStartDate = new Date(-8640000000000000);
-    const defaultEndDate = new Date(8640000000000000);
-    this.startDate = defaultStartDate;
-    this.endDate = defaultEndDate;
-    this.startDate1 = defaultStartDate;
-    this.endDate1 = defaultEndDate;
-    this.startDate2 = defaultStartDate;
-    this.endDate2 = defaultEndDate;
-  },
-  handleGaugeClick(gauge) {
-    this.selectedGauge = this.selectedGauge === gauge ? null : gauge;
-    this.resetDateRanges();
-  },
-  goBack() {
-  console.log("back button is clicked")
-    this.selectedGauge = null;
-    this.resetDateRanges();
-  },
-    toggleDrawer() {
-      this.isDrawerOpen = !this.isDrawerOpen;
+    toggleThreshold() {
+      this.thresholdEnabled = !this.thresholdEnabled;
     },
-    RoutePage(value){
-      this.$router.push(value)
-    }
+    resetDateRanges() {
+      const defaultStartDate = new Date(-8640000000000000);
+      const defaultEndDate = new Date(8640000000000000);
+      this.startDate = defaultStartDate;
+      this.endDate = defaultEndDate;
+      this.userThreshold=0;
+      this.thresholdEnabled= false;
+      // this.startDate1 = defaultStartDate;
+      // this.endDate1 = defaultEndDate;
+      // this.startDate2 = defaultStartDate;
+      // this.endDate2 = defaultEndDate;
+    },
+    handleGaugeClick(gauge) {
+      this.selectedGauge = this.selectedGauge === gauge ? null : gauge;
+      this.resetDateRanges();
+    },
+    goBack() {
+      console.log("back button is clicked")
+      this.selectedGauge = null;
+      this.resetDateRanges();
+    },
+    // toggleDrawer() {
+    //   this.isDrawerOpen = !this.isDrawerOpen;
+    // },
+    // RoutePage(value){
+    //   this.$router.push(value)
+    // }
   },
 };
 </script>
@@ -468,16 +456,10 @@ h3 {
   box-sizing: border-box;
 }
 
-.row + .row {
+.row+.row {
   margin-top: -50px;
 }
 
-
-
-.filter-container label {
-  display: block;
-  margin-bottom: 5px;
-}
 
 
 /* Multiline Chart Section */
@@ -485,97 +467,121 @@ h3 {
   display: flex;
   margin-left: 110px;
   margin-right: 110px;
-  margin-top: 5%; /* Adjust to your layout */
+  margin-top: 5%;
+  /* Adjust to your layout */
 }
 
-.sidebar {
-  width: 160px;
-  height: 250px;
-  padding: 20px;
-  background-color: #f5f5f5;
-}
+
 
 select {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   padding: 5px;
   font-size: 16px;
   border-radius: 8px;
   border-color: #a0eab6;
 }
 
-.legend {
-  margin-top: 20px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.legend-color {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
-  border-radius: 2px;
-}
 
 .chart {
   flex-grow: 1;
 }
 
 .back-button {
-  background-color: #0e5b20;
+  background-color: #236d35;
   color: #f5f5f5;
   cursor: pointer;
   padding: 8px;
   padding-left: 20px;
   padding-right: 20px;
-  border-radius: 10px;
+  border-radius: 9px;
   border: none;
   font-size: 18px;
 }
 
-
 .gauge-and-filter {
   display: flex;
-  align-items: flex-start; /* Align items to the top */
-  gap: 150px; /* Space between gauge and filter components */
-  margin-bottom: 20px;
+  align-items: flex-start;
+  /* Align items to the top */
+  gap: 10px;
+  /* Adjust the space between gauge and filter components */
+  margin-bottom: 10px;
+  /* Space below the row */
 }
 
 .gauge-container {
-  flex: 1; /* Gauge takes available space */
+  flex: 1;
+  /* Gauge takes available space */
   width: 500px;
+  /* Set a fixed width or adjust as needed */
 }
 
 .filter-container {
-  flex: 1; /* Filter takes available space */
-  margin-top: 13%;
+  flex: 1;
+  /* Filter takes available space */
   background-color: #e3faea;
-  height: 250px;
-  width: 200px;
   padding: 15px;
-  border-radius: 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 7%;
+  max-width: 300px;
+  /* Set a max width if necessary */
+}
+
+
+.threshold-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.threshold-label p {
+  margin: 0;
+  margin-top: 5px;
+  color: #000000;
+}
+
+.threshold-input {
+  border-radius: 8px;
+  border-color: #a0eab6;
+  font-size: 16px;
+}
+
+.threshold-button {
+  background-color: #0e5b20;
+  color: #f5f5f5;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.threshold-button:hover {
+  background-color: #0d4b1d;
+  /* Darker green on hover */
 }
 
 /* Ensure the date range controls fit well */
 .date-range-controls {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Space between controls */
-  margin-top: 10px;
+  gap: 1px;
+  /* Space between controls */
 }
 
-.date-range-controls input{
+.date-range-controls input {
   border-radius: 8px;
   border-color: #a0eab6;
 }
+
 .back {
   display: flex;
-  justify-content: flex-start; /* Aligns content to the left */
-  margin-left: 15%;
-  
+  justify-content: flex-start;
+  /* Aligns content to the left */
+  /* margin-left: 15%; */
+
 }
 
 .card {
@@ -586,15 +592,16 @@ select {
   padding: 20px;
   width: 100%;
   max-width: 500px;
-  min-height:325px; /* Set a fixed or minimum height */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+  min-height: 325px;
+  /* Set a fixed or minimum height */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* Smooth transition */
 }
 
 .card:hover {
-  transform: scale(1.05); /* Enlarge the card by 5% */
-  box-shadow: 0 4px 20px rgba(3, 201, 36, 0.548); /* Enhance the shadow on hover */
+  transform: scale(1.05);
+  /* Enlarge the card by 5% */
+  box-shadow: 0 4px 20px rgba(3, 201, 36, 0.548);
+  /* Enhance the shadow on hover */
 }
-
-
-
 </style>
