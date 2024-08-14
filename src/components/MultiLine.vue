@@ -1,26 +1,28 @@
 <template>
   <div>
     <!-- Threshold Input and Button -->
-    <div class="threshold column">
-      <div class="threshold-label">
-        <p>Set threshold:</p>
-      </div>
-      <div class="q-mb-xl q-ml-xl">
-        <input v-model.number="userThreshold" type="number" class="threshold-input" placeholder="Set Threshold Value" />
-        <button @click="toggleThreshold" class="threshold-button">
-          {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
-        </button>
+    <div class="threshold-wrapper">
+      <div class="threshold-container">
+        <div class="threshold-label">
+          <p>Set threshold:</p>
+        </div>
+        <div class="threshold-controls">
+          <input v-model.number="userThreshold" type="number" placeholder="Set Threshold Value" />
+          <button @click="toggleThreshold">
+            {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
+          </button>
+        </div>
       </div>
     </div>
-     
     
     <div>
       <!-- Multi Line Chart -->
       <div ref="chartRef" class="chart"></div>
     </div>
-    
   </div>
 </template>
+
+
 
 <script>
 import { ref, onMounted, watch, computed } from 'vue';
@@ -217,8 +219,8 @@ export default {
 
   if (filteredData.value.length === 0) return;
 
-  const margin = { top: 20, right: 20, bottom: 50, left: 40 },
-    width = 1300 - margin.left - margin.right,
+  const margin = { top: 20, right: 20, bottom: 50, left: 35 },
+    width = 1275 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
   const svg = d3.select(chartRef.value)
@@ -259,7 +261,7 @@ export default {
     .attr("text-anchor", "middle")
     .attr("x", width / 2)
     .attr("y", height + margin.bottom)
-    .text("Date");
+    
 
   // Add Y axis label
   svg.append("text")
@@ -268,7 +270,7 @@ export default {
     .attr("transform", "rotate(-90)")
     .attr("y", -margin.left + 9.5)
     .attr("x", -height / 2)
-    .text("Flow Rate (m³/hr)");
+    
 
   // Handling the Threshold and Data Rendering
   if (thresholdEnabled.value) {
@@ -432,6 +434,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .chart {
   width: 100%;
@@ -452,53 +455,61 @@ export default {
   font-size: 12px;
 }
 
-p{
+p {
   font-weight: 500;
   font-size: 18px;
 }
 
-.threshold-input {
-  margin-right: 10px;
+.threshold-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.threshold-container {
+  background-color: #e3faea;
   padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  width: 150px;
-}
-
-.threshold-button {
-  padding: 10px 20px;
-  background-color: #1d6e34;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.threshold-button:hover {
-  background-color: #0d4221;
-}
-
-.threshold-line {
-  stroke: red;
-  stroke-width: 2;
-  stroke-dasharray: 4,4;
-}
-
-.threshold {
+  border-bottom-left-radius: 10px; /* Rounded corners */
+  border-bottom-right-radius: 10px; /* Rounded corners */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-end; /* Align the content to the right */
-  margin-bottom: 20px; /* Add some space below */
-  width: 100%;
+  align-items: center;
+  width: 300px;
 }
 
 .threshold-label {
-  margin-top: 10px;
-  margin-bottom: 5px;
-  font-weight: bold;
-  text-align: right;
+  margin-top: -20px;
+  margin-bottom: -10px;
+}
+
+.threshold-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.threshold-controls input {
+  padding: 5px;
+  width: 70%;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+.threshold-controls button {
+  padding: 5px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  color: white; /* White text */
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  background-color: #0e5b20;
+}
+
+.threshold-controls button:hover {
+  background-color: #0d4b1d;
+  /* Darker green on hover */
 }
 </style>

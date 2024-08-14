@@ -1,27 +1,36 @@
 <template>
-  <div class="container">
-    <div class="sidebar">
-      <select v-model="filter" @change="loadData">
-        <option value="day">Day</option>
-        <option value="month">Month</option>
-        <option value="year">Year</option>
-      </select>
-      <div class="date-range-controls">
-        <label for="startDate">Start Date:</label>
-        <input type="date" id="startDate" v-model="startDate1" />
+  <div class="column">
+    <div class="row">
+      <div class="filter-container">
+        <!-- Filter Controls -->
+        <select v-model="filter" @change="loadData">
+          <option value="day">Day</option>
+          <option value="month">Month</option>
+          <option value="year">Year</option>
+        </select>
+        <div class="date-range-controls">
+          <label for="startDate">Start Date:</label>
+          <input type="date" id="startDate" v-model="startDate" />
 
-        <label for="endDate">End Date:</label>
-        <input type="date" id="endDate" v-model="endDate1" />
-      </div>
+          <label for="endDate">End Date:</label>
+          <input type="date" id="endDate" v-model="endDate" />
+        </div>
 
-      <div class="legend">
-        <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
-          <div class="legend-color" :style="{ backgroundColor: colors(index) }"></div>
-          <span>{{ sensor }}</span>
+        <div class="legend">
+          <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
+            <div class="legend-color" :style="{ backgroundColor: colors(index) }"></div>
+            <span>{{ sensor }}</span>
+          </div>
         </div>
       </div>
     </div>
-    <MultiLine :data="iotData" :filter="filter" :startDate="startDate1" :endDate="endDate1" class="chart" />
+    <MultiLine
+      :data="iotData" 
+      :filter="filter" 
+      :startDate="startDate" 
+      :endDate="endDate"
+      class="chart" 
+    />
   </div>
 </template>
 
@@ -85,25 +94,32 @@ export default {
 };
 </script>
 
+
 <style scoped>
-.container {
-  display: flex;
-  flex-direction: column; /* Stack children vertically */
-  margin-left: 110px;
-  margin-right: 110px;
+.column {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-.sidebar {
-  flex: 1;
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+.filter-container {
   background-color: #e3faea;
   padding: 15px;
-  border-radius: 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
   display: flex;
   flex-direction: column;
-  margin-top:5% ;
-  margin-left:40% ;
-  max-width: 300px;
+  width: 300px;
+  /* max-width: 300px; */
 }
+
 select {
   margin-bottom: 10px;
   padding: 5px;
@@ -112,19 +128,17 @@ select {
   border-color: #a0eab6;
 }
 
-
-
 .date-range-controls label {
   display: block;
-  text-align: center; /* Center label text */
+  text-align: center;
   font-size: 14px;
-  margin-bottom: 5px; /* Add space below labels */
+  margin-bottom: 5px;
 }
+
 .date-range-controls {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  /* Space between controls */
 }
 
 .date-range-controls input {
@@ -148,7 +162,6 @@ select {
   margin-right: 8px;
   border-radius: 2px;
 }
-
 
 .chart {
   flex-grow: 1;

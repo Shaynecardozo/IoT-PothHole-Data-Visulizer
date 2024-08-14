@@ -512,6 +512,7 @@ select {
 
 .gauge-container {
   flex: 1;
+  cursor: pointer;
   /* Gauge takes available space */
   width: 500px;
   /* Set a fixed width or adjust as needed */

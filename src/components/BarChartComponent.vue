@@ -51,8 +51,8 @@ export default {
       d3.select(this.$refs.chart).selectAll("*").remove();
 
       const filteredData = this.filterData();
-      const margin = { top: 20, right: 20, bottom: 50, left: 40 },
-        width = 1300 - margin.left - margin.right,
+      const margin = { top: 20, right: 20, bottom: 50, left: 35 },
+        width = 1275 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
       const svg = d3.select(this.$refs.chart)
