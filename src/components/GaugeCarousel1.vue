@@ -106,10 +106,10 @@
   
   <style scoped>
   .carousel-container {
-    border: 2px solid #4caf50;
+    /* border: 2px solid #4caf50; */
     max-width: 100vw; /* Ensure the container does not exceed viewport width */
     overflow: hidden; /* Hide any overflow */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.9); /* Shadow for the entire carousel container */
+    /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.9); Shadow for the entire carousel container */
     border-radius: 10px; /* Rounded corners */
   }
   
@@ -119,11 +119,11 @@
   }
   
   .carousel-content {
-    border: 2px solid #4caf50;
+    /* border: 2px solid #4caf50; */
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
     border-radius: 8px;
     padding: 10px; /* Reduced padding to fit content better */
     background-color: #ffffff;

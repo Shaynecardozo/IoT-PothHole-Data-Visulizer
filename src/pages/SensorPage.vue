@@ -1,19 +1,6 @@
 <template>
   <div id="app">
 
-    <!-- <div :class="['drawer', { 'drawer-closed': !isDrawerOpen }]" style="z-index: 10;"> -->
-      <!-- Drawer Toggle Button -->
-      <!-- <button @click="toggleDrawer" class="menu-icon">☰</button> -->
-
-      <!-- Drawer Content -->
-      <!-- <ul v-if="isDrawerOpen" class="q-mt-xl">
-        <li clickable @click="RoutePage('')"><q-icon name="query_stats" /> Sensors</li>
-        <li clickable @click="RoutePage('/Multiline')"><q-icon name="map" /> Multi-Line Chart</li>
-        <li clickable @click="RoutePage('/Comparisonbar')"><q-icon name="edit_road" /> Comparison Bar Chart</li>
-      </ul>
-    </div> -->
-
-    <!-- back button -->
     <div class="q-pa-md back" v-if="selectedGauge !== null">
         <button @click="goBack" class="back-button"> Back </button>
     </div>
@@ -310,61 +297,7 @@
         />
       </div>
     </div>
-    <!-- <div v-if="selectedGauge===null" class="container">
-      <MultiLine :data="iotData" :filter="filter1" :startDate="startDate1" :endDate="endDate1"  class="chart" />
-      
-      <div class="sidebar">
-        <select v-model="filter1" @change="loadData">
-          <option value="day">Day</option>
-          <option value="month">Month</option>
-          <option value="year">Year</option>
-        </select>
-        <div class="date-range-controls">
-            <label for="startDate">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate1" />
-
-            <label for="endDate">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate1" />
-          </div>
-
-        <div class="legend">
-          <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
-            <div class="legend-color" :style="{ backgroundColor: colors(index) }"></div>
-            <span>{{ sensor }}</span>
-          </div>
-        </div>
-      </div>
-      
-    </div>
-
-    <div v-if="selectedGauge===null" class="container">
-      <ComparisonBarChartComponent :data="iotData" :filter="filter2" :startDate="startDate2" :endDate="endDate2" class="chart" />
-      
-      <div class="sidebar">
-        <select v-model="filter2" @change="loadData">
-          <option value="day">Day</option>
-          <option value="month">Month</option>
-          <option value="year">Year</option>
-        </select>
-        <div class="date-range-controls">
-            <label for="startDate">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate2" />
-
-            <label for="endDate">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate2" />
-          </div>
-
-        <div class="legend">
-          <div class="legend-item" v-for="(sensor, index) in sensors" :key="sensor">
-            <div class="legend-color" :style="{ backgroundColor: colors(index) }"></div>
-            <span>{{ sensor }}</span>
-          </div>
-        </div>
-      </div>
-      
-    </div> -->
-
-
+   
   </div>
 </template>
 
@@ -478,12 +411,7 @@ export default {
         console.error('Error loading Excel file:', error);
       }
     },
-    // handleGaugeClick(gauge) {
-    //   this.selectedGauge = this.selectedGauge === gauge ? null : gauge;
-    // },
-    // goBack() {
-    //   this.selectedGauge = null;
-    // },
+   
     resetDateRanges() {
     const defaultStartDate = new Date(-8640000000000000);
     const defaultEndDate = new Date(8640000000000000);
@@ -520,7 +448,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #040c6e;
-  margin-top: 3%;
+  /* margin-top: 3%; */
 }
 
 h3 {
@@ -529,18 +457,22 @@ h3 {
 
 .row {
   display: flex;
-  justify-content: center;
-  margin-bottom: 1px;
-}
+  justify-content: space-evenly;
 
-.row + .row {
-  margin-top: -25px;
 }
 
 .column {
   flex: 1;
   text-align: center;
+  padding: 10px;
+  box-sizing: border-box;
 }
+
+.row + .row {
+  margin-top: -50px;
+}
+
+
 
 .filter-container label {
   display: block;
@@ -603,60 +535,13 @@ select {
   border: none;
   font-size: 18px;
 }
-/* Drawer styling
-.drawer {
-  width: 250px;
-  height: calc(100vh - 50px); /* Adjust height to be below the navbar */
-  /* position: fixed;
-  top: 50px; /* Height of the navbar */
-  /* left: 0;
-  background-color: #f4f4f4;
-  overflow-x: hidden;
-  transition: all 0.3s ease;
 
-} */
-
-/* .drawer-closed {
-  width: 60px; /* Narrow width when the drawer is closed */
-  /* height: fit-content;
-  border-radius:0 50% 50% 0;
-  transition: all 0.3s ease;
-} */
-
-/* .drawer ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.drawer ul li {
-  padding: 5px 10px;
-  margin:10px 20px;
-  width:fit-content;
-}
-.drawer ul li:hover {
-  transition:all 0.5s ease;
-  cursor:pointer;
-  background-color: blue;
-  border-radius: 20px;
-  color:white
-} */ 
-
-/* Toggle button styling */
-/* .menu-icon {
-  font-size: 24px;
-  margin: 10px;
-  float: right;
-  background: none;
-  border: none;
-  color: #333;
-  cursor: pointer;
-} */
 
 .gauge-and-filter {
   display: flex;
   align-items: flex-start; /* Align items to the top */
   gap: 150px; /* Space between gauge and filter components */
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 }
 
 .gauge-container {
@@ -701,6 +586,7 @@ select {
   padding: 20px;
   width: 100%;
   max-width: 500px;
+  min-height:325px; /* Set a fixed or minimum height */
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
 }
 
