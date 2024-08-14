@@ -11,13 +11,14 @@
           <!-- Larger version of the line chart -->
           <div ref="popupLineChartContainer" class="popup-chart-container"></div>
         </q-card-section>
-        <q-card-actions>
+        <q-card-actions class="popup-actions">
           <q-btn flat label="Close" @click="dialog = false"></q-btn>
         </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
 </template>
+
 
 <script>
 import { onMounted, watch, ref } from 'vue';
@@ -143,7 +144,13 @@ export default {
 
       svg.append('g')
         .attr('transform', `translate(0, ${height})`)
-        .call(xAxis);
+        .call(xAxis)
+        .selectAll('text')
+        .attr('transform', 'rotate(-45)') // Slant labels by -45 degrees
+        .style('text-anchor', 'end') // Align text to the end
+        .style('font-size', '10px') // Adjust font size if necessary
+        .attr('dx', '-0.8em') // Adjust horizontal position
+        .attr('dy', '0.15em'); // Adjust vertical position
 
       svg.append('g')
         .call(yAxis)
@@ -249,23 +256,52 @@ export default {
 
 <style scoped>
 .card {
-  /* Add styles for card layout */
-}
-
-.line-chart {
-  /* Add styles for line chart */
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 16px;
+  margin: 16px;
+  width: 50%; /* Adjust width to fit side by side */
+  height: 50%;
+  position: relative;
 }
 
 .icon {
-  /* Add styles for icon */
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+}
+
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 120px;
+  height: auto;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Style for the popup card */
+.popup-card {
+  width: 100vw; /* Full viewport width */
+  height: 90vh; /* 90% of viewport height */
+  position: relative;
 }
 
 .popup-chart-container {
   width: 100%;
-  height: 400px; /* Adjust as needed */
+  height: 100%;
 }
 
-.tooltip {
-  /* Add styles for tooltip */
+/* Ensure the q-dialog takes full width and height */
+.q-dialog__inner {
+  width: 100vw;
+  height: 90vh;
 }
+
 </style>

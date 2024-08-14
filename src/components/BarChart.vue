@@ -255,8 +255,8 @@ export default {
 
 /* Style for the popup card */
 .popup-card {
-  width: 75vw;
-  height: 75vh;
+  width: 100vw; /* Full viewport width */
+  height: 90vh; /* 90% of viewport height */
   position: relative;
 }
 
@@ -264,4 +264,11 @@ export default {
   width: 100%;
   height: 100%;
 }
+
+/* Ensure the q-dialog takes full width and height */
+.q-dialog__inner {
+  width: 100vw;
+  height: 90vh;
+}
+
 </style>
