@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <div class="card">
-      <q-icon name="favorite" class="icon"></q-icon>
+      <q-icon name="note_alt" class="icon"></q-icon>
       <p>Total Complaints</p>
       <h3>{{ totalComplaints }}</h3>
     </div>
@@ -34,7 +34,7 @@ export default {
   justify-content: space-around;
 }
 .card {
-  background: linear-gradient(to right, #007bff, #0056b3); /* Gradient background */
+  background: linear-gradient(to right, #b56727, #ed7117); /* Gradient background */
   color: white;
   padding: 10px;
   border-radius: 10px;

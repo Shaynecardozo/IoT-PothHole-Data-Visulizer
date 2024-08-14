@@ -1,11 +1,28 @@
 <template>
+<<<<<<< HEAD
   <div class="card donut-chart-card">
     <!-- Icon with click event to open popup -->
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
+=======
+  <div class="donut-chart">
+>>>>>>> f6c27e08b662ff2dc9a0a1e3e83a29440cfe1744
     <svg ref="donutChart"></svg>
     <div class="legend">
       <!-- <div><span class="color-box fixed"></span> Fixed</div>
       <div><span class="color-box unfixed"></span> Unfixed</div> -->
+<<<<<<< HEAD
+=======
+      </div>
+    </div>
+
+  <div class="card">
+    <div class="donut-chart">
+      <svg ref="donutChart"></svg>
+      <div class="legend">
+        <!-- <div><span class="color-box fixed"></span> Fixed</div>
+        <div><span class="color-box unfixed"></span> Unfixed</div> -->
+      </div>
+>>>>>>> f6c27e08b662ff2dc9a0a1e3e83a29440cfe1744
     </div>
 
     <!-- Popup Dialog -->
@@ -48,7 +65,7 @@ export default {
       const radius = Math.min(width, height) / 2;
       const innerRadius = radius * 0.4; // Inner radius for donut effect
 
-      const color = d3.scaleOrdinal(["#007bff", "#72e5ff"]); // Colors
+      const color = d3.scaleOrdinal(["#b56727", "#ed7117"]); // Colors
 
       const pie = d3.pie().value(d => d.value);
       const arc = d3.arc().outerRadius(radius - 10).innerRadius(innerRadius);
