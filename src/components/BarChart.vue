@@ -161,7 +161,7 @@ export default {
 
       const color = d3.scaleOrdinal()
         .domain(['Fixed Complaints', 'Unfixed Complaints'])
-        .range(['#b56727', '#ed7117']);
+        .range(["#90EE90", "#138808"]);
 
       // Create and position the tooltip
       const tooltip = createTooltip();

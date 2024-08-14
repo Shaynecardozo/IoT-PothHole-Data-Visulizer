@@ -3,10 +3,10 @@
     <!-- Icon with click event to open popup -->
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
     <svg ref="donutChart"></svg>
-    <div class="legend">
-      <!-- <div><span class="color-box fixed"></span> Fixed</div>
-      <div><span class="color-box unfixed"></span> Unfixed</div> -->
-    </div>
+    <!-- <div class="legend">
+      <div><span class="color-box fixed"></span> Fixed</div>
+      <div><span class="color-box unfixed"></span> Unfixed</div>
+    </div> -->
 
     <!-- Popup Dialog -->
     <q-dialog v-model="dialog" persistent>
@@ -48,7 +48,7 @@ export default {
       const radius = Math.min(width, height) / 2;
       const innerRadius = radius * 0.4; // Inner radius for donut effect
 
-      const color = d3.scaleOrdinal(["#b56727", "#ed7117"]); // Colors
+      const color = d3.scaleOrdinal(["#90EE90", "#138808"]); // Colors
 
       const pie = d3.pie().value(d => d.value);
       const arc = d3.arc().outerRadius(radius - 10).innerRadius(innerRadius);
@@ -117,8 +117,7 @@ export default {
   border-radius: 8px;
   padding: 16px;
   margin: 16px;
-  width: 100%; /* Adjust width as needed */
-  max-width: 400px; /* Optional: Set max-width for responsiveness */
+  width: 240px; /* Adjust width as needed */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: relative;
 }

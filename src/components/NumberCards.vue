@@ -34,7 +34,7 @@ export default {
   justify-content: space-around;
 }
 .card {
-  background: linear-gradient(to right, #b56727, #ed7117); /* Gradient background */
+  background: linear-gradient(to right, #138808, #90EE90); /* Gradient background */
   color: white;
   padding: 10px;
   border-radius: 10px;
