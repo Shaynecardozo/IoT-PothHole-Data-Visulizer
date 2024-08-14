@@ -1,28 +1,11 @@
 <template>
-<<<<<<< HEAD
   <div class="card donut-chart-card">
     <!-- Icon with click event to open popup -->
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
-=======
-  <div class="donut-chart">
->>>>>>> f6c27e08b662ff2dc9a0a1e3e83a29440cfe1744
     <svg ref="donutChart"></svg>
     <div class="legend">
       <!-- <div><span class="color-box fixed"></span> Fixed</div>
       <div><span class="color-box unfixed"></span> Unfixed</div> -->
-<<<<<<< HEAD
-=======
-      </div>
-    </div>
-
-  <div class="card">
-    <div class="donut-chart">
-      <svg ref="donutChart"></svg>
-      <div class="legend">
-        <!-- <div><span class="color-box fixed"></span> Fixed</div>
-        <div><span class="color-box unfixed"></span> Unfixed</div> -->
-      </div>
->>>>>>> f6c27e08b662ff2dc9a0a1e3e83a29440cfe1744
     </div>
 
     <!-- Popup Dialog -->
@@ -174,4 +157,5 @@ export default {
 .unfixed {
   background-color: #72e5ff;
 }
+
 </style>
