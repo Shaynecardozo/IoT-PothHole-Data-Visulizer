@@ -3,10 +3,10 @@
     <!-- Icon with click event to open popup -->
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
     <svg ref="donutChart"></svg>
-    <!-- <div class="legend">
+    <div class="legend">
       <div><span class="color-box fixed"></span> Fixed</div>
       <div><span class="color-box unfixed"></span> Unfixed</div>
-    </div> -->
+    </div>
 
     <!-- Popup Dialog -->
     <q-dialog v-model="dialog" persistent>
@@ -143,18 +143,22 @@ export default {
   justify-content: center;
   margin-top: 10px;
 }
-.legend .color-box {
-  display: inline-block;
+.legend div {
+  display: flex;
+  align-items: center;
+  margin-right: 15px; /* Adjust spacing between legend items */
+}
+.color-box {
   width: 20px;
   height: 20px;
+  border: solid black 0.2px;
   margin-right: 10px;
-  border-radius: 50%;
 }
 .fixed {
-  background-color: #007bff;
+  background-color: #90EE90; /* Fixed color */
+  position: relative;
 }
 .unfixed {
-  background-color: #72e5ff;
+  background-color: #138808; /* Unfixed color */
 }
-
 </style>

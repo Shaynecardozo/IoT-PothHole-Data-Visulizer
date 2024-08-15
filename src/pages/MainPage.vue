@@ -11,6 +11,7 @@
       :totalComplaints="totalComplaints"
       :fixedComplaints="fixedComplaints"
       :unfixedComplaints="unfixedComplaints"
+      :pwdVerifications="pwdVerifications"
     />
   </div>
   <div class="charts">
@@ -46,6 +47,7 @@ export default {
       totalComplaints: 0,
       fixedComplaints: 0,
       unfixedComplaints: 0,
+      pwdVerifications: 0,
       data: [],
       constituencies: [],
       selectedConstituency: ''
@@ -75,6 +77,7 @@ export default {
       this.totalComplaints = filteredData.length;
       this.fixedComplaints = filteredData.filter(feature => feature.properties.FixedOn).length;
       this.unfixedComplaints = this.totalComplaints - this.fixedComplaints;
+      this.pwdVerifications = filteredData.filter(feature => feature.properties.PWDVerifiedOn).length
     },
     handleSelectedConstituencyChange(newConstituency) {
       this.selectedConstituency = newConstituency;

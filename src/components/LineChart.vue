@@ -50,41 +50,59 @@ export default {
     };
 
     const processGeoJSONData = (geojsonData) => {
-      const counts = geojsonData.features.reduce((acc, feature) => {
-        const properties = feature.properties;
-        const constituency = properties.constituency;
-        const date = new Date(properties.ComplaintReceived);
-        const month = new Date(properties.ComplaintReceived).toLocaleString('default', { month: 'short' }) + ' ' + date.getFullYear(); // Format: "Jan 2023"
+    const counts = geojsonData.features.reduce((acc, feature) => {
+    const properties = feature.properties;
+    const constituency = properties.constituency;
+    const date = new Date(properties.ComplaintReceived);
+    const month = new Date(properties.ComplaintReceived).toLocaleString('default', { month: 'short' }) + ' ' + date.getFullYear(); // Format: "Jan 2023"
 
-        if (!acc[constituency]) {
-          acc[constituency] = { months: {}, fixed: 0, unfixed: 0 };
-        }
+    if (!acc[constituency]) {
+      acc[constituency] = { months: {}, fixed: 0, unfixed: 0 };
+    }
 
-        if (!acc[constituency].months[month]) {
-          acc[constituency].months[month] = { fixed: 0, unfixed: 0 };
-        }
+    if (!acc[constituency].months[month]) {
+      acc[constituency].months[month] = { fixed: 0, unfixed: 0 };
+    }
 
-        if (properties.PWDVerifiedOn) {
-          acc[constituency].months[month].fixed += 1;
-          acc[constituency].fixed += 1;
-        } else {
-          acc[constituency].months[month].unfixed += 1;
-          acc[constituency].unfixed += 1;
-        }
+    if (properties.FixedOn) {
+      acc[constituency].months[month].fixed += 1;
+      acc[constituency].fixed += 1;
+    } else {
+      acc[constituency].months[month].unfixed += 1;
+      acc[constituency].unfixed += 1;
+    }
 
-        return acc;
-      }, {});
+    return acc;
+  }, {});
 
-      const labels = [...new Set(Object.values(counts).flatMap(c => Object.keys(c.months)))];
-      const processedData = Object.entries(counts).map(([constituency, data]) => ({
-        constituency,
-        months: labels.map(month => data.months[month] || { fixed: 0, unfixed: 0 }),
-        fixedCounts: labels.map(month => (data.months[month] ? data.months[month].fixed : 0)),
-        unfixedCounts: labels.map(month => (data.months[month] ? data.months[month].unfixed : 0)),
-      }));
+  // Collect all unique months
+  const labels = [...new Set(Object.values(counts).flatMap(c => Object.keys(c.months)))];
+  const parseDate = d3.timeParse("%b %Y");
+  const sortedLabels = labels.map(d => parseDate(d)).sort((a, b) => a - b);
+  const sortedLabelsFormatted = sortedLabels.map(d => d3.timeFormat("%b %Y")(d));
 
-      return { labels, processedData };
+  // Create processed data with zero values for missing months
+  const processedData = Object.entries(counts).map(([constituency, data]) => {
+    const monthsMap = sortedLabelsFormatted.reduce((acc, month) => {
+      acc[month] = { fixed: 0, unfixed: 0 };
+      return acc;
+    }, {});
+
+    Object.entries(data.months).forEach(([month, values]) => {
+      monthsMap[month] = values;
+    });
+
+    return {
+      constituency,
+      months: sortedLabelsFormatted.map(month => monthsMap[month]),
+      fixedCounts: sortedLabelsFormatted.map(month => monthsMap[month].fixed),
+      unfixedCounts: sortedLabelsFormatted.map(month => monthsMap[month].unfixed),
     };
+  });
+
+  return { labels: sortedLabelsFormatted, processedData };
+};
+
 
     const createTooltip = () => {
       return d3.select('body').append('div')
@@ -118,116 +136,155 @@ export default {
     };
 
     const createLineChart = (data, container) => {
-      const containerSelection = d3.select(container);
-      containerSelection.html(''); // Clear any existing charts
+  const containerSelection = d3.select(container);
+  containerSelection.html(''); // Clear any existing charts
 
-      const width = container === lineChartContainer.value ? 400 : window.innerWidth * 0.75;
-      const height = container === lineChartContainer.value ? 200 : window.innerHeight * 0.75;
-      const margin = { top: 20, right: 20, bottom: 100, left: 50 };
+  const width = container === lineChartContainer.value ? 400 : window.innerWidth * 0.75;
+  const height = container === lineChartContainer.value ? 200 : window.innerHeight * 0.75;
+  const margin = { top: 60, right: 20, bottom: 100, left: 50 }; // Adjusted top margin for legend
 
-      const svg = containerSelection.append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
+  const svg = containerSelection.append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
 
-      const xScale = d3.scaleTime()
-        .domain(d3.extent(data.labels, d => new Date(d)))
-        .range([0, width]);
+  // Parse the dates from labels and sort them
+  const parseDate = d3.timeParse("%b %Y");
+  const sortedLabels = data.labels.map(d => parseDate(d)).sort((a, b) => a - b);
+  const xScale = d3.scaleTime()
+    .domain(d3.extent(sortedLabels))
+    .range([0, width]);
 
-      const yScale = d3.scaleLinear()
-        .domain([0, d3.max(data.processedData.flatMap(d => [...d.fixedCounts, ...d.unfixedCounts]))])
-        .range([height, 0]);
+  const yScale = d3.scaleLinear()
+    .domain([0, d3.max(data.processedData.flatMap(d => [...d.fixedCounts, ...d.unfixedCounts]))])
+    .range([height, 0]);
 
-      const xAxis = d3.axisBottom(xScale).ticks(data.labels.length).tickFormat(d3.timeFormat("%b '%y"));
-      const yAxis = d3.axisLeft(yScale);
+  const xAxis = d3.axisBottom(xScale).ticks(sortedLabels.length).tickFormat(d3.timeFormat("%b '%y"));
+  const yAxis = d3.axisLeft(yScale);
 
-      svg.append('g')
-        .attr('transform', `translate(0, ${height})`)
-        .call(xAxis)
-        .selectAll('text')
-        .attr('transform', 'rotate(-45)') // Slant labels by -45 degrees
-        .style('text-anchor', 'end') // Align text to the end
-        .style('font-size', '10px') // Adjust font size if necessary
-        .attr('dx', '-0.8em') // Adjust horizontal position
-        .attr('dy', '0.15em'); // Adjust vertical position
+  svg.append('g')
+    .attr('transform', `translate(0, ${height})`)
+    .call(xAxis)
+    .selectAll('text')
+    .attr('transform', 'rotate(-45)') // Slant labels by -45 degrees
+    .style('text-anchor', 'end') // Align text to the end
+    .style('font-size', '10px') // Adjust font size if necessary
+    .attr('dx', '-0.8em') // Adjust horizontal position
+    .attr('dy', '0.15em'); // Adjust vertical position
 
-      svg.append('g')
-        .call(yAxis)
-        .append('text')
-        .attr('fill', '#000')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', -40)
-        .attr('dy', '0.71em')
-        .attr('text-anchor', 'end')
-        .text('Number of Complaints');
+  svg.append('g')
+    .call(yAxis)
+    .append('text')
+    .attr('fill', '#000')
+    .attr('transform', 'rotate(-90)')
+    .attr('y', -40)
+    .attr('dy', '0.71em')
+    .attr('text-anchor', 'end')
+    .text('Number of Complaints');
 
-      const color = d3.scaleOrdinal()
-        .domain(['Fixed Complaints', 'Unfixed Complaints'])
-        .range(["#90EE90", "#138808"]);
+  const color = d3.scaleOrdinal()
+    .domain(['Fixed Complaints', 'Unfixed Complaints'])
+    .range(["#90EE90", "#138808"]);
 
-      // Create and position the tooltip
-      const tooltip = createTooltip();
+  // Create and position the tooltip
+  const tooltip = createTooltip();
 
-      data.processedData.forEach(d => {
-        const line = d3.line()
-          .x((d, i) => xScale(new Date(data.labels[i])))
-          .y(d => yScale(d));
+  // Add legend
+  const legend = svg.append('g')
+    .attr('class', 'legend')
+    .attr('transform', `translate(0, ${-margin.top / 2})`); // Adjust vertical position
 
-        svg.append('path')
-          .datum(d.fixedCounts)
-          .attr('class', `line fixed ${d.constituency}`)
-          .attr('d', line)
-          .attr('fill', 'none')
-          .attr('stroke', color('Fixed Complaints'))
-          .on('mouseover', (event) => showTooltip(tooltip, `Fixed Complaints`, event))
-          .on('mouseout', () => hideTooltip(tooltip));
+  const legendItems = color.domain().map((d, i) => ({
+    label: d,
+    color: color(d),
+    x: i * 150 // Adjust spacing between legend items
+  }));
 
-        svg.append('path')
-          .datum(d.unfixedCounts)
-          .attr('class', `line unfixed ${d.constituency}`)
-          .attr('d', line)
-          .attr('fill', 'none')
-          .attr('stroke', color('Unfixed Complaints'))
-          .on('mouseover', (event) => showTooltip(tooltip, `Unfixed Complaints`, event))
-          .on('mouseout', () => hideTooltip(tooltip));
+  legendItems.forEach((item) => {
+    // Add color box
+    legend.append('rect')
+      .attr('x', item.x)
+      .attr('y', 0)
+      .attr('width', 20)
+      .attr('height', 20)
+      .style('fill', item.color);
 
-        // Add points to the lines
-        svg.selectAll(`.dot-${d.constituency}-fixed`)
-          .data(d.fixedCounts)
-          .enter().append('circle')
-          .attr('class', `dot fixed ${d.constituency}`)
-          .attr('cx', (d, i) => xScale(new Date(data.labels[i])))
-          .attr('cy', d => yScale(d))
-          .attr('r', 3)
-          .attr('fill', color('Fixed Complaints'))
-          .on('mouseover', (event, value) => showTooltip(tooltip, `Fixed Complaints: ${value}`, event))
-          .on('mouseout', () => hideTooltip(tooltip));
+    // Add text
+    legend.append('text')
+      .attr('x', item.x + 30) // Space between color box and text
+      .attr('y', 15)
+      .text(item.label);
+  });
 
-        svg.selectAll(`.dot-${d.constituency}-unfixed`)
-          .data(d.unfixedCounts)
-          .enter().append('circle')
-          .attr('class', `dot unfixed ${d.constituency}`)
-          .attr('cx', (d, i) => xScale(new Date(data.labels[i])))
-          .attr('cy', d => yScale(d))
-          .attr('r', 3)
-          .attr('fill', color('Unfixed Complaints'))
-          .on('mouseover', (event, value) => showTooltip(tooltip, `Unfixed Complaints: ${value}`, event))
-          .on('mouseout', () => hideTooltip(tooltip));
-      });
-    };
+  data.processedData.forEach(d => {
+    const line = d3.line()
+      .x((_, i) => xScale(sortedLabels[i]))
+      .y(d => yScale(d));
+
+    // Create lines for fixed and unfixed complaints
+    svg.append('path')
+      .datum(d.fixedCounts)
+      .attr('class', `line fixed ${d.constituency}`)
+      .attr('d', line)
+      .attr('fill', 'none')
+      .attr('stroke', color('Fixed Complaints'))
+      .on('mouseover', (event) => showTooltip(tooltip, `Fixed Complaints`, event))
+      .on('mouseout', () => hideTooltip(tooltip));
+
+    svg.append('path')
+      .datum(d.unfixedCounts)
+      .attr('class', `line unfixed ${d.constituency}`)
+      .attr('d', line)
+      .attr('fill', 'none')
+      .attr('stroke', color('Unfixed Complaints'))
+      .on('mouseover', (event) => showTooltip(tooltip, `Unfixed Complaints`, event))
+      .on('mouseout', () => hideTooltip(tooltip));
+
+    // Add points to the lines
+    svg.selectAll(`.dot-${d.constituency}-fixed`)
+      .data(d.fixedCounts)
+      .enter().append('circle')
+      .attr('class', `dot fixed ${d.constituency}`)
+      .attr('cx', (_, i) => xScale(sortedLabels[i]))
+      .attr('cy', d => yScale(d))
+      .attr('r', 3)
+      .attr('fill', color('Fixed Complaints'))
+      .on('mouseover', (event, value) => showTooltip(tooltip, `Fixed Complaints: ${value}`, event))
+      .on('mouseout', () => hideTooltip(tooltip));
+
+    svg.selectAll(`.dot-${d.constituency}-unfixed`)
+      .data(d.unfixedCounts)
+      .enter().append('circle')
+      .attr('class', `dot unfixed ${d.constituency}`)
+      .attr('cx', (_, i) => xScale(sortedLabels[i]))
+      .attr('cy', d => yScale(d))
+      .attr('r', 3)
+      .attr('fill', color('Unfixed Complaints'))
+      .on('mouseover', (event, value) => showTooltip(tooltip, `Unfixed Complaints: ${value}`, event))
+      .on('mouseout', () => hideTooltip(tooltip));
+  });
+};
+
+
+
 
     const updateChart = async () => {
-      const geojsonData = await fetchGeoJSONData();
-      if (geojsonData) {
-        const filteredData = props.selectedConstituency
-          ? geojsonData.features.filter(feature => feature.properties.constituency === props.selectedConstituency)
-          : geojsonData.features;
+    const geojsonData = await fetchGeoJSONData();
+    if (geojsonData) {
+      // Define a subset of constituencies to show initially
+      const initialConstituencies = ['Constituency1', 'Constituency2', 'Constituency3']; // Replace with actual names or IDs
 
-        const processedData = processGeoJSONData({ features: filteredData });
-        createLineChart(processedData, lineChartContainer.value);
-      }
-    };
+      // Filter data based on the selected constituency or use the initial subset
+      const filteredData = props.selectedConstituency
+        ? geojsonData.features.filter(feature => feature.properties.constituency === props.selectedConstituency)
+        : geojsonData.features.filter(feature => initialConstituencies.includes(feature.properties.constituency));
+
+      const processedData = processGeoJSONData({ features: filteredData });
+      createLineChart(processedData, lineChartContainer.value);
+    }
+  };
+
 
     const openPopup = async () => {
       dialog.value = true;
@@ -303,4 +360,20 @@ export default {
   width: 100vw;
   height: 90vh;
 }
+
+.legend {
+  font-size: 12px;
+}
+
+.legend rect {
+  stroke-width: 0.2px;
+  stroke: #000;
+}
+
+.legend text {
+  font-size: 12px;
+  alignment-baseline: middle;
+}
+
+
 </style>
