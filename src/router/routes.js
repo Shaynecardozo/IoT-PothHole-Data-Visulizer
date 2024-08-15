@@ -11,6 +11,8 @@ const routes = [
       { path: "Gauges", component: () => import("src/pages/SensorPage.vue") },
       { path: "Multiline", component: () => import("src/pages/MultiLinePage.vue") },
       { path: "Comparisonbar", component: () => import("src/pages/ComparisonBarPage.vue") },
+      { path: "Hierarchy", component: () => import("src/pages/HierarchyChart.vue") },
+
 
       {
         path: "/barchart",

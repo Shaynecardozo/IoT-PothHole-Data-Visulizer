@@ -67,6 +67,18 @@
               <q-item-section>MultiLine Graph</q-item-section>
             </q-item>
           </q-list>
+          <q-list>
+            <q-item
+              clickable
+              @click="navigateTo('/Hierarchy')"
+              :class="{ 'bg-active text-active': isActiveRoute('/Hierarchy') }"
+                  style="gap:10px"
+              class="rounded-item row q-ml-md row justify-start items-center"
+            >
+              <q-icon name="stacked_bar_chart" size="xs" :color="isActiveRoute('/Hierarchy') ? 'white' : 'black'" />
+              <q-item-section>Hierarchy Chart</q-item-section>
+            </q-item>
+          </q-list>
         </q-expansion-item>
         <q-expansion-item
           label="Potholes"

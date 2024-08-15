@@ -6,8 +6,8 @@
         animated
         autoplay
         swipeable
-        control-color="black"
-        arrows
+        navigation
+        control-color="green"
         padding
         :interval="1000" 
         class="custom-carousel"
