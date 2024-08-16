@@ -72,7 +72,8 @@ export default {
 
       const root = d3.hierarchy(tree.data);
       const treeLayout = d3.tree().size([width - 100, height - 100])
-      .separation((a, b) => (a.parent === b.parent ? 1.5 : 2));
+      .separation((a, b) => (a.parent === b.parent ? 1.55 : 2));
+
       treeLayout(root);
 
       // Draw the links
@@ -94,9 +95,9 @@ export default {
         .enter()
         .append('rect')
         .attr('class', 'node')
-        .attr('x', d => d.x - 40)
+        .attr('x', d => d.x - 37)
         .attr('y', d => d.y - 20)
-        .attr('width', 80)
+        .attr('width', 75)
         .attr('height', 40)
         .attr('fill', 'lightgreen')
         .attr('stroke', 'black')
@@ -129,7 +130,7 @@ export default {
         .attr('text-anchor', 'middle')
         .style('font-size', '12px')
         .style('fill', 'black')
-        .text(d => d.data.name);
+        .text(d => d.parent === null ? d.data.name : d.data.id); //display name if rootnode, otherwise display id
     },
 
     processData(data) {
@@ -184,6 +185,7 @@ export default {
 <style scoped>
 .tree-card {
   margin-bottom: 20px;
+  box-shadow: 2px 2px 8px rgba(57, 179, 71, 0.837);
 }
 
 .chart-container {
@@ -192,6 +194,7 @@ export default {
   overflow: hidden;  /* Prevents overflow issues */
   display: flex;
   justify-content: center;
+  
 }
 
 svg {
@@ -205,7 +208,7 @@ svg {
   border: 1px solid black;
   border-radius: 4px;
   pointer-events: none;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.794);
   font-size: 12px;
 }
 
