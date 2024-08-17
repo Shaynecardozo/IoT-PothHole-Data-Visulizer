@@ -1,19 +1,38 @@
 <template>
   <div class="card bar-chart">
+    <!-- Icon with click event to open popup -->
+    <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
     <div ref="barChartContainer"></div>
+
+    <!-- Popup Dialog -->
+    <q-dialog v-model="dialog" persistent>
+      <q-card class="popup-card">
+        <q-card-section>
+          <!-- Larger version of the bar chart -->
+          <div ref="popupBarChartContainer" class="popup-chart-container"></div>
+        </q-card-section>
+        <q-card-actions>
+          <q-btn flat label="Close" @click="dialog = false"></q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script>
 import { onMounted, watch, ref } from 'vue';
 import * as d3 from 'd3';
+import { QDialog, QCard, QCardSection, QCardActions, QBtn, QIcon } from 'quasar';
 
 export default {
+  components: { QDialog, QCard, QCardSection, QCardActions, QBtn, QIcon },
   props: {
     selectedConstituency: String
   },
   setup(props) {
     const barChartContainer = ref(null);
+    const popupBarChartContainer = ref(null);
+    const dialog = ref(false);
 
     const fetchGeoJSONData = async () => {
       try {
@@ -29,130 +48,245 @@ export default {
       }
     };
 
+    const formatMonthYear = (date) => {
+    // Create a D3 time format function for the short month and year
+    const formatMonth = d3.timeFormat('%b'); // e.g., Jan, Feb
+    const formatYear = d3.timeFormat('%y');  // e.g., 21
+
+    // Extract short month and last two digits of the year
+    const month = formatMonth(date); // Jan
+    const year = formatYear(date);   // 21
+
+    // Combine them in "Jan-21" format
+    return `${month}-${year}`;
+    };
+
     const processGeoJSONData = (geojsonData) => {
-      const counts = geojsonData.features.reduce((acc, feature) => {
-        const properties = feature.properties;
-        const constituency = properties.constituency;
-        const date = new Date(properties.ComplaintReceived);
-        const month = date.toLocaleString('default', { month: 'short' }) + ' ' + date.getFullYear(); // Format: "Jan 2023"
+    const counts = geojsonData.features.reduce((acc, feature) => {
+    const properties = feature.properties;
+    const constituency = properties.constituency;
+    const date = new Date(properties.ComplaintReceived);
+    const monthYear = formatMonthYear(date); // Use the new format function
 
-        if (!acc[constituency]) {
-          acc[constituency] = { months: {}, fixed: 0, unfixed: 0 };
-        }
+    if (!acc[constituency]) {
+      acc[constituency] = { months: {}, fixed: 0, unfixed: 0 };
+    }
 
-        if (!acc[constituency].months[month]) {
-          acc[constituency].months[month] = { fixed: 0, unfixed: 0 };
-        }
+    if (!acc[constituency].months[monthYear]) {
+      acc[constituency].months[monthYear] = { fixed: 0, unfixed: 0 };
+    }
 
-        if (properties.PWDVerifiedOn) {
-          acc[constituency].months[month].fixed += 1;
-          acc[constituency].fixed += 1;
-        } else {
-          acc[constituency].months[month].unfixed += 1;
-          acc[constituency].unfixed += 1;
-        }
+    if (properties.FixedOn) {
+      acc[constituency].months[monthYear].fixed += 1;
+      acc[constituency].fixed += 1;
+    }
+    else {
+      acc[constituency].months[monthYear].unfixed += 1;
+      acc[constituency].unfixed += 1;
+    }
 
-        return acc;
-      }, {});
+    return acc;
+  }, {});
 
-      const labels = [...new Set(Object.values(counts).flatMap(c => Object.keys(c.months)))];
-      const processedData = Object.entries(counts).map(([constituency, data]) => ({
-        constituency,
-        months: labels.map(month => data.months[month] || { fixed: 0, unfixed: 0 }),
-        fixedCounts: labels.map(month => (data.months[month] ? data.months[month].fixed : 0)),
-        unfixedCounts: labels.map(month => (data.months[month] ? data.months[month].unfixed : 0)),
-      }));
+  // Get the sorted list of months
+  const labels = [...new Set(Object.values(counts).flatMap(c => Object.keys(c.months)))];
+  labels.sort((a, b) => d3.ascending(d3.timeParse('%b-%y')(a), d3.timeParse('%b-%y')(b))); // Sort months chronologically
 
-      return { labels, processedData };
+  const processedData = Object.entries(counts).map(([constituency, data]) => ({
+    constituency,
+    months: labels.map(monthYear => data.months[monthYear] || { fixed: 0, unfixed: 0 }),
+    fixedCounts: labels.map(monthYear => (data.months[monthYear] ? data.months[monthYear].fixed : 0)),
+    unfixedCounts: labels.map(monthYear => (data.months[monthYear] ? data.months[monthYear].unfixed : 0)),
+  }));
+
+  return { labels, processedData };
+};
+
+
+
+    const createTooltip = () => {
+      return d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('position', 'absolute')
+        .style('text-align', 'center')
+        .style('width', '120px')
+        .style('height', 'auto')
+        .style('padding', '2px')
+        .style('font', '12px sans-serif')
+        .style('background', 'lightsteelblue')
+        .style('border', '0px')
+        .style('border-radius', '8px')
+        .style('pointer-events', 'none')
+        .style('opacity', 0);
     };
 
-    const createBarChart = (data) => {
-      const container = d3.select(barChartContainer.value);
-      container.html(''); // Clear any existing charts
+    const showTooltip = (tooltip, content, event) => {
+      tooltip.html(content)
+        .style('left', `${event.pageX + 5}px`)
+        .style('top', `${event.pageY - 28}px`)
+        .transition()
+        .duration(200)
+        .style('opacity', .9);
+    };
 
-      const width = 400;
-      const height = 200;
-      const margin = { top: 20, right: 20, bottom: 100, left: 50 };
+    const hideTooltip = (tooltip) => {
+      tooltip.transition()
+        .duration(500)
+        .style('opacity', 0);
+    };
 
-      const svg = container.append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
+  const createBarChart = (data, container) => {
+  const containerSelection = d3.select(container);
+  containerSelection.html(''); // Clear any existing charts
 
-      const xScale = d3.scaleBand()
-        .domain(data.labels)
-        .range([0, width])
-        .padding(0.1);
+  const width = container === barChartContainer.value ? 400 : window.innerWidth * 0.75;
+  const height = container === barChartContainer.value ? 200 : window.innerHeight * 0.75;
+  const margin = { top: 80, right: 20, bottom: 100, left: 50 }; // Increase top margin for legend
 
-      const yScale = d3.scaleLinear()
-        .domain([0, d3.max(data.processedData.flatMap(d => [...d.fixedCounts, ...d.unfixedCounts]))])
-        .range([height, 0]);
+  const svg = containerSelection.append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
 
-      const xAxis = d3.axisBottom(xScale);
-      const yAxis = d3.axisLeft(yScale);
+  const xScale = d3.scaleBand()
+    .domain(data.labels)
+    .range([0, width])
+    .padding(0.1);
 
-      svg.append('g')
-        .attr('transform', `translate(0, ${height})`)
-        .call(xAxis)
-        .selectAll('text')
-        .attr('transform', 'rotate(-90)')
-        .style('text-anchor', 'end');
+  const yScale = d3.scaleLinear()
+    .domain([0, d3.max(data.processedData.flatMap(d => [...d.fixedCounts, ...d.unfixedCounts]))])
+    .range([height, 0]);
 
-      svg.append('g')
-        .call(yAxis)
-        .append('text')
-        .attr('fill', '#000')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', -40)
-        .attr('dy', '0.71em')
-        .attr('text-anchor', 'end')
-        .text('Number of Complaints');
+  const xAxis = d3.axisBottom(xScale);
+  const yAxis = d3.axisLeft(yScale);
 
-      const color = d3.scaleOrdinal()
-        .domain(['Fixed Complaints', 'Unfixed Complaints'])
-        .range(['#007bff', '#72e5ff']);
+  svg.append('g')
+    .attr('transform', `translate(0, ${height})`)
+    .call(xAxis)
+    .selectAll('text')
+    .attr('transform', 'rotate(-45)')
+    .style('text-anchor', 'end');
 
-      data.processedData.forEach(d => {
-        svg.selectAll(`.bar.fixed.${d.constituency}`)
-          .data(d.fixedCounts)
-          .enter().append('rect')
-          .attr('class', `bar fixed ${d.constituency}`)
-          .attr('x', (d, i) => xScale(data.labels[i]))
-          .attr('y', d => yScale(d))
-          .attr('width', xScale.bandwidth() / 2)
-          .attr('height', d => height - yScale(d))
-          .attr('fill', color('Fixed Complaints'));
+  svg.append('g')
+    .call(yAxis)
+    .append('text')
+    .attr('fill', '#000')
+    .attr('transform', 'rotate(-90)')
+    .attr('y', -40)
+    .attr('dy', '0.71em')
+    .attr('text-anchor', 'end')
+    .text('Number of Complaints');
 
-        svg.selectAll(`.bar.unfixed.${d.constituency}`)
-          .data(d.unfixedCounts)
-          .enter().append('rect')
-          .attr('class', `bar unfixed ${d.constituency}`)
-          .attr('x', (d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
-          .attr('y', d => yScale(d))
-          .attr('width', xScale.bandwidth() / 2)
-          .attr('height', d => height - yScale(d))
-          .attr('fill', color('Unfixed Complaints'));
+  const color = d3.scaleOrdinal()
+    .domain(['Fixed Complaints', 'Unfixed Complaints'])
+    .range(["#90EE90", "#138808"]);
+
+  // Create and position the tooltip
+  const tooltip = createTooltip();
+
+  // Add legend
+  const legend = svg.append('g')
+    .attr('class', 'legend')
+    .attr('transform', `translate(0, ${-margin.top / 2})`);
+
+  const legendItems = color.domain().map((d, i) => ({
+    label: d,
+    color: color(d),
+    x: i * 150 // Adjust spacing between legend items
+  }));
+
+  legendItems.forEach((item) => {
+    // Add color box
+    legend.append('rect')
+      .attr('x', item.x)
+      .attr('y', 0)
+      .attr('width', 20)
+      .attr('height', 20)
+      .style('fill', item.color);
+
+    // Add text
+    legend.append('text')
+      .attr('x', item.x + 30) // Space between color box and text
+      .attr('y', 15)
+      .text(item.label);
+  });
+
+  data.processedData.forEach(d => {
+    svg.selectAll(`.bar.fixed.${d.constituency}`)
+      .data(d.fixedCounts)
+      .enter().append('rect')
+      .attr('class', `bar fixed ${d.constituency}`)
+      .attr('x', (d, i) => xScale(data.labels[i]))
+      .attr('y', d => yScale(d))
+      .attr('width', xScale.bandwidth() / 2)
+      .attr('height', d => height - yScale(d))
+      .attr('fill', color('Fixed Complaints'))
+      .on('mouseover', (event, d) => {
+        d3.select(event.target)
+          .attr('fill', 'orange'); // Change color on hover
+        showTooltip(tooltip, `Fixed: ${d}`, event);
+      })
+      .on('mouseout', (event, d) => {
+        d3.select(event.target)
+          .attr('fill', color('Fixed Complaints')); // Reset color on mouse out
+        hideTooltip(tooltip);
       });
-    };
+
+    svg.selectAll(`.bar.unfixed.${d.constituency}`)
+      .data(d.unfixedCounts)
+      .enter().append('rect')
+      .attr('class', `bar unfixed ${d.constituency}`)
+      .attr('x', (d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
+      .attr('y', d => yScale(d))
+      .attr('width', xScale.bandwidth() / 2)
+      .attr('height', d => height - yScale(d))
+      .attr('fill', color('Unfixed Complaints'))
+      .on('mouseover', (event, d) => {
+        d3.select(event.target)
+          .attr('fill', 'yellow'); // Change color on hover
+        showTooltip(tooltip, `Unfixed: ${d}`, event);
+      })
+      .on('mouseout', (event, d) => {
+        d3.select(event.target)
+          .attr('fill', color('Unfixed Complaints')); // Reset color on mouse out
+        hideTooltip(tooltip);
+      });
+  });
+};
+
+
+
+
 
     const updateChart = async () => {
       const geojsonData = await fetchGeoJSONData();
       if (geojsonData) {
+        // Define a subset of constituencies to show initially
+        const initialConstituencies = ['Constituency1', 'Constituency2', 'Constituency3']; // Replace with actual names or IDs
+
+        // Filter data based on the selected constituency or use the initial subset
         const filteredData = props.selectedConstituency
           ? geojsonData.features.filter(feature => feature.properties.constituency === props.selectedConstituency)
-          : geojsonData.features;
+          : geojsonData.features.filter(feature => initialConstituencies.includes(feature.properties.constituency));
 
         const processedData = processGeoJSONData({ features: filteredData });
-        createBarChart(processedData);
+        createBarChart(processedData, barChartContainer.value);
       }
+    };
+
+    const openPopup = async () => {
+      dialog.value = true;
+      // Ensure the popup chart is drawn after the dialog opens
+      await updateChart(); // Optional: Fetch and process data again for the popup
+      createBarChart(await fetchGeoJSONData().then(data => processGeoJSONData({ features: props.selectedConstituency ? data.features.filter(feature => feature.properties.constituency === props.selectedConstituency) : data.features })), popupBarChartContainer.value);
     };
 
     watch(() => props.selectedConstituency, updateChart, { immediate: true });
 
     onMounted(updateChart);
 
-    return { barChartContainer };
+    return { barChartContainer, popupBarChartContainer, dialog, openPopup };
   }
 };
 </script>
@@ -164,6 +298,57 @@ export default {
   padding: 16px;
   margin: 16px;
   width: 50%; /* Adjust width to fit side by side */
-  height: 30%;
+  height: 50%;
+  position: relative;
 }
+
+.icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+}
+
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 120px;
+  height: auto;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Style for the popup card */
+.popup-card {
+  width: 100vw; /* Full viewport width */
+  height: 90vh; /* 90% of viewport height */
+  position: relative;
+}
+
+.popup-chart-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Ensure the q-dialog takes full width and height */
+.q-dialog__inner {
+  width: 100vw;
+  height: 90vh;
+}
+
+.legend rect {
+  stroke-width: 0.2px;
+  stroke: #000;
+}
+
+.legend text {
+  font-size: 12px;
+  /* alignment-baseline: middle; */
+}
+
 </style>

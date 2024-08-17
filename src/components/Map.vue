@@ -25,21 +25,21 @@
       <div class="column">
         <q-toggle
           v-model="showMarkers"
-          color="blue"
+          color="green"
           class="col-4 q-my-sm"
           label="Markers"
           @update:model-value="updateMap"
         />
         <q-toggle
           v-model="showHeatMap"
-          color="blue"
+          color="green"
           class="col-4 q-my-sm"
           label="Heatmap"
           @update:model-value="updateMap"
         />
         <q-toggle
           v-model="showPending"
-          color="blue"
+          color="green"
           class="col-4 q-my-sm"
           label="Unfixed Potholes"
           @update:model-value="updateMap"
@@ -58,7 +58,12 @@
       />
     </div>
     <div id="map" style="height: 100%; z-index: 5"></div>
-    <q-dialog v-model="dialog" persistent>
+    <q-dialog
+      v-model="dialog"
+      transition-show="flip-up"
+      transition-hide="flip-down"
+      persistent
+    >
       <q-card class="custom-dialog">
         <q-card-section>
           <div class="text-h6 text-center">Pothole Details</div>
@@ -68,62 +73,79 @@
           class="q-mx-sm"
           style="border: 2px solid black; border-radius: 10px"
         >
-          <div class="row">
-            <strong class="col-6"><q-icon name="edit_road" /> Id</strong
-            ><span class="q-pl-sm"
-              >: {{ selectedPothole.id ? selectedPothole.id : "NA" }}</span
-            >
-            <strong class="col-6"><q-icon name="area_chart" /> Area</strong
-            ><span class="q-pl-sm"
-              >: {{ selectedPothole.area ? selectedPothole.area : "NA" }}</span
-            >
-            <strong class="col-6"><q-icon name="build" /> FIxed On</strong
-            ><span class="q-pl-sm"
-              >:
-              {{
-                selectedPothole.FixedOn ? selectedPothole.FixedOn : "NA"
-              }}</span
-            >
-            <strong class="col-6"
-              ><q-icon name="location_on" /> Constituency</strong
-            ><span class="q-pl-sm"
-              >:
-              {{
-                selectedPothole.constituency
-                  ? selectedPothole.constituency
-                  : "NA"
-              }}</span
-            >
-            <strong class="col-6"
-              ><q-icon name="verified" /> PWD verified on</strong
-            ><span class="q-pl-sm"
-              >:
-              {{
-                selectedPothole.PWDVerifiedOn
-                  ? selectedPothole.PWDVerifiedOn
-                  : "NA"
-              }}</span
-            >
-            <strong class="col-6"
-              ><q-icon name="priority_high" /> Complaint Recieved on</strong
-            ><span class="q-pl-sm"
-              >:
-              {{
-                selectedPothole.ComplaintReceived
-                  ? selectedPothole.ComplaintReceived
-                  : "NA"
-              }}</span
-            >
-            <strong class="col-6"
-              ><q-icon name="assignment_ind" /> Assigned to Contractor</strong
-            ><span class="q-pl-sm"
-              >:
-              {{
-                selectedPothole.AssignedToContractor
-                  ? selectedPothole.AssignedToContractor
-                  : "NA"
-              }}</span
-            >
+          <div class="column">
+            <div class="row">
+              <strong class="col-6"><q-icon name="edit_road" /> Id</strong
+              ><span class="q-pl-sm"
+                >: {{ selectedPothole.id ? selectedPothole.id : "NA" }}</span
+              >
+            </div>
+            <div class="row">
+              <strong class="col-6"><q-icon name="area_chart" /> Area</strong
+              ><span class="q-pl-sm"
+                >:
+                {{ selectedPothole.area ? selectedPothole.area : "NA" }}</span
+              >
+            </div>
+            <div class="row">
+              <strong class="col-6"><q-icon name="build" /> FIxed On</strong
+              ><span class="q-pl-sm"
+                >:
+                {{
+                  selectedPothole.FixedOn ? selectedPothole.FixedOn : "NA"
+                }}</span
+              >
+            </div>
+            <div class="row">
+              <strong class="col-6"
+                ><q-icon name="location_on" /> Constituency</strong
+              >
+              <span class="q-pl-sm"
+                >:
+                {{
+                  selectedPothole.constituency
+                    ? selectedPothole.constituency
+                    : "NA"
+                }}</span
+              >
+            </div>
+            <div class="row">
+              <strong class="col-6">
+                <q-icon name="verified" /> PWD verified on</strong
+              >
+              <span class="q-pl-sm"
+                >:
+                {{
+                  selectedPothole.PWDVerifiedOn
+                    ? selectedPothole.PWDVerifiedOn
+                    : "NA"
+                }}</span
+              >
+            </div>
+            <div class="row">
+              <strong class="col-6"
+                ><q-icon name="priority_high" /> Complaint Recieved on</strong
+              ><span class="q-pl-sm"
+                >:
+                {{
+                  selectedPothole.ComplaintReceived
+                    ? selectedPothole.ComplaintReceived
+                    : "NA"
+                }}</span
+              >
+            </div>
+            <div class="row">
+              <strong class="col-6"
+                ><q-icon name="assignment_ind" /> Assigned to Contractor</strong
+              ><span class="q-pl-sm"
+                >:
+                {{
+                  selectedPothole.AssignedToContractor
+                    ? selectedPothole.AssignedToContractor
+                    : "NA"
+                }}</span
+              >
+            </div>
           </div>
         </q-card-section>
         <q-card-actions align="center">

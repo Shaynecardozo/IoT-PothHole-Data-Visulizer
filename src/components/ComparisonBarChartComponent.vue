@@ -1,16 +1,42 @@
 <template>
-  <div class="chart" ref="chartRef"></div>
+  <div>
+    <!-- Threshold Input and Button -->
+    <div class="threshold column">
+      <div class="threshold-label">
+        <p>Set threshold:</p>
+      </div>
+      <div class="q-mb-xl q-ml-xl">
+        <input v-model.number="userThreshold" type="number" class="threshold-input" placeholder="Set Threshold Value" />
+        <button @click="toggleThreshold" class="threshold-button">
+          {{ thresholdEnabled ? 'Enabled' : 'Disabled' }}
+        </button>
+      </div>
+    </div>
+    <div>
+      <!-- Bar Chart -->
+      <div class="chart" ref="chartRef"></div>
+    </div>
+
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
 import * as d3 from 'd3';
 
-const props = defineProps(['data', 'filter', 'startDate', 'endDate']);
+const props = defineProps(['data', 'filter', 'startDate', 'endDate', 'initialThreshold']);
 const chartRef = ref(null);
 
 const sensors = ref(['flowmeter1', 'flowmeter2', 'flowmeter3', 'flowmeter4']);
-const colors = d3.scaleOrdinal(d3.schemeCategory10);
+const colors = d3.scaleOrdinal([
+      "#006400", // DarkGreen
+      "#32CD32", // LimeGreen
+      "#8FBC8F", // DarkSeaGreen
+      "#ADFF2F", // GreenYellow
+    ]);
+
+const thresholdEnabled = ref(false); // State to control threshold visibility
+const userThreshold = ref(props.initialThreshold || 0); // State for user-defined threshold
 
 // Compute filtered data
 const filteredData = computed(() => {
@@ -147,6 +173,11 @@ const getTooltipDateFormat = () => {
   }
 };
 
+const toggleThreshold = () => {
+  thresholdEnabled.value = !thresholdEnabled.value;
+  renderChart();
+};
+
 // Render chart
 const renderChart = () => {
   d3.select(chartRef.value).selectAll('*').remove();
@@ -154,7 +185,7 @@ const renderChart = () => {
   if (!filteredData.value.length) return;
 
   const margin = { top: 20, right: 20, bottom: 50, left: 60 },
-    width = 1400 - margin.left - margin.right,
+    width = 1300 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
   const svg = d3.select(chartRef.value)
@@ -170,7 +201,9 @@ const renderChart = () => {
 
   x0.domain(filteredData.value.map(d => d.date));
   x1.domain(sensors.value).range([0, x0.bandwidth()]);
-  y.domain([0, d3.max(filteredData.value, d => d3.max(sensors.value, key => +d[key] || 0))]);
+
+  // Set the y-axis domain based on the maximum value, considering the threshold
+  y.domain([0, Math.max(d3.max(filteredData.value, d => d3.max(sensors.value, key => +d[key] || 0)), userThreshold.value)]);
 
   const xAxis = svg.append('g')
     .attr('class', 'x axis')
@@ -191,7 +224,11 @@ const renderChart = () => {
     .attr('transform', d => `translate(${x0(d.date)},0)`);
 
   bars.selectAll('rect')
-    .data(d => sensors.value.map(sensor => ({ key: sensor, value: +d[sensor], date: d.date })))
+    .data(d => sensors.value.map(sensor => {
+      const value = +d[sensor];
+      // Only include bars with values less than or equal to the threshold
+      return thresholdEnabled.value && value > userThreshold.value ? null : { key: sensor, value, date: d.date };
+    }).filter(d => d !== null))  // Filter out null values
     .enter().append('rect')
     .attr('x', d => x1(d.key))
     .attr('y', d => y(0))
@@ -215,10 +252,26 @@ const renderChart = () => {
       d3.select(this).attr('fill', colors(d.key));
       d3.select(this).select('title').remove();
     });
+
+  if (thresholdEnabled.value) {
+    // Add threshold line
+    svg.append("line")
+      .attr("class", "threshold-line")
+      .attr("x1", 0)
+      .attr("y1", y(userThreshold.value))
+      .attr("x2", width)
+      .attr("y2", y(userThreshold.value))
+      .attr("stroke", "red")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "4,4");
+  }
 };
 
+
+
 onMounted(renderChart);
-watch([() => props.data, () => props.filter, () => props.startDate, () => props.endDate], renderChart);
+watch([() => props.data, () => props.filter, () => props.startDate, () => props.endDate, userThreshold, thresholdEnabled], renderChart);
+
 </script>
 
 <style scoped>
@@ -231,11 +284,53 @@ watch([() => props.data, () => props.filter, () => props.startDate, () => props.
   font-size: 12px;
 }
 
-.legend {
-  font-size: 12px;
+p{
+  font-weight: 500;
+  font-size: 18px;
 }
-.legend rect {
-  stroke: #000;
-  stroke-width: 1px;
+
+.threshold-input {
+  margin-right: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  width: 150px;
+}
+
+.threshold-button {
+  padding: 10px 20px;
+  background-color: #1d6e34;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.threshold-button:hover {
+  background-color: #0d4221;
+}
+
+.threshold-line {
+  stroke: red;
+  stroke-width: 2;
+  stroke-dasharray: 4,4;
+}
+
+.threshold {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end; /* Align the content to the right */
+  margin-bottom: 20px; /* Add some space below */
+  width: 100%;
+}
+
+.threshold-label {
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  text-align: right;
 }
 </style>

@@ -24,7 +24,7 @@
         </div>
       </div>
     </div>
-    <MultiLine
+    <ComparisonBarChartComponent
       :data="iotData"
       :filter="filter"
       :startDate="startDate"
@@ -35,37 +35,45 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import MultiLine from 'components/MultiLine.vue';
-import * as XLSX from 'xlsx';
+import ComparisonBarChartComponent from 'components/ComparisonBarChartComponent.vue';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import * as d3 from 'd3';
 
 export default {
   components: {
-    MultiLine
+    ComparisonBarChartComponent,
   },
-  setup() {
-    const iotData = ref([]);
-    const filter = ref('day');
-    const sensors = ref(['Flowmeter 1', 'Flowmeter 2', 'Flowmeter 3', 'Flowmeter 4']);
-    const colors = d3.scaleOrdinal([
-      "#006400", // DarkGreen
-      "#32CD32", // LimeGreen
-      "#8FBC8F", // DarkSeaGreen
-      "#ADFF2F", // GreenYellow
-    ]);
-    const startDate1 = ref(new Date(-8640000000000000));
-    const endDate1 = ref(new Date(8640000000000000));
-
-    const loadData = async () => {
+  data() {
+    return {
+      filter: 'day',
+      startDate: new Date(-8640000000000000),
+      endDate: new Date(8640000000000000),
+      iotData: [],
+      sensors: ['Flowmeter 1', 'Flowmeter 2', 'Flowmeter 3', 'Flowmeter 4'],
+      colors: d3.scaleOrdinal([
+        "#006400", // DarkGreen
+        "#32CD32", // LimeGreen
+        "#8FBC8F", // DarkSeaGreen
+        "#ADFF2F", // GreenYellow
+      ]),
+    };
+  },
+  mounted() {
+    this.loadData();
+  },
+  methods: {
+    async loadData() {
       try {
         const response = await axios.get('/IOTData for analysis_fileForInterns.ods', { responseType: 'arraybuffer' });
         const data = new Uint8Array(response.data);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        iotData.value = XLSX.utils.sheet_to_json(worksheet, { header: 1 }).slice(1).map((row) => ({
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Prepare data for charts
+        this.iotData = jsonData.slice(1).map(row => ({
           date: row[0],
           'Flowmeter 1': row[1],
           'Flowmeter 2': row[3],
@@ -75,25 +83,10 @@ export default {
       } catch (error) {
         console.error('Error loading Excel file:', error);
       }
-    };
-
-    onMounted(() => {
-      loadData();
-    });
-
-    return {
-      iotData,
-      filter,
-      sensors,
-      colors,
-      loadData,
-      startDate1,
-      endDate1
-    };
-  }
+    },
+  },
 };
 </script>
-
 
 <style scoped>
 .column {

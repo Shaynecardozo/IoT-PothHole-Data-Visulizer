@@ -5,10 +5,9 @@
         <q-icon
           name="leaderboard"
           size="xl"
-          color="blue"
-          style="border: 6px solid; border-radius: 50%; padding: 8px"
+          style="border: 6px solid; border-radius: 50%; padding: 8px; color: #1d6e34;"
         />
-        <h3 class="text-center text-bold text-blue-7">Login Here</h3>
+        <h3 class="text-center text-bold" style="color: #1d6e34;">Login Here</h3>
         <q-form
           @submit.prevent="submitForm"
           class="q-gutter-md q-mb-lg"
@@ -29,13 +28,13 @@
             class="q-my-lg"
           />
           <div class="row justify-center q-mt-xl">
-            <q-btn label="Submit" type="submit" color="primary" />
+            <q-btn label="Submit" type="submit" style="background-color: #1d6e34; color: white;" />
           </div>
         </q-form>
       </q-card-section>
       <q-card-section class="col-6" v-show="$q.screen.gt.sm">
         <img
-          src="/data/login_image.jpg"
+          src="/data/greenlogin.jpg"
           alt="Image Not Found"
           class="loginImage"
         />

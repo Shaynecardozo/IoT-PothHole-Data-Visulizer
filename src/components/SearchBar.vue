@@ -1,11 +1,12 @@
 <template>
-  <div class="dropdown">
-    <label for="constituency">Select Constituency:</label>
-    <select v-model="internalSelectedConstituency" @change="emitUpdateCounts">
+  <div class="dropdown full-width row justify-center">
+    <!-- <label for="constituency">Select Constituency:</label> -->
+    <q-select style="width: 80vw;" clearable v-model="internalSelectedConstituency" :options="constituencies" label="Filter By Constituency" @update:model-value="emitUpdateCounts" filled />
+    <!-- <select v-model="internalSelectedConstituency" @change="emitUpdateCounts">
       <option v-for="constituency in constituencies" :key="constituency" :value="constituency">
         {{ constituency }}
       </option>
-    </select>
+    </select> -->
   </div>
 </template>
 
@@ -39,7 +40,6 @@ export default {
 <style scoped>
 .dropdown {
   margin-top: 20px;
-  text-align: center;
 }
 .dropdown label {
   margin-right: 10px;

@@ -4,9 +4,12 @@ const routes = [
     component: () => import("layouts/MainLayout.vue"),
     children: [
       { path:"",component:()=>import("src/pages/loginPage.vue")},
-      { path: "flowmeter", component: () => import("src/pages/mainpage.vue") },
+      { path: "Gauges", component: () => import("src/pages/SensorPage.vue") },
+      { path: "Multiline", component: () => import("src/pages/MultiLinePage.vue") },
+      { path: "Comparisonbar", component: () => import("src/pages/ComparisonBarPage.vue") },
       { path: "potholes", component: () => import("src/pages/PotholeMainPage.vue") },
       { path: "landing", component: () => import("src/pages/LandingPage.vue") },
+      { path: "Hierarchy", component: () => import("src/pages/HierarchyChart.vue") },
       {
         path: "/barchart",
         name: "barchart",

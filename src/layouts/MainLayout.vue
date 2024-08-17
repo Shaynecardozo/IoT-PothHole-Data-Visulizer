@@ -3,11 +3,11 @@
     <!-- Header with Three-Dot Button -->
     <q-header style="height: 50px;" class="bg-drawer text-white row items-center">
       <q-btn v-if="checklogin" flat dense round icon="menu" @click="drawer = !drawer" class="text-white" />
-      <div class="q-ml-sm text-h6">Iot Pothole</div>
+      <div class="q-ml-xl text-h6">Iot Pothole</div>
     </q-header>
 
     <!-- Drawer/Sidebar -->
-    <q-drawer v-if="checklogin" v-model="drawer" :width="220" side="left" overlay  content-class="bg-drawer">
+    <q-drawer v-if="checklogin" v-model="drawer" :width="220" side="left"   content-class="bg-drawer" class="q-mt-md">
       <q-list>
         <!-- Landing Section with Dropdown -->
 
@@ -34,37 +34,49 @@
           <q-list >
             <q-item
               clickable
-              @click="navigateTo('/flowmeter')"
-              :class="{ 'bg-active text-active': isActiveRoute('/flowmeter') }"
+              @click="navigateTo('/Gauges')"
+              :class="{ 'bg-active text-active': isActiveRoute('/Gauges') }"
                   style="gap:10px"
               class="rounded-item q-ml-md row justify-start items-center"
             >
-              <q-icon name="speed" size="xs" :color="isActiveRoute('/flowmeter') ? 'white' : 'black'" />
+              <q-icon name="speed" size="xs" :color="isActiveRoute('/Gauges') ? 'white' : 'black'" />
               <q-item-section>Sensors</q-item-section>
             </q-item>
           </q-list>
           <q-list>
             <q-item
               clickable
-              @click="navigateTo('/flowmeter')"
-              :class="{ 'bg-active text-active': isActiveRoute('/flowmeter') }"
+              @click="navigateTo('/Comparisonbar')"
+              :class="{ 'bg-active text-active': isActiveRoute('/Comparisonbar') }"
                   style="gap:10px"
               class="rounded-item row q-ml-md row justify-start items-center"
             >
-              <q-icon name="stacked_bar_chart" size="xs" :color="isActiveRoute('/flowmeter') ? 'white' : 'black'" />
-              <q-item-section>Bar Chart</q-item-section>
+              <q-icon name="stacked_bar_chart" size="xs" :color="isActiveRoute('/Comparisonbar') ? 'white' : 'black'" />
+              <q-item-section>Comparison Bar Chart</q-item-section>
             </q-item>
           </q-list>
           <q-list>
             <q-item
               clickable
-              @click="navigateTo('/flowmeter')"
-              :class="{ 'bg-active text-active': isActiveRoute('/flowmeter') }"
+              @click="navigateTo('/Multiline')"
+              :class="{ 'bg-active text-active': isActiveRoute('/Multiline') }"
                   style="gap:10px"
               class="rounded-item row q-ml-md row justify-start items-center"
             >
-              <q-icon name="stacked_line_chart" size="xs" :color="isActiveRoute('/flowmeter') ? 'white' : 'black'" />
-              <q-item-section>Line Graph</q-item-section>
+              <q-icon name="stacked_line_chart" size="xs" :color="isActiveRoute('/Multiline') ? 'white' : 'black'" />
+              <q-item-section>MultiLine Graph</q-item-section>
+            </q-item>
+          </q-list>
+          <q-list>
+            <q-item
+              clickable
+              @click="navigateTo('/Hierarchy')"
+              :class="{ 'bg-active text-active': isActiveRoute('/Hierarchy') }"
+                  style="gap:10px"
+              class="rounded-item row q-ml-md row justify-start items-center"
+            >
+              <q-icon name="stacked_bar_chart" size="xs" :color="isActiveRoute('/Hierarchy') ? 'white' : 'black'" />
+              <q-item-section>Hierarchy Chart</q-item-section>
             </q-item>
           </q-list>
         </q-expansion-item>
@@ -169,7 +181,7 @@ export default {
 
 .bg-drawer {
 
-  background-color: green !important; /* Green background */
+  background-color: #1d6e34 !important; /* Green background */
 }
 
 .text-active {

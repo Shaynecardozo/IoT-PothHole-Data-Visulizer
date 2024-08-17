@@ -1,9 +1,7 @@
 <template>
   <div @click="emitClick">
-    <!-- Back Button -->
- <!-- <button @click="goBack" class="back-button">Back to Main Page</button> -->
     <!-- Existing gauge display code -->
-     <div ref="gauge"></div>
+    <div ref="gauge" class="gauge-container"></div>
   </div>
 </template>
 
@@ -21,15 +19,10 @@ export default {
     }
   },
   methods: {
-    // New goBack method to navigate to the main page
-// goBack() {
-//       this.$router.push('/'); // Adjust this route based on your actual main page path
-//     },
-    
     createGauge() {
-      const width = 500; // Increased width
-      const height = 300; // Increased height
-      const margin = 20;
+      const width = 300; // Adjusted width for smaller gauge
+      const height = 200; // Adjusted height for smaller gauge
+      const margin = 10;  // Adjusted margin
       const radius = Math.min(width, height) / 2 - margin;
 
       // Clear any existing gauge
@@ -41,7 +34,7 @@ export default {
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", `translate(${width / 2}, ${height - 119})`);
+        .attr("transform", `translate(${width / 2}, ${height - margin})`);
 
       // Define the scale
       this.scale = d3.scaleLinear()
@@ -82,9 +75,9 @@ export default {
         .style("stroke-width", 2);
 
       // Arrow
-      const pointerWidth = 10;
+      const pointerWidth = 8; // Adjusted width for smaller gauge
       const pointerHeadLengthPercent = 0.9;
-      const pointerTailLength = 5;
+      const pointerTailLength = 4; // Adjusted tail length for smaller gauge
       const pointerHeadLength = Math.round(radius * pointerHeadLengthPercent);
 
       const lineData = [
@@ -106,9 +99,9 @@ export default {
       // Text label (initially set to 0)
       this.label = svg.append("text")
         .attr("x", 0)
-        .attr("y", -radius - 30)
+        .attr("y", -radius - 20) // Adjusted position for smaller gauge
         .attr("text-anchor", "middle")
-        .attr("font-size", "24px")
+        .attr("font-size", "18px") // Adjusted font size
         .text(`Level Avg: ${this.levelAvg ? this.levelAvg.toFixed(2) : '0.00'} m`);
 
       // Reading labels every 2.5 units
@@ -116,19 +109,20 @@ export default {
       readings.forEach(reading => {
         // Add tick marks
         svg.append("line")
-          .attr("x1", (radius - 10) * Math.sin(this.scale(reading)))
-          .attr("y1", -(radius - 10) * Math.cos(this.scale(reading)))
+          .attr("x1", (radius - 5) * Math.sin(this.scale(reading))) // Adjusted tick mark length
+          .attr("y1", -(radius - 5) * Math.cos(this.scale(reading)))
           .attr("x2", radius * Math.sin(this.scale(reading)))
           .attr("y2", -radius * Math.cos(this.scale(reading)))
           .attr("stroke", "black")
-          .attr("stroke-width", 2);
+          .attr("stroke-width", 1); // Adjusted stroke width
 
         // Add reading labels
         svg.append("text")
-          .attr("x", (radius + 15) * Math.sin(this.scale(reading)))
-          .attr("y", -(radius + 15) * Math.cos(this.scale(reading)))
+          .attr("x", (radius + 10) * Math.sin(this.scale(reading))) // Adjusted label position
+          .attr("y", -(radius + 10) * Math.cos(this.scale(reading)))
           .attr("text-anchor", "middle")
           .attr("dy", "0.35em")
+          .attr("font-size", "12px") // Adjusted font size
           .text(reading);
       });
 
@@ -163,9 +157,13 @@ export default {
 </script>
 
 <style scoped>
-#gauge {
+.gauge-container {
   display: flex;
+  margin-top:-20px;
+
   justify-content: center;
   align-items: center;
+  max-width: 100%; /* Ensure it fits within its container */
+  height: auto;
 }
 </style>
