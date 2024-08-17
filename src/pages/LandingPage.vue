@@ -1,7 +1,7 @@
 <template>
   <div class="landing-page">
     <div class="card-container top-cards">
-      <div class="card small-card" @click="navigateTo('/map')" style="cursor: pointer;">
+      <div class="card small-card" @click="navigateTo('/potholes')" style="cursor: pointer;">
         <div class="card-content">
           <q-icon name="location_city" class="icon1"></q-icon>
           <div class="text-content">

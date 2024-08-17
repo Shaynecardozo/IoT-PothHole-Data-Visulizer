@@ -1,6 +1,6 @@
 <template>
   <div @click="emitClick">
-    <!-- Existing gauge display code -->
+    <!-- Gauge display container -->
     <div ref="gauge" class="gauge-container"></div>
   </div>
 </template>
@@ -34,32 +34,28 @@ export default {
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", `translate(${width / 2}, ${height - margin})`);
+        .attr("transform", `translate(${width / 2}, ${height -30})`);
 
       // Define the scale
       this.scale = d3.scaleLinear()
         .domain([0, this.maxValue])
         .range([-Math.PI / 2, Math.PI / 2]);
 
-      // Define color ranges
-      const colorRanges = [
-        { start: 0, end: this.maxValue / 3, color: "green" },
-        { start: this.maxValue / 3, end: (this.maxValue / 3) * 2, color: "yellow" },
-        { start: (this.maxValue / 3) * 2, end: this.maxValue, color: "red" }
-      ];
+      // Define gradient
+      const gradient = svg.append("defs")
+        .append("linearGradient")
+        .attr("id", "gauge-gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%");
 
-      // Draw each color segment
-      colorRanges.forEach(range => {
-        const segmentArc = d3.arc()
-          .innerRadius(radius * 0.7)
-          .outerRadius(radius * 0.9)
-          .startAngle(this.scale(range.start))
-          .endAngle(this.scale(range.end));
-
-        svg.append("path")
-          .attr("d", segmentArc)
-          .style("fill", range.color);
-      });
+      gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#a0eab6"); 
+      gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#0a6a27"); 
 
       // Foreground arc for the animated border
       this.foregroundArc = d3.arc()
@@ -71,8 +67,35 @@ export default {
         .datum({ endAngle: -Math.PI / 2 })
         .attr("d", this.foregroundArc)
         .style("fill", "none")
-        .style("stroke", "black")
-        .style("stroke-width", 2);
+        .style("stroke", "url(#gauge-gradient)")
+        .style("stroke-width", 4);
+
+      // Draw the gradient arc
+      const arc = d3.arc()
+        .innerRadius(radius * 0.7)
+        .outerRadius(radius * 0.9)
+        .startAngle(this.scale(0))
+        .endAngle(this.scale(this.maxValue));
+
+      svg.append("path")
+        .attr("d", arc)
+        .style("fill", "url(#gauge-gradient)");
+
+      // Place "Flow Avg" label above the gauge
+      svg.append("text")
+        .attr("x", 0)
+        .attr("y", -radius - 40) // Positioned above the gauge
+        .attr("text-anchor", "middle")
+        .attr("font-size", "18px")
+        .text("Flow Avg");
+
+      // Place the value of flowAvg below the gauge
+      this.valueLabel = svg.append("text")
+        .attr("x", 0)
+        .attr("y", 25) // Positioned below the gauge
+        .attr("text-anchor", "middle")
+        .attr("font-size", "15px")
+        .text(`${this.flowAvg ? this.flowAvg.toFixed(2) : '0.00'} m³/h`);
 
       // Arrow
       const pointerWidth = 8; // Adjusted width
@@ -95,14 +118,6 @@ export default {
         .append("path")
         .attr("d", pointerLine)
         .attr("transform", `rotate(-90)`);
-
-      // Text label (initially set to 0)
-      this.label = svg.append("text")
-        .attr("x", 0)
-        .attr("y", -radius - 20) // Adjusted position
-        .attr("text-anchor", "middle")
-        .attr("font-size", "18px") // Adjusted font size
-        .text(`Flow Avg: ${this.flowAvg ? this.flowAvg.toFixed(2) : '0.00'} m³/h`);
 
       // Reading labels based on maxValue
       const step = this.maxValue <= 600 ? 100 : 250;
@@ -151,8 +166,8 @@ export default {
           };
         });
 
-      // Update the text label with the new value
-      this.label.text(`Flow Avg: ${this.flowAvg ? this.flowAvg.toFixed(2) : '0.00'} m³/h`);
+      // Update the value label below the gauge
+      this.valueLabel.text(`${this.flowAvg ? this.flowAvg.toFixed(2) : '0.00'} m³/h`);
     }
   }
 };

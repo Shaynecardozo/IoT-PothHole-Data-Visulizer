@@ -34,32 +34,40 @@ export default {
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", `translate(${width / 2}, ${height - margin})`);
+        .attr("transform", `translate(${width / 2}, ${height -30})`);
 
       // Define the scale
       this.scale = d3.scaleLinear()
         .domain([0, 15])
         .range([-Math.PI / 2, Math.PI / 2]);
 
-      // Define color ranges for the level gauge
-      const colorRanges = [
-        { start: 0, end: 5, color: "green" },
-        { start: 5, end: 10, color: "yellow" },
-        { start: 10, end: 15, color: "red" }
-      ];
+      // Define gradient
+      const gradient = svg.append("defs")
+        .append("linearGradient")
+        .attr("id", "gauge-gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%");
 
-      // Draw each color segment
-      colorRanges.forEach(range => {
-        const segmentArc = d3.arc()
-          .innerRadius(radius * 0.7)
-          .outerRadius(radius * 0.9)
-          .startAngle(this.scale(range.start))
-          .endAngle(this.scale(range.end));
+      gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#a0eab6"); 
 
-        svg.append("path")
-          .attr("d", segmentArc)
-          .style("fill", range.color);
-      });
+      gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#0a6a27"); 
+
+      // Draw the gradient arc
+      const arc = d3.arc()
+        .innerRadius(radius * 0.7)
+        .outerRadius(radius * 0.9)
+        .startAngle(this.scale(0))
+        .endAngle(this.scale(15));
+
+      svg.append("path")
+        .attr("d", arc)
+        .style("fill", "url(#gauge-gradient)");
 
       // Foreground arc
       this.foregroundArc = d3.arc()
@@ -71,7 +79,7 @@ export default {
         .datum({ endAngle: -Math.PI / 2 })
         .attr("d", this.foregroundArc)
         .style("fill", "none")
-        .style("stroke", "black")
+        .style("stroke", "url(#gauge-gradient)")
         .style("stroke-width", 2);
 
       // Arrow
@@ -97,13 +105,20 @@ export default {
         .attr("transform", `rotate(-90)`);
 
       // Text label (initially set to 0)
-      this.label = svg.append("text")
+        svg.append("text")
         .attr("x", 0)
-        .attr("y", -radius - 20) // Adjusted position for smaller gauge
+        .attr("y", -radius - 40) // Positioned above the gauge
         .attr("text-anchor", "middle")
-        .attr("font-size", "18px") // Adjusted font size
-        .text(`Level Avg: ${this.levelAvg ? this.levelAvg.toFixed(2) : '0.00'} m`);
+        .attr("font-size", "18px")
+        .text("Level Avg");
 
+      // Place the value of flowAvg below the gauge
+      this.valueLabel = svg.append("text")
+        .attr("x", 0)
+        .attr("y", 25) // Positioned below the gauge
+        .attr("text-anchor", "middle")
+        .attr("font-size", "15px")
+        .text(`${this.levelAvg ? this.levelAvg.toFixed(2) : '0.00'} m`);
       // Reading labels every 2.5 units
       const readings = [0, 2.5, 5, 7.5, 10, 12.5, 15];
       readings.forEach(reading => {
@@ -150,7 +165,7 @@ export default {
         });
 
       // Update the text label with the new value
-      this.label.text(`Level Avg: ${this.levelAvg ? this.levelAvg.toFixed(2) : '0.00'} m`);
+      this.valueLabel.text(`${this.levelAvg ? this.levelAvg.toFixed(2) : '0.00'} m`);
     }
   }
 };
