@@ -289,7 +289,7 @@ export default {
     }
 
     const loadJson = () => {
-      fetch("data/PotholeData for analysis_fileForInterns.geojson")
+      fetch("path/to/PotholeData for analysis_fileForInterns.geojson")
         .then((response) => response.json())
         .then((data) => {
           potholedata.value = data.features;
@@ -419,6 +419,12 @@ export default {
   height: fit-content;
   border-radius:0 50% 50% 0;
   transition: all 0.3s ease;
+}
+
+.q-select__dropdown {
+  max-height: 200px !important; /* Ensure it takes priority */
+  overflow-y: auto !important;
+  overflow-x:scroll
 }
 
 .drawer ul {

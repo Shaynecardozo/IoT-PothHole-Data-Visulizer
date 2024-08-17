@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh lpR fFf">
     <!-- Header with Three-Dot Button -->
-    <q-header style="height: 50px;" class="bg-drawer text-white row items-center">
+    <q-header style="height: 40px;" class="bg-drawer text-white row items-center">
       <q-btn v-if="checklogin" flat dense round icon="menu" @click="drawer = !drawer" class="text-white" />
       <div class="q-ml-xl text-h6">Iot Pothole</div>
     </q-header>
