@@ -82,7 +82,7 @@ export default {
         .call(d3.axisLeft(y).ticks(10));
 
       const colorScale = d3.scaleSequential(d3.interpolateGreens)
-        .domain([-20, d3.max(filteredData, d => d.value)]);
+        .domain([-10, d3.max(filteredData, d => d.value)]);
 
       if (this.thresholdEnabled) {
         // Add threshold line

@@ -10,6 +10,11 @@ import * as d3 from 'd3';
 
 export default {
   props: ['pressureAvg'],
+  data() {
+    return {
+      displayedValue: 0, // Counter to display the incremented value
+    };
+  },
   mounted() {
     this.createGauge();
   },
@@ -19,157 +24,171 @@ export default {
     }
   },
   methods: {
-  createGauge() {
-    const width = 300; // Reduced width
-    const height = 200; // Reduced height
-    const margin = 10;  // Reduced margin
-    const radius = Math.min(width, height) / 2 - margin;
+    createGauge() {
+      const width = 300; // Reduced width
+      const height = 200; // Reduced height
+      const margin = 10;  // Reduced margin
+      const radius = Math.min(width, height) / 2 - margin;
 
-    // Clear any existing gauge
-    d3.select(this.$refs.gauge).selectAll("*").remove();
+      // Clear any existing gauge
+      d3.select(this.$refs.gauge).selectAll("*").remove();
 
-    // Append the SVG element
-    const svg = d3.select(this.$refs.gauge)
+      // Append the SVG element
+      const svg = d3.select(this.$refs.gauge)
         .append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", `translate(${width / 2}, ${height -30})`);
+        .attr("transform", `translate(${width / 2}, ${height - 30})`);
 
-    // Define the scale
-    this.scale = d3.scaleLinear()
-      .domain([0, 45])
-      .range([-Math.PI / 2, Math.PI / 2]);
+      // Define the scale
+      this.scale = d3.scaleLinear()
+        .domain([0, 45])
+        .range([-Math.PI / 2, Math.PI / 2]);
 
-    // Define gradient
-    const gradient = svg.append("defs")
-      .append("linearGradient")
-      .attr("id", "gauge-gradient")
-      .attr("x1", "0%")
-      .attr("y1", "0%")
-      .attr("x2", "100%")
-      .attr("y2", "0%");
+      // Define gradient
+      const gradient = svg.append("defs")
+        .append("linearGradient")
+        .attr("id", "gauge-gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%");
 
-    gradient.append("stop")
-      .attr("offset", "0%")
-      .attr("stop-color", "#a0eab6"); 
+      gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#a0eab6");
 
-    gradient.append("stop")
-      .attr("offset", "100%")
-      .attr("stop-color", "#0a6a27"); 
+      gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#0a6a27");
 
-    // Foreground arc
-    this.foregroundArc = d3.arc()
-      .innerRadius(radius * 0.7)
-      .outerRadius(radius * 0.9)
-      .startAngle(-Math.PI / 2);
+      // Foreground arc
+      this.foregroundArc = d3.arc()
+        .innerRadius(radius * 0.7)
+        .outerRadius(radius * 0.9)
+        .startAngle(-Math.PI / 2);
 
-    this.foreground = svg.append("path")
-      .datum({ endAngle: -Math.PI / 2 })
-      .attr("d", this.foregroundArc)
-      .style("fill", "none")
-      .style("stroke", "url(#gauge-gradient)")
-      .style("stroke-width", 4);
+      this.foreground = svg.append("path")
+        .datum({ endAngle: -Math.PI / 2 })
+        .attr("d", this.foregroundArc)
+        .style("fill", "none")
+        .style("stroke", "url(#gauge-gradient)")
+        .style("stroke-width", 4);
 
-    // Draw the gradient arc
-    const arc = d3.arc()
-      .innerRadius(radius * 0.7)
-      .outerRadius(radius * 0.9)
-      .startAngle(this.scale(0))
-      .endAngle(this.scale(45));
+      // Draw the gradient arc
+      const arc = d3.arc()
+        .innerRadius(radius * 0.7)
+        .outerRadius(radius * 0.9)
+        .startAngle(this.scale(0))
+        .endAngle(this.scale(45));
 
-    svg.append("path")
-      .attr("d", arc)
-      .style("fill", "url(#gauge-gradient)");
+      svg.append("path")
+        .attr("d", arc)
+        .style("fill", "url(#gauge-gradient)");
 
-    // Arrow
-    const pointerWidth = 8; // Adjusted width
-    const pointerHeadLengthPercent = 0.9;
-    const pointerTailLength = 4; // Adjusted tail length
-    const pointerHeadLength = Math.round(radius * pointerHeadLengthPercent);
+      // Arrow
+      const pointerWidth = 8; // Adjusted width
+      const pointerHeadLengthPercent = 0.9;
+      const pointerTailLength = 4; // Adjusted tail length
+      const pointerHeadLength = Math.round(radius * pointerHeadLengthPercent);
 
-    const lineData = [
-      [pointerWidth / 2, 0],
-      [0, -pointerHeadLength],
-      [-(pointerWidth / 2), 0],
-      [0, pointerTailLength],
-      [pointerWidth / 2, 0]
-    ];
+      const lineData = [
+        [pointerWidth / 2, 0],
+        [0, -pointerHeadLength],
+        [-(pointerWidth / 2), 0],
+        [0, pointerTailLength],
+        [pointerWidth / 2, 0]
+      ];
 
-    const pointerLine = d3.line().curve(d3.curveLinear);
-    this.pointer = svg.append("g").data([lineData])
-      .attr("class", "pointer")
-      .attr("transform", `translate(0,0)`)
-      .append("path")
-      .attr("d", pointerLine)
-      .attr("transform", `rotate(-90)`);
+      const pointerLine = d3.line().curve(d3.curveLinear);
+      this.pointer = svg.append("g").data([lineData])
+        .attr("class", "pointer")
+        .attr("transform", `translate(0,0)`)
+        .append("path")
+        .attr("d", pointerLine)
+        .attr("transform", `rotate(-90)`);
 
       svg.append("text")
         .attr("x", 0)
         .attr("y", -radius - 40) // Positioned above the gauge
         .attr("text-anchor", "middle")
-        .attr("font-size", "18px")
+        .attr("fill",'green')
+        .attr("font-size", "30px")
         .text("Pressure Avg");
 
-      // Place the value of flowAvg below the gauge
+      // Place the value of pressureAvg below the gauge
       this.valueLabel = svg.append("text")
         .attr("x", 0)
-        .attr("y", 25) // Positioned below the gauge
+        .attr("y", 26) // Positioned below the gauge
         .attr("text-anchor", "middle")
-        .attr("font-size", "15px")
-        .text(`${this.pressureAvg ? this.pressureAvg.toFixed(2) : '0.00'} Kg/cm²`);
+        .attr("font-size", "18px")
+        .attr("font-weight",'800')
+        .attr("fill","green")
+        .text(`${this.displayedValue.toFixed(2)} Kg/cm²`);
 
+      // Reading labels every 5 units
+      const readings = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45];
+      readings.forEach(reading => {
+        // Add tick marks
+        svg.append("line")
+          .attr("x1", (radius - 5) * Math.sin(this.scale(reading))) // Adjusted tick mark length
+          .attr("y1", -(radius - 5) * Math.cos(this.scale(reading)))
+          .attr("x2", radius * Math.sin(this.scale(reading)))
+          .attr("y2", -radius * Math.cos(this.scale(reading)))
+          .attr("stroke", "black")
+          .attr("stroke-width", 1); // Adjusted stroke width
 
-    // Reading labels every 5 units
-    const readings = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45];
-    readings.forEach(reading => {
-      // Add tick marks
-      svg.append("line")
-        .attr("x1", (radius - 5) * Math.sin(this.scale(reading))) // Adjusted tick mark length
-        .attr("y1", -(radius - 5) * Math.cos(this.scale(reading)))
-        .attr("x2", radius * Math.sin(this.scale(reading)))
-        .attr("y2", -radius * Math.cos(this.scale(reading)))
-        .attr("stroke", "black")
-        .attr("stroke-width", 1); // Adjusted stroke width
-
-      // Add reading labels
-      svg.append("text")
-        .attr("x", (radius + 10) * Math.sin(this.scale(reading))) // Adjusted label position
-        .attr("y", -(radius + 10) * Math.cos(this.scale(reading)))
-        .attr("text-anchor", "middle")
-        .attr("dy", "0.35em")
-        .attr("font-size", "12px") // Reduced font size
-        .text(reading);
-    });
-
-    this.updateGauge();
-  },
-  emitClick() {
-    this.$emit('gauge-clicked');
-  },
-  updateGauge() {
-    this.pointer.transition()
-      .duration(2000)
-      .attrTween("transform", () => {
-        const interpolate = d3.interpolate(-90, this.scale(this.pressureAvg) * 180 / Math.PI);
-        return t => `rotate(${interpolate(t)})`;
+        // Add reading labels
+        svg.append("text")
+          .attr("x", (radius + 10) * Math.sin(this.scale(reading))) // Adjusted label position
+          .attr("y", -(radius + 10) * Math.cos(this.scale(reading)))
+          .attr("text-anchor", "middle")
+          .attr("dy", "0.35em")
+          .attr("font-size", "12px") // Reduced font size
+          .text(reading);
       });
 
-    this.foreground.transition()
-      .duration(2000)
-      .attrTween("d", (d) => {
-        const interpolate = d3.interpolate(d.endAngle, this.scale(this.pressureAvg));
-        return t => {
-          d.endAngle = interpolate(t);
-          return this.foregroundArc(d);
-        };
-      });
+      this.updateGauge();
+    },
+    emitClick() {
+      this.$emit('gauge-clicked');
+    },
+    updateGauge() {
+      const duration = 2000; // Animation duration
 
-    // Update the text label with the new value
-    this.valueLabel.text(`${this.pressureAvg ? this.pressureAvg.toFixed(2) : '0.00'} Kg/cm²`);
+      // Animate the pointer
+      this.pointer.transition()
+        .duration(duration)
+        .attrTween("transform", () => {
+          const interpolate = d3.interpolate(-90, this.scale(this.pressureAvg) * 180 / Math.PI);
+          return t => `rotate(${interpolate(t)})`;
+        });
+
+      // Animate the foreground arc
+      this.foreground.transition()
+        .duration(duration)
+        .attrTween("d", (d) => {
+          const interpolate = d3.interpolate(d.endAngle, this.scale(this.pressureAvg));
+          return t => {
+            d.endAngle = interpolate(t);
+            return this.foregroundArc(d);
+          };
+        });
+
+      // Animate the value label below the gauge
+      const valueInterpolator = d3.interpolate(this.displayedValue, this.pressureAvg);
+      d3.select(this)
+        .transition()
+        .duration(duration)
+        .tween("text", () => {
+          return t => {
+            this.displayedValue = valueInterpolator(t);
+            this.valueLabel.text(`${this.displayedValue.toFixed(2)} Kg/cm²`);
+          };
+        });
+    }
   }
-}
-
 };
 </script>
 
@@ -181,6 +200,6 @@ export default {
   justify-content: center;
   align-items: center;
   max-width: 100%; /* Ensure it fits within its container */
-  height: auto;    /* Allow height to adjust based on content */
+  /* height: auto;    Allow height to adjust based on content */
 }
 </style>

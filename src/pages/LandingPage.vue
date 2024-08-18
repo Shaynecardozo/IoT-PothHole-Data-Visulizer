@@ -1,4 +1,4 @@
-<template>
+<template height="90vh">
   <div class="landing-page">
     <div class="card-container top-cards">
       <div class="card small-card" @click="navigateTo('/potholes')" style="cursor: pointer;">
@@ -186,6 +186,7 @@ export default {
 .landing-page {
   display: flex;
   flex-direction: column;
+  height: fit-content;
   gap: 25px; /* Adjust as needed */
   padding: 20px; /* Padding around the page */
 }
@@ -254,7 +255,7 @@ export default {
   min-height: 150px; /* Fixed height for equal sizing */
   background: linear-gradient(135deg, #2f4550, #4caf50);
   color: white;
-  transition: background 0.6s ease, transform 0.4s ease, box-shadow 0.4s ease;
+  transition: all 0.6s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -275,6 +276,6 @@ export default {
   align-items: center;
   justify-content: center;
   width: fit-content;
- 
+
 }
 </style>

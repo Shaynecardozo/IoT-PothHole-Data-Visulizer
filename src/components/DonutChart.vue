@@ -1,6 +1,9 @@
 <template>
   <div class="card donut-chart-card">
     <!-- Icon with click event to open popup -->
+    <span class="q-ml-sm" style="font-size: 20px; font-weight:500;color:green;">
+      Number Of Fixed And Unfixed Complaints
+     </span>
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
     <div class="legend q-mb-md">
       <div><span class="color-box fixed"></span> Fixed</div>
@@ -88,7 +91,15 @@ export default {
       arcs
         .append("path")
         .attr("d", arc)
-        .style("fill", (d) => color(d.data.label));
+        .style("fill", (d) => color(d.data.label))
+        .transition() // Apply transition
+        .duration(1000) // Duration of the animation
+        .attrTween("d", function (d) {
+          const i = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
+          return function (t) {
+            return arc(i(t));
+          };
+        });
 
       arcs
         .append("text")

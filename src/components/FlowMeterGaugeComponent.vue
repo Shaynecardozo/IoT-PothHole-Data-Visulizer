@@ -10,6 +10,11 @@ import * as d3 from 'd3';
 
 export default {
   props: ['flowAvg', 'maxValue'],
+  data() {
+    return {
+      displayedValue: 0, // Counter to display the incremented value
+    };
+  },
   mounted() {
     this.createGauge();
   },
@@ -52,10 +57,10 @@ export default {
 
       gradient.append("stop")
         .attr("offset", "0%")
-        .attr("stop-color", "#a0eab6"); 
+        .attr("stop-color", "#a0eab6");
       gradient.append("stop")
         .attr("offset", "100%")
-        .attr("stop-color", "#0a6a27"); 
+        .attr("stop-color", "#0a6a27");
 
       // Foreground arc for the animated border
       this.foregroundArc = d3.arc()
@@ -86,16 +91,19 @@ export default {
         .attr("x", 0)
         .attr("y", -radius - 40) // Positioned above the gauge
         .attr("text-anchor", "middle")
-        .attr("font-size", "18px")
+        .attr("font-size", "30px")
+        .attr("fill",'green')
         .text("Flow Avg");
 
       // Place the value of flowAvg below the gauge
       this.valueLabel = svg.append("text")
         .attr("x", 0)
-        .attr("y", 25) // Positioned below the gauge
+        .attr("y", 26) // Positioned below the gauge
         .attr("text-anchor", "middle")
-        .attr("font-size", "15px")
-        .text(`${this.flowAvg ? this.flowAvg.toFixed(2) : '0.00'} m³/h`);
+        .attr("font-size", "18px")
+        .attr("font-weight",'800')
+        .attr("fill","green")
+        .text(`${this.displayedValue.toFixed(2)} m³/h`);
 
       // Arrow
       const pointerWidth = 8; // Adjusted width
@@ -139,7 +147,9 @@ export default {
           .attr("y", -(radius + 10) * Math.cos(this.scale(reading)))
           .attr("text-anchor", "middle")
           .attr("dy", "0.35em")
-          .attr("font-size", "12px") // Adjusted font size
+          .attr("font-size", "12px")
+          .attr("fill","green")
+          .attr("font-weight",'600') // Adjusted font size
           .text(reading);
       });
 
@@ -149,15 +159,19 @@ export default {
       this.$emit('gauge-clicked');
     },
     updateGauge() {
+      const duration = 2000; // Animation duration
+
+      // Animate the pointer
       this.pointer.transition()
-        .duration(2000)
+        .duration(duration)
         .attrTween("transform", () => {
           const interpolate = d3.interpolate(-90, this.scale(this.flowAvg) * 180 / Math.PI);
           return t => `rotate(${interpolate(t)})`;
         });
 
+      // Animate the foreground arc
       this.foreground.transition()
-        .duration(2000)
+        .duration(duration)
         .attrTween("d", (d) => {
           const interpolate = d3.interpolate(d.endAngle, this.scale(this.flowAvg));
           return t => {
@@ -166,8 +180,17 @@ export default {
           };
         });
 
-      // Update the value label below the gauge
-      this.valueLabel.text(`${this.flowAvg ? this.flowAvg.toFixed(2) : '0.00'} m³/h`);
+      // Animate the value label below the gauge
+      const valueInterpolator = d3.interpolate(this.displayedValue, this.flowAvg);
+      d3.select(this)
+        .transition()
+        .duration(duration)
+        .tween("text", () => {
+          return t => {
+            this.displayedValue = valueInterpolator(t);
+            this.valueLabel.text(`${this.displayedValue.toFixed(2)} m³/h`);
+          };
+        });
     }
   }
 };

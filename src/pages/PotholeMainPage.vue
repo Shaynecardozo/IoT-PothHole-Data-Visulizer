@@ -5,7 +5,9 @@
         :fixedComplaints="MaxFixed"
         :unfixedComplaints="MaxPending"
       />
-      <BarChartConstituency />
+      <q-card class="barChart">
+        <BarChartConstituency />
+      </q-card>
     </div>
     <div>
       <SearchBar
@@ -28,6 +30,7 @@
       />
       <BarChart :selectedConstituency="selectedConstituency" />
       <!-- Line Chart Component -->
+
       <LineChart :selectedConstituency="selectedConstituency" />
     </div>
   </div>
@@ -123,5 +126,10 @@ export default {
   flex-direction: row;
   justify-content: space-evenly;
   flex-wrap: wrap;
+}
+.barChart{
+height: fit-content;
+width: fit-content;
+margin-top: 18px;
 }
 </style>

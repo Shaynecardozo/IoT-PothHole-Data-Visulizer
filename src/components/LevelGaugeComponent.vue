@@ -1,6 +1,5 @@
 <template>
   <div @click="emitClick">
-    <!-- Existing gauge display code -->
     <div ref="gauge" class="gauge-container"></div>
   </div>
 </template>
@@ -10,6 +9,11 @@ import * as d3 from 'd3';
 
 export default {
   props: ['levelAvg'],
+  data() {
+    return {
+      displayedValue: 0, // Counter to display the incremented value
+    };
+  },
   mounted() {
     this.createGauge();
   },
@@ -34,7 +38,7 @@ export default {
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", `translate(${width / 2}, ${height -30})`);
+        .attr("transform", `translate(${width / 2}, ${height - 30})`);
 
       // Define the scale
       this.scale = d3.scaleLinear()
@@ -52,11 +56,11 @@ export default {
 
       gradient.append("stop")
         .attr("offset", "0%")
-        .attr("stop-color", "#a0eab6"); 
+        .attr("stop-color", "#a0eab6");
 
       gradient.append("stop")
         .attr("offset", "100%")
-        .attr("stop-color", "#0a6a27"); 
+        .attr("stop-color", "#0a6a27");
 
       // Draw the gradient arc
       const arc = d3.arc()
@@ -105,20 +109,24 @@ export default {
         .attr("transform", `rotate(-90)`);
 
       // Text label (initially set to 0)
-        svg.append("text")
+      svg.append("text")
         .attr("x", 0)
         .attr("y", -radius - 40) // Positioned above the gauge
         .attr("text-anchor", "middle")
-        .attr("font-size", "18px")
+        .attr("font-size", "30px")
+        .attr("fill","green")
         .text("Level Avg");
 
-      // Place the value of flowAvg below the gauge
+      // Place the value of levelAvg below the gauge
       this.valueLabel = svg.append("text")
         .attr("x", 0)
-        .attr("y", 25) // Positioned below the gauge
+        .attr("y", 26) // Positioned below the gauge
         .attr("text-anchor", "middle")
-        .attr("font-size", "15px")
-        .text(`${this.levelAvg ? this.levelAvg.toFixed(2) : '0.00'} m`);
+        .attr("font-size", "18px")
+        .attr("font-weight",'800')
+        .attr("fill","green")
+        .text(`${this.displayedValue.toFixed(2)} m`);
+
       // Reading labels every 2.5 units
       const readings = [0, 2.5, 5, 7.5, 10, 12.5, 15];
       readings.forEach(reading => {
@@ -147,15 +155,19 @@ export default {
       this.$emit('gauge-clicked');
     },
     updateGauge() {
+      const duration = 2000; // Animation duration
+
+      // Animate the pointer
       this.pointer.transition()
-        .duration(2000)
+        .duration(duration)
         .attrTween("transform", () => {
           const interpolate = d3.interpolate(-90, this.scale(this.levelAvg) * 180 / Math.PI);
           return t => `rotate(${interpolate(t)})`;
         });
 
+      // Animate the foreground arc
       this.foreground.transition()
-        .duration(2000)
+        .duration(duration)
         .attrTween("d", (d) => {
           const interpolate = d3.interpolate(d.endAngle, this.scale(this.levelAvg));
           return t => {
@@ -164,8 +176,17 @@ export default {
           };
         });
 
-      // Update the text label with the new value
-      this.valueLabel.text(`${this.levelAvg ? this.levelAvg.toFixed(2) : '0.00'} m`);
+      // Animate the value label
+      const valueInterpolator = d3.interpolate(this.displayedValue, this.levelAvg);
+      d3.select(this)
+        .transition()
+        .duration(duration)
+        .tween("text", () => {
+          return t => {
+            this.displayedValue = valueInterpolator(t);
+            this.valueLabel.text(`${this.displayedValue.toFixed(2)} m`);
+          };
+        });
     }
   }
 };
@@ -175,7 +196,6 @@ export default {
 .gauge-container {
   display: flex;
   margin-top: -20px;
-
   justify-content: center;
   align-items: center;
   max-width: 100%; /* Ensure it fits within its container */

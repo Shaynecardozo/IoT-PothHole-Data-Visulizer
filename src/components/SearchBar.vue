@@ -1,7 +1,13 @@
 <template>
   <div class="dropdown full-width row justify-center">
     <!-- <label for="constituency">Select Constituency:</label> -->
-    <q-select style="width: 80vw;" clearable v-model="internalSelectedConstituency" :options="constituencies" label="Filter By Constituency" @update:model-value="emitUpdateCounts" filled />
+     <q-form
+      class="q-gutter-md"
+
+     >
+     <q-select clearable v-model="internalSelectedConstituency" style="width:80vw" :options="constituencies" label="Filter By Constituency" @update:model-value="emitUpdateCounts" filled />
+
+     </q-form>
     <!-- <select v-model="internalSelectedConstituency" @change="emitUpdateCounts">
       <option v-for="constituency in constituencies" :key="constituency" :value="constituency">
         {{ constituency }}

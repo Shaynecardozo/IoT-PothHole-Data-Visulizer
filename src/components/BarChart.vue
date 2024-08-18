@@ -1,6 +1,9 @@
 <template>
   <div class="card bar-chart">
     <!-- Icon with click event to open popup -->
+     <span class="q-ml-xl" style="font-size: 20px; font-weight:500;color:green;">
+      Number Of Fixed And Unfixed Complaints
+     </span>
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
     <div ref="barChartContainer"></div>
 
@@ -135,7 +138,7 @@ export default {
         .style('opacity', 0);
     };
 
-  const createBarChart = (data, container) => {
+    const createBarChart = (data, container) => {
   const containerSelection = d3.select(container);
   containerSelection.html(''); // Clear any existing charts
 
@@ -162,21 +165,31 @@ export default {
   const yAxis = d3.axisLeft(yScale);
 
   svg.append('g')
-    .attr('transform', `translate(0, ${height})`)
-    .call(xAxis)
-    .selectAll('text')
-    .attr('transform', 'rotate(-45)')
-    .style('text-anchor', 'end');
+  .attr('transform', `translate(0, ${height})`)
+  .call(xAxis)
+  .selectAll('text')
+  .attr('transform', 'rotate(-45)')
+  .attr('dy', '0.35em')  // Adjust this value to move the text closer to the axis
+  .attr('dx', '-0.7em')  // Adjust horizontal position to better align with the ticks
+  .style('text-anchor', 'end');
 
+// Add "Months" label to the x-axis
+svg.append('text')
+  .attr('fill', '#000')
+  .attr('x', width / 2)  // Position in the middle of the x-axis
+  .attr('y', height + margin.bottom - 30)  // Adjust position below the axis
+  .attr('text-anchor', 'middle')
+  .text('Months');
+
+  // Y-axis with centered label
   svg.append('g')
     .call(yAxis)
     .append('text')
     .attr('fill', '#000')
-    .attr('transform', 'rotate(-90)')
-    .attr('y', -40)
+    .attr('transform', `translate(-${margin.left - 10}, ${height / 2}) rotate(-90)`)
     .attr('dy', '0.71em')
-    .attr('text-anchor', 'end')
-    .text('Number of Complaints');
+    .attr('text-anchor', 'middle')
+    .text('Number of Complaints'); // Adjust this as needed
 
   const color = d3.scaleOrdinal()
     .domain(['Fixed Complaints', 'Unfixed Complaints'])
@@ -213,14 +226,14 @@ export default {
   });
 
   data.processedData.forEach(d => {
-    svg.selectAll(`.bar.fixed.${d.constituency}`)
+    const barsFixed = svg.selectAll(`.bar.fixed.${d.constituency}`)
       .data(d.fixedCounts)
       .enter().append('rect')
       .attr('class', `bar fixed ${d.constituency}`)
       .attr('x', (d, i) => xScale(data.labels[i]))
-      .attr('y', d => yScale(d))
+      .attr('y', height) // Start from the bottom
       .attr('width', xScale.bandwidth() / 2)
-      .attr('height', d => height - yScale(d))
+      .attr('height', 0) // Start with zero height
       .attr('fill', color('Fixed Complaints'))
       .on('mouseover', (event, d) => {
         d3.select(event.target)
@@ -233,14 +246,20 @@ export default {
         hideTooltip(tooltip);
       });
 
-    svg.selectAll(`.bar.unfixed.${d.constituency}`)
+    // Animate bars from top to bottom
+    barsFixed.transition()
+      .duration(1000) // Duration of the animation
+      .attr('y', d => yScale(d))
+      .attr('height', d => height - yScale(d));
+
+    const barsUnfixed = svg.selectAll(`.bar.unfixed.${d.constituency}`)
       .data(d.unfixedCounts)
       .enter().append('rect')
       .attr('class', `bar unfixed ${d.constituency}`)
       .attr('x', (d, i) => xScale(data.labels[i]) + xScale.bandwidth() / 2)
-      .attr('y', d => yScale(d))
+      .attr('y', height) // Start from the bottom
       .attr('width', xScale.bandwidth() / 2)
-      .attr('height', d => height - yScale(d))
+      .attr('height', 0) // Start with zero height
       .attr('fill', color('Unfixed Complaints'))
       .on('mouseover', (event, d) => {
         d3.select(event.target)
@@ -252,8 +271,15 @@ export default {
           .attr('fill', color('Unfixed Complaints')); // Reset color on mouse out
         hideTooltip(tooltip);
       });
+
+    // Animate bars from top to bottom
+    barsUnfixed.transition()
+      .duration(1000) // Duration of the animation
+      .attr('y', d => yScale(d))
+      .attr('height', d => height - yScale(d));
   });
 };
+
 
 
 
@@ -297,8 +323,8 @@ export default {
   border-radius: 4px;
   padding: 16px;
   margin: 16px;
-  width: 50%; /* Adjust width to fit side by side */
-  height: 50%;
+  width: fit-content;/* Adjust width to fit side by side */
+  height: fit-content;
   position: relative;
 }
 
