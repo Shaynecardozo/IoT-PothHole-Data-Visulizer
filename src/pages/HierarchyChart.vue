@@ -1,65 +1,74 @@
 <template>
-  <q-page padding>
-    <q-card v-for="(tree, index) in trees" :key="index" class="tree-card">
-      <q-card-section>
-        <!-- Card title showing the root node's name -->
-        <q-card-title class="q-ml-xl rootname ">
-          <q-icon name="gas_meter" />
-          {{
-          tree.data.name
-        }}</q-card-title>
-      </q-card-section>
-
-      <q-card-section>
+  <q-page >
+    <main style="border:1px solid gainsboro; border-radius: 5px;" class="q-ma-lg q-pa-md">
+      <h3 class="q-ma-none q-mb-lg row items-center" style="color: green">
+        <q-icon name="water_drop" class="q-mr-md" /> <span> Flowmeters</span>
+      </h3>
+      <q-expansion-item
+        v-for="(tree, index) in trees"
+        :key="index"
+        class="tree-expansion"
+        expand-separator
+        :default-opened="index === 0"
+        :label="tree.data.name"
+        icon="gas_meter"
+      >
         <div :id="'tree-' + index" class="chart-container"></div>
-      </q-card-section>
-    </q-card>
+      </q-expansion-item>
 
-    <!-- Popup Dialog -->
-    <q-dialog v-model="showPopup">
-      <q-card class="custom-dialog">
-        <q-card-section>
-          <div style="font-weight: bold; font-size: 25px; color:green" class="text-center">Flowmeter Details</div>
-        </q-card-section>
+      <!-- Popup Dialog -->
+      <q-dialog v-model="showPopup">
+        <q-card class="custom-dialog">
+          <q-card-section>
+            <div
+              style="font-weight: bold; font-size: 25px; color: green"
+              class="text-center"
+            >
+              Flowmeter Details
+            </div>
+          </q-card-section>
 
-        <q-card-section
-          class="q-mx-sm"
-          style="border: 2px solid black; border-radius: 10px"
-        >
-          <div class="column">
-            <div class="row">
-              <strong class="col-6"><q-icon name="task" /> Id</strong
-              ><span class="q-pl-sm"
-                >: {{ popupNode.id ? popupNode.id : "NA" }}</span
-              >
+          <q-card-section
+            class="q-mx-sm"
+            style="border: 2px solid black; border-radius: 10px"
+          >
+            <div class="column">
+              <div class="row">
+                <strong class="col-6"><q-icon name="task" /> Id</strong>
+                <span class="q-pl-sm"
+                  >: {{ popupNode.id ? popupNode.id : "NA" }}</span
+                >
+              </div>
+              <div class="row">
+                <strong class="col-6"><q-icon name="badge" /> Name</strong>
+                <span class="q-pl-sm"
+                  >: {{ popupNode.name ? popupNode.name : "NA" }}</span
+                >
+              </div>
+              <div class="row">
+                <strong class="col-6"
+                  ><q-icon name="location_on" /> Location</strong
+                >
+                <span class="q-pl-sm"
+                  >: {{ popupNode.location ? popupNode.location : "NA" }}</span
+                >
+              </div>
+              <div class="row">
+                <strong class="col-6"
+                  ><q-icon name="account_tree" /> Position</strong
+                >
+                <span class="q-pl-sm"
+                  >: {{ popupNode.position ? popupNode.position : "NA" }}</span
+                >
+              </div>
             </div>
-            <div class="row">
-              <strong class="col-6"><q-icon name="badge" /> Name</strong
-              ><span class="q-pl-sm"
-                >: {{ popupNode.name ? popupNode.name : "NA" }}</span
-              >
-            </div>
-            <div class="row">
-              <strong class="col-6 "><q-icon name="location_on" /> Location</strong
-              ><span class="q-pl-sm"
-                >: {{ popupNode.location ? popupNode.location : "NA" }}</span
-              >
-            </div>
-            <div class="row">
-              <strong class="col-6"
-                ><q-icon name="account_tree" /> Position</strong
-              >
-              <span class="q-pl-sm"
-                >: {{ popupNode.position ? popupNode.position : "NA" }}</span
-              >
-            </div>
-          </div>
-        </q-card-section>
-        <q-card-actions align="center">
-          <q-btn label="Close" color="blue" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+          </q-card-section>
+          <q-card-actions align="center">
+            <q-btn label="Close" color="blue" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </main>
   </q-page>
 </template>
 
@@ -156,7 +165,7 @@ export default {
         .attr("fill", "green")
         .attr("stroke", "black")
         .attr("stroke-width", 2)
-        .style('cursor','pointer')
+        .style("cursor", "pointer")
         .on("click", (event, d) => {
           this.popupNode = d.data; // Set the node data for the popup
           this.showPopup = true; // Show the popup dialog
@@ -174,13 +183,13 @@ export default {
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "azure")
-        .style('cursor','pointer')
+        .style("cursor", "pointer")
         .text((d) => (d.parent === null ? d.data.name : d.data.id))
         .on("click", (event, d) => {
           this.popupNode = d.data; // Set the node data for the popup
           this.showPopup = true; // Show the popup dialog
-        });;
-         // Display name if root node, otherwise display id
+        });
+      // Display name if root node, otherwise display id
     },
 
     processData(data) {
@@ -235,18 +244,20 @@ export default {
 </script>
 
 <style scoped>
-.tree-card {
+.tree-expansion {
   margin-bottom: 20px;
   box-shadow: 2px 2px 8px rgba(57, 179, 71, 0.837);
+  font-size: 30px;
+  font-weight: bold;
+  color: green;
 }
 
-.rootname
-{
+.rootname {
   font-weight: bold;
   font-size: 3rem;
   display: flex;
-  margin:10px 10px;
-  gap:10px;
+  margin: 10px 10px;
+  gap: 10px;
   align-items: center;
   color: green;
 }
@@ -263,7 +274,6 @@ svg {
   background-color: #f9f9f9;
 }
 
-
 .popup-details h4 {
   color: #146c2de7;
   font-weight: bold;
@@ -273,5 +283,10 @@ svg {
   max-width: 22rem;
   font-size: 20px;
   width: 100%;
+}
+
+.custom-icon {
+  font-size: 2rem; /* Adjust the size as needed */
+  color: primary;
 }
 </style>

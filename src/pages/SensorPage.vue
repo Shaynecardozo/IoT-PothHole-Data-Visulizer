@@ -14,7 +14,7 @@
           <div class="gauge-and-filter">
             <div class="gauge-container card">
               <h3 v-if="selectedGauge === 'pressure' || selectedGauge === null"
-                style="color: #0e5b20; font-size: 36px;">Pressure Sensor</h3>
+                style="color: #0e5b20 ; font-size: 36px; margin-bottom:20px; ">Pressure Sensor</h3>
               <PressureGaugeComponent v-if="selectedGauge === 'pressure' || selectedGauge === null"
                 :pressureAvg="pressureAvg" @gauge-clicked="handleGaugeClick('pressure')" />
             </div>
@@ -61,7 +61,7 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'level' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+              <h3 v-if="selectedGauge === 'level' || selectedGauge === null" style="color: #0e5b20; font-size: 36px; margin-bottom:20px;">
                 Level Sensor</h3>
               <LevelGaugeComponent v-if="selectedGauge === 'level' || selectedGauge === null" :levelAvg="levelAvg"
                 @gauge-clicked="handleGaugeClick('level')" />
@@ -106,7 +106,7 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'flow1' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+              <h3 v-if="selectedGauge === 'flow1' || selectedGauge === null" style="color: #0e5b20; font-size: 36px; margin-bottom:20px;">
                 Flowmeter 1</h3>
               <FlowMeterGaugeComponent v-if="selectedGauge === 'flow1' || selectedGauge === null" :flowAvg="flowAvg1"
                 :maxValue="1500" @gauge-clicked="handleGaugeClick('flow1')" />
@@ -153,7 +153,7 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'flow2' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+              <h3 v-if="selectedGauge === 'flow2' || selectedGauge === null" style="color: #0e5b20; font-size: 36px; margin-bottom:20px;">
                 Flowmeter 2</h3>
               <FlowMeterGaugeComponent v-if="selectedGauge === 'flow2' || selectedGauge === null" :flowAvg="flowAvg2"
                 :maxValue="2000" @gauge-clicked="handleGaugeClick('flow2')" />
@@ -198,7 +198,7 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'flow3' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+              <h3 v-if="selectedGauge === 'flow3' || selectedGauge === null" style="color: #0e5b20; font-size: 36px; margin-bottom:20px;">
                 Flowmeter 3</h3>
               <FlowMeterGaugeComponent v-if="selectedGauge === 'flow3' || selectedGauge === null" :flowAvg="flowAvg3"
                 :maxValue="600" @gauge-clicked="handleGaugeClick('flow3')" />
@@ -243,7 +243,7 @@
         <div class="row">
           <div class="gauge-and-filter">
             <div class="gauge-container card">
-              <h3 v-if="selectedGauge === 'flow4' || selectedGauge === null" style="color: #0e5b20; font-size: 36px;">
+              <h3 v-if="selectedGauge === 'flow4' || selectedGauge === null" style="color: #0e5b20; font-size: 36px; margin-bottom:20px;">
                 Flowmeter 4</h3>
               <FlowMeterGaugeComponent v-if="selectedGauge === 'flow4' || selectedGauge === null" :flowAvg="flowAvg4"
                 :maxValue="600" @gauge-clicked="handleGaugeClick('flow4')" />
@@ -504,7 +504,7 @@ select {
   display: flex;
   align-items: flex-start;
   /* Align items to the top */
-  gap: 10px;
+  /* gap: 10px; */
   /* Adjust the space between gauge and filter components */
   margin-bottom: 10px;
   /* Space below the row */
@@ -598,6 +598,7 @@ select {
   padding: 20px;
   width: 100%;
   max-width: 500px;
+  height: fit-content;
   min-height: 325px;
   /* Set a fixed or minimum height */
   transition: transform 0.3s ease, box-shadow 0.3s ease;

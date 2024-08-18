@@ -1,8 +1,8 @@
 <template>
-  <div class="card bar-chart">
+  <div class="bar-chart-card">
     <!-- Icon with click event to open popup -->
-    <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
-    <div ref="barChartContainer"></div>
+    <q-icon name="open_in_full" class="popup-icon" @click="openPopup"></q-icon>
+    <div ref="barChartContainer" class="bar-chart-container"></div>
 
     <!-- Popup Dialog -->
     <q-dialog v-model="dialog" persistent>
@@ -40,7 +40,7 @@ export default {
 
     // Tooltip div
     const tooltip = d3.select("body").append("div")
-      .attr("class", "tooltip")
+      .attr("class", "bar-chart-tooltip")
       .style("position", "absolute")
       .style("visibility", "hidden")
       .style("background-color", "#fff")
@@ -99,7 +99,7 @@ export default {
 
       const width = container === barChartContainer.value ? 600 : window.innerWidth * 0.75;
       const height = container === barChartContainer.value ? 200 : window.innerHeight * 0.75;
-      const margin = { top: 80, right: 20, bottom: 100, left: 50 };
+      const margin = { top: 80, right: 20, bottom: 80, left: 50 };
 
       const svg = containerSelection
         .append("svg")
@@ -249,33 +249,32 @@ export default {
 };
 </script>
 
-<style>
-.card {
-  /* border: 1px solid #ddd; */
+<style scoped>
+.bar-chart-card {
   border-radius: 4px;
-  padding: 16px;
+
   margin: 16px;
   width: fit-content;
   height: fit-content;
   position: relative;
 }
 
-.icon {
+.popup-icon {
   position: absolute;
   top: 8px;
   right: 8px;
   cursor: pointer;
 }
 
-.bar-chart .bar {
+.bar-chart-container .bar {
   transition: fill 0.3s;
 }
 
-.bar-chart .bar.fixed:hover {
+.bar-chart-container .bar.fixed:hover {
   fill: orange;
 }
 
-.bar-chart .bar.unfixed:hover {
+.bar-chart-container .bar.unfixed:hover {
   fill: yellow;
 }
 
@@ -306,7 +305,7 @@ export default {
   font-size: 12px;
 }
 
-.tooltip {
+.bar-chart-tooltip {
   position: absolute;
   visibility: hidden;
   background-color: #fff;

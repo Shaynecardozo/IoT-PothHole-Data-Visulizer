@@ -10,6 +10,11 @@ import * as d3 from 'd3';
 
 export default {
   props: ['pressureAvg'],
+  data() {
+    return {
+      displayedValue: 0, // Counter to display the incremented value
+    };
+  },
   mounted() {
     this.createGauge();
   },
@@ -34,32 +39,29 @@ export default {
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", `translate(${width / 2}, ${height - margin})`);
+        .attr("transform", `translate(${width / 2}, ${height - 30})`);
 
       // Define the scale
       this.scale = d3.scaleLinear()
         .domain([0, 45])
         .range([-Math.PI / 2, Math.PI / 2]);
 
-      // Define color ranges
-      const colorRanges = [
-        { start: 0, end: 15, color: "green" },
-        { start: 15, end: 30, color: "yellow" },
-        { start: 30, end: 45, color: "red" }
-      ];
+      // Define gradient
+      const gradient = svg.append("defs")
+        .append("linearGradient")
+        .attr("id", "gauge-gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%");
 
-      // Draw each color segment
-      colorRanges.forEach(range => {
-        const segmentArc = d3.arc()
-          .innerRadius(radius * 0.7)
-          .outerRadius(radius * 0.9)
-          .startAngle(this.scale(range.start))
-          .endAngle(this.scale(range.end));
+      gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#a0eab6");
 
-        svg.append("path")
-          .attr("d", segmentArc)
-          .style("fill", range.color);
-      });
+      gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#0a6a27");
 
       // Foreground arc
       this.foregroundArc = d3.arc()
@@ -71,8 +73,19 @@ export default {
         .datum({ endAngle: -Math.PI / 2 })
         .attr("d", this.foregroundArc)
         .style("fill", "none")
-        .style("stroke", "black")
-        .style("stroke-width", 2);
+        .style("stroke", "url(#gauge-gradient)")
+        .style("stroke-width", 4);
+
+      // Draw the gradient arc
+      const arc = d3.arc()
+        .innerRadius(radius * 0.7)
+        .outerRadius(radius * 0.9)
+        .startAngle(this.scale(0))
+        .endAngle(this.scale(45));
+
+      svg.append("path")
+        .attr("d", arc)
+        .style("fill", "url(#gauge-gradient)");
 
       // Arrow
       const pointerWidth = 8; // Adjusted width
@@ -96,13 +109,23 @@ export default {
         .attr("d", pointerLine)
         .attr("transform", `rotate(-90)`);
 
-      // Text label (initially set to 0)
-      this.label = svg.append("text")
+      svg.append("text")
         .attr("x", 0)
-        .attr("y", -radius - 20) // Adjusted position
+        .attr("y", -radius - 40) // Positioned above the gauge
         .attr("text-anchor", "middle")
-        .attr("font-size", "18px") // Reduced font size
-        .text(`Pressure Avg: ${this.pressureAvg ? this.pressureAvg.toFixed(2) : '0.00'} Kg/cm²`);
+        .attr("fill",'green')
+        .attr("font-size", "30px")
+        .text("Pressure Avg");
+
+      // Place the value of pressureAvg below the gauge
+      this.valueLabel = svg.append("text")
+        .attr("x", 0)
+        .attr("y", 26) // Positioned below the gauge
+        .attr("text-anchor", "middle")
+        .attr("font-size", "18px")
+        .attr("font-weight",'800')
+        .attr("fill","green")
+        .text(`${this.displayedValue.toFixed(2)} Kg/cm²`);
 
       // Reading labels every 5 units
       const readings = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45];
@@ -132,15 +155,19 @@ export default {
       this.$emit('gauge-clicked');
     },
     updateGauge() {
+      const duration = 2000; // Animation duration
+
+      // Animate the pointer
       this.pointer.transition()
-        .duration(2000)
+        .duration(duration)
         .attrTween("transform", () => {
           const interpolate = d3.interpolate(-90, this.scale(this.pressureAvg) * 180 / Math.PI);
           return t => `rotate(${interpolate(t)})`;
         });
 
+      // Animate the foreground arc
       this.foreground.transition()
-        .duration(2000)
+        .duration(duration)
         .attrTween("d", (d) => {
           const interpolate = d3.interpolate(d.endAngle, this.scale(this.pressureAvg));
           return t => {
@@ -149,8 +176,17 @@ export default {
           };
         });
 
-      // Update the text label with the new value
-      this.label.text(`Pressure Avg: ${this.pressureAvg ? this.pressureAvg.toFixed(2) : '0.00'} Kg/cm²`);
+      // Animate the value label below the gauge
+      const valueInterpolator = d3.interpolate(this.displayedValue, this.pressureAvg);
+      d3.select(this)
+        .transition()
+        .duration(duration)
+        .tween("text", () => {
+          return t => {
+            this.displayedValue = valueInterpolator(t);
+            this.valueLabel.text(`${this.displayedValue.toFixed(2)} Kg/cm²`);
+          };
+        });
     }
   }
 };
@@ -164,6 +200,6 @@ export default {
   justify-content: center;
   align-items: center;
   max-width: 100%; /* Ensure it fits within its container */
-  height: auto;    /* Allow height to adjust based on content */
+  /* height: auto;    Allow height to adjust based on content */
 }
 </style>

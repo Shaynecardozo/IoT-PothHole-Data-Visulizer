@@ -141,7 +141,7 @@ export default {
 
   const width = container === lineChartContainer.value ? 400 : window.innerWidth * 0.75;
   const height = container === lineChartContainer.value ? 200 : window.innerHeight * 0.75;
-  const margin = { top: 60, right: 20, bottom: 100, left: 50 }; // Adjusted top margin for legend
+  const margin = { top: 80, right: 20, bottom: 100, left: 50 }; // Adjusted top margin for legend
 
   const svg = containerSelection.append('svg')
     .attr('width', width + margin.left + margin.right)

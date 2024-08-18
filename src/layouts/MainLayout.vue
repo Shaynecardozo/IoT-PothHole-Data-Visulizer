@@ -7,7 +7,7 @@
     </q-header>
 
     <!-- Drawer/Sidebar -->
-    <q-drawer v-if="checklogin" v-model="drawer" :width="220" side="left"   content-class="bg-drawer" class="q-mt-md">
+    <q-drawer bordered v-if="checklogin" v-model="drawer" :width="220" side="left"   content-class="bg-drawer" class="q-mt-md">
       <q-list>
         <!-- Landing Section with Dropdown -->
 
@@ -204,7 +204,9 @@ export default {
 }
 
 .q-item:hover {
-  background-color: rgb(114, 171, 140) !important; /* Highlight background on hover */
+  background-color: rgb(69, 255, 85) !important; /* Highlight background on hover */
+  /* color: rgb(248, 248, 248) !important; Highlight background on hover */
+
 }
 
 </style>

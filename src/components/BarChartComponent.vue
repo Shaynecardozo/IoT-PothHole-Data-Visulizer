@@ -1,11 +1,5 @@
 <template>
   <div>
-    <!-- Threshold Input and Button -->
-    <input v-model.number="userThreshold" type="number" class="threshold-input" placeholder="Set Threshold Value" />
-    <button @click="toggleThreshold" class="threshold-button">
-      Threshold Value is {{ thresholdEnabled ? 'Enabled' : 'Disabled' }} ({{ userThreshold }})
-    </button>
-
     <!-- Bar Chart -->
     <div ref="chart"></div>
   </div>
@@ -32,38 +26,33 @@ export default {
       type: Date,
       default: () => new Date(8640000000000000) // Maximum possible date
     },
-    initialThreshold: {
+    threshold: {
       type: Number,
-      default: 6 // Default threshold value
+      default: 0 // Default threshold value
+    },
+    thresholdEnabled: {
+      type: Boolean,
+      default: false // Default threshold enabled state
     }
-  },
-  data() {
-    return {
-      thresholdEnabled: false, // State to control threshold visibility
-      userThreshold: this.initialThreshold // State for user-defined threshold
-    };
   },
   watch: {
     data: 'renderChart',
     filter: 'renderChart',
     startDate: 'renderChart',
     endDate: 'renderChart',
-    thresholdEnabled: 'renderChart', // Re-render chart when threshold is toggled
-    userThreshold: 'renderChart' // Re-render chart when user changes the threshold value
+    threshold: 'renderChart', // Re-render chart when threshold value changes
+    thresholdEnabled: 'renderChart' // Re-render chart when threshold enable/disable state changes
   },
   mounted() {
     this.renderChart();
   },
   methods: {
-    toggleThreshold() {
-      this.thresholdEnabled = !this.thresholdEnabled;
-    },
     renderChart() {
       d3.select(this.$refs.chart).selectAll("*").remove();
 
       const filteredData = this.filterData();
-      const margin = { top: 20, right: 20, bottom: 50, left: 40 },
-        width = 1300 - margin.left - margin.right,
+      const margin = { top: 20, right: 20, bottom: 50, left: 35 },
+        width = 1275 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
       const svg = d3.select(this.$refs.chart)
@@ -77,7 +66,7 @@ export default {
         y = d3.scaleLinear().rangeRound([height, 0]);
 
       x.domain(filteredData.map(d => d.date));
-      y.domain([0, Math.max(d3.max(filteredData, d => d.value), this.userThreshold)]);
+      y.domain([0, Math.max(d3.max(filteredData, d => d.value), this.threshold)]);
 
       const xAxis = svg.append("g")
         .attr("class", "x axis")
@@ -92,7 +81,7 @@ export default {
         .attr("class", "y axis")
         .call(d3.axisLeft(y).ticks(10));
 
-        const colorScale = d3.scaleSequential(d3.interpolateGreens)
+      const colorScale = d3.scaleSequential(d3.interpolateGreens)
         .domain([-20, d3.max(filteredData, d => d.value)]);
 
       if (this.thresholdEnabled) {
@@ -100,52 +89,47 @@ export default {
         svg.append("line")
           .attr("class", "threshold-line")
           .attr("x1", 0)
-          .attr("y1", y(this.userThreshold))
+          .attr("y1", y(this.threshold))
           .attr("x2", width)
-          .attr("y2", y(this.userThreshold))
+          .attr("y2", y(this.threshold))
           .attr("stroke", "red")
           .attr("stroke-width", 2)
           .attr("stroke-dasharray", "4,4");
 
         // Add bars with conditional color and transparency for above-threshold bars
         svg.selectAll(".bar")
-        .data(filteredData)
-    .enter().append("rect")
-    .attr("class", "bar")
-    .attr("x", d => x(d.date))
-    .attr("y", height) // Start the bars from the bottom of the chart
-    .attr("width", x.bandwidth())
-    .style("fill", d => d.value > this.userThreshold ? "transparent" : colorScale(d.value))
-    .style("opacity", d => d.value > this.userThreshold ? 0.2 : 1)
-    .transition()
-    .duration(2000)
-    .attr("y", d => y(Math.min(d.value, this.userThreshold))) // Animate to the final position
-    .attr("height", d => height - y(Math.min(d.value, this.userThreshold)));
-
-
-
-
+          .data(filteredData)
+          .enter().append("rect")
+          .attr("class", "bar")
+          .attr("x", d => x(d.date))
+          .attr("y", height) // Start the bars from the bottom of the chart
+          .attr("width", x.bandwidth())
+          .style("fill", d => d.value > this.threshold ? "transparent" : colorScale(d.value))
+          .style("opacity", d => d.value > this.threshold ? 0.2 : 1)
+          .transition()
+          .duration(2000)
+          .attr("y", d => y(Math.min(d.value, this.threshold))) // Animate to the final position
+          .attr("height", d => height - y(Math.min(d.value, this.threshold)));
       } else {
         // Display all bars as normal
         svg.selectAll(".bar")
-        .data(filteredData)
-        .enter().append("rect")
-        .attr("class", "bar")
-        .attr("x", d => x(d.date))
-        .attr("y", height)
-        .attr("width", x.bandwidth())
-        .attr("height", 0)
-        .style("fill", d => colorScale(d.value)) // Initial color based on value
-        .transition()
-        .duration(2000)
-        .attr("y", d => y(d.value))
-        .attr("height", d => height - y(d.value));
-
+          .data(filteredData)
+          .enter().append("rect")
+          .attr("class", "bar")
+          .attr("x", d => x(d.date))
+          .attr("y", height)
+          .attr("width", x.bandwidth())
+          .attr("height", 0)
+          .style("fill", d => colorScale(d.value)) // Initial color based on value
+          .transition()
+          .duration(2000)
+          .attr("y", d => y(d.value))
+          .attr("height", d => height - y(d.value));
       }
 
       svg.selectAll(".bar")
         .on("mouseover", (event, d) => {
-          if (!this.thresholdEnabled || d.value <= this.userThreshold) {
+          if (!this.thresholdEnabled || d.value <= this.threshold) {
             const formatDate = this.getTooltipDateFormat();
             d3.select(event.currentTarget)
               .style("fill", "orange")
@@ -154,9 +138,9 @@ export default {
           }
         })
         .on("mouseout", (event, d) => {
-          if (!this.thresholdEnabled || d.value <= this.userThreshold) {
+          if (!this.thresholdEnabled || d.value <= this.threshold) {
             d3.select(event.currentTarget)
-              .style("fill",  d => colorScale(d.value))
+              .style("fill", d => colorScale(d.value))
               .select("title").remove();
           }
         });
@@ -296,28 +280,5 @@ export default {
   stroke: red;
   stroke-width: 2;
   stroke-dasharray: 4,4;
-}
-
-.threshold-input {
-  margin-right: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  width: 150px;
-}
-
-.threshold-button {
-  padding: 10px 20px;
-  background-color: #000000;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.threshold-button:hover {
-  background-color: #333333;
 }
 </style>

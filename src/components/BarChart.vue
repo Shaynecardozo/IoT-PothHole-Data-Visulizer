@@ -297,8 +297,8 @@ export default {
   border-radius: 4px;
   padding: 16px;
   margin: 16px;
-  width: 50%; /* Adjust width to fit side by side */
-  height: 50%;
+  width: fit-content;/* Adjust width to fit side by side */
+  height: fit-content;
   position: relative;
 }
 

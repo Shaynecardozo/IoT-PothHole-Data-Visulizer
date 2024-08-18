@@ -15,7 +15,7 @@
       <q-carousel-slide v-for="(sensor, index) in sensors" :key="index" :name="index + 1">
         <div class="carousel-content">
           <h3
-          style="color: #0e5b20; font-size: 36px;">{{ sensor.title }}</h3>
+          style="color: #0e5b20; font-size: 36px; margin-bottom:20px">{{ sensor.title }}</h3>
           <component :is="sensor.component" v-bind="sensor.props" />
         </div>
       </q-carousel-slide>

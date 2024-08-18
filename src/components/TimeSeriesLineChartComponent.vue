@@ -1,11 +1,5 @@
 <template>
   <div>
-    <!-- Threshold Input and Button -->
-    <input v-model.number="userThreshold" type="number" class="threshold-input" placeholder="Set Threshold Value" />
-    <button @click="toggleThreshold" class="threshold-button">
-      Threshold Value is {{ thresholdEnabled ? 'Enabled' : 'Disabled' }} ({{ userThreshold }})
-    </button>
-
     <!-- Line Chart -->
     <div ref="chart"></div>
   </div>
@@ -26,46 +20,41 @@ export default {
     },
     startDate: {
       type: Date,
-      default: () => new Date(-8640000000000000) // Very early date if not specified
+      default: () => new Date(-8640000000000000) // Minimum possible date
     },
     endDate: {
       type: Date,
-      default: () => new Date(8640000000000000) // Very late date if not specified
+      default: () => new Date(8640000000000000) // Maximum possible date
     },
-    initialThreshold: {
+    threshold: {
       type: Number,
-      default: 6 // Default threshold value
+      default: 0 // Default threshold value
+    },
+    thresholdEnabled: {
+      type: Boolean,
+      default: false // Default threshold enabled state
     }
-  },
-  data() {
-    return {
-      thresholdEnabled: false, // State to control threshold visibility
-      userThreshold: this.initialThreshold // State for user-defined threshold
-    };
   },
   watch: {
     data: 'renderChart',
     filter: 'renderChart',
     startDate: 'renderChart',
     endDate: 'renderChart',
-    thresholdEnabled: 'renderChart', // Re-render chart when threshold is toggled
-    userThreshold: 'renderChart' // Re-render chart when user changes the threshold value
+    threshold: 'renderChart', // Re-render chart when threshold value changes
+    thresholdEnabled: 'renderChart' // Re-render chart when threshold enable/disable state changes
   },
   mounted() {
     this.renderChart();
   },
   methods: {
-    toggleThreshold() {
-      this.thresholdEnabled = !this.thresholdEnabled;
-    },
     renderChart() {
       d3.select(this.$refs.chart).selectAll("*").remove();
 
       const filteredData = this.filterData();
       if (filteredData.length === 0) return;
 
-      const margin = { top: 20, right: 20, bottom: 50, left: 40 },
-        width = 1300 - margin.left - margin.right,
+      const margin = { top: 20, right: 20, bottom: 50, left: 35 },
+        width = 1275 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
       const svg = d3.select(this.$refs.chart)
@@ -79,7 +68,7 @@ export default {
         y = d3.scaleLinear().range([height, 0]);
 
       x.domain(d3.extent(filteredData, d => d.date));
-      y.domain([0, Math.max(d3.max(filteredData, d => d.value), this.userThreshold)]);
+      y.domain([0, Math.max(d3.max(filteredData, d => d.value), this.threshold)]);
 
       const xAxis = svg.append("g")
         .attr("class", "x axis")
@@ -103,7 +92,7 @@ export default {
         .attr("class", "line")
         .attr("d", line)
         .attr('fill', 'none')
-        .attr('stroke', 'steelblue')
+        .attr('stroke', 'green')
         .attr('stroke-width', 2.5);
 
       // Get the length of the line path for animation
@@ -124,8 +113,8 @@ export default {
         .attr("cx", d => x(d.date))
         .attr("cy", d => y(d.value))
         .attr("r", 4)
-        .style("fill", d => this.thresholdEnabled && d.value > this.userThreshold ? "transparent" : "red")
-        .style("opacity", d => this.thresholdEnabled && d.value > this.userThreshold ? 0.2 : 1);
+        .style("fill", d => this.thresholdEnabled && d.value > this.threshold ? "transparent" : "red")
+        .style("opacity", d => this.thresholdEnabled && d.value > this.threshold ? 0.2 : 1);
 
       svg.selectAll(".dot")
         .on("mouseover", function(event, d) {
@@ -140,7 +129,7 @@ export default {
             .transition()
             .duration(200)
             .attr("r", 4) // Reset size
-            .style("fill", d => this.thresholdEnabled && d.value > this.userThreshold ? "transparent" : "red"); // Reset color
+            .style("fill", d => this.thresholdEnabled && d.value > this.threshold ? "transparent" : "red"); // Reset color
         })
         .append("title")
         .text(d => {
@@ -153,9 +142,9 @@ export default {
         svg.append("line")
           .attr("class", "threshold-line")
           .attr("x1", 0)
-          .attr("y1", y(this.userThreshold))
+          .attr("y1", y(this.threshold))
           .attr("x2", width)
-          .attr("y2", y(this.userThreshold))
+          .attr("y2", y(this.threshold))
           .attr("stroke", "red")
           .attr("stroke-width", 2)
           .attr("stroke-dasharray", "4,4");
@@ -182,7 +171,6 @@ export default {
           };
         }).filter(d => d !== null);
 
-        // Filter data within the custom range
         const filteredData = parsedData.filter(d => d.date >= start && d.date <= end);
 
         let groupedData = [];
@@ -286,6 +274,7 @@ export default {
           return (date) => {
             const day = date.getDate();
             const suffix = getOrdinalSuffix(day);
+
             return d3.timeFormat(`%d${suffix} %B %Y`)(date);
           };
         case 'month':
@@ -302,46 +291,25 @@ export default {
 
 <style scoped>
 .line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 2.5px;
+  stroke: green;
+  stroke-width: 2.5;
 }
 
 .dot {
-  stroke: white;
-  stroke-width: 1.5px;
+  fill: red;
 }
 
-.axis text {
-  font-size: 12px;
+.dot:hover {
+  fill: orange;
+}
+
+.axis--x path {
+  display: none;
 }
 
 .threshold-line {
   stroke: red;
   stroke-width: 2;
   stroke-dasharray: 4,4;
-}
-
-.threshold-input {
-  margin-right: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  width: 150px;
-}
-
-.threshold-button {
-  padding: 10px 20px;
-  background-color: #000000;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.threshold-button:hover {
-  background-color: #333333;
 }
 </style>
