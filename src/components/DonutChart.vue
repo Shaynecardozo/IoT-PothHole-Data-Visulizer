@@ -48,7 +48,7 @@ export default {
       const radius = Math.min(width, height) / 2;
       const innerRadius = radius * 0.4; // Inner radius for donut effect
 
-      const color = d3.scaleOrdinal(["#90EE90", "#138808"]); // Colors
+      const color = d3.scaleOrdinal(["#4caf50","#2f4550"]); // Colors
 
       const pie = d3.pie().value(d => d.value);
       const arc = d3.arc().outerRadius(radius - 10).innerRadius(innerRadius);

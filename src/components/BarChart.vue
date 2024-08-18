@@ -48,59 +48,67 @@ export default {
       }
     };
 
-    const formatMonthYear = (date) => {
-    // Create a D3 time format function for the short month and year
-    const formatMonth = d3.timeFormat('%b'); // e.g., Jan, Feb
-    const formatYear = d3.timeFormat('%y');  // e.g., 21
+     const formatMonthYear = (date) => {
+      const formatMonth = d3.timeFormat('%b'); // e.g., Jan, Feb
+      const formatYear = d3.timeFormat('%y');  // e.g., 21
 
-    // Extract short month and last two digits of the year
-    const month = formatMonth(date); // Jan
-    const year = formatYear(date);   // 21
+      const month = formatMonth(date); // Jan
+      const year = formatYear(date);   // 21
 
-    // Combine them in "Jan-21" format
-    return `${month}-${year}`;
+      return `${month}-${year}`;
+    };
+
+    const getAllMonthYearLabels = (geojsonData) => {
+      const dates = geojsonData.features.map(feature => new Date(feature.properties.ComplaintReceived));
+      const firstDate = d3.min(dates);
+      const lastDate = d3.max(dates);
+      const allMonthYearLabels = [];
+
+      let currentDate = new Date(firstDate);
+      while (currentDate <= lastDate) {
+        allMonthYearLabels.push(formatMonthYear(currentDate));
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+
+      return allMonthYearLabels;
     };
 
     const processGeoJSONData = (geojsonData) => {
-    const counts = geojsonData.features.reduce((acc, feature) => {
-    const properties = feature.properties;
-    const constituency = properties.constituency;
-    const date = new Date(properties.ComplaintReceived);
-    const monthYear = formatMonthYear(date); // Use the new format function
+      const allMonthYearLabels = getAllMonthYearLabels(geojsonData);
+      const counts = geojsonData.features.reduce((acc, feature) => {
+        const properties = feature.properties;
+        const constituency = properties.constituency;
+        const date = new Date(properties.ComplaintReceived);
+        const monthYear = formatMonthYear(date);
 
-    if (!acc[constituency]) {
-      acc[constituency] = { months: {}, fixed: 0, unfixed: 0 };
-    }
+        if (!acc[constituency]) {
+          acc[constituency] = { months: {}, fixed: 0, unfixed: 0 };
+        }
 
-    if (!acc[constituency].months[monthYear]) {
-      acc[constituency].months[monthYear] = { fixed: 0, unfixed: 0 };
-    }
+        if (!acc[constituency].months[monthYear]) {
+          acc[constituency].months[monthYear] = { fixed: 0, unfixed: 0 };
+        }
 
-    if (properties.FixedOn) {
-      acc[constituency].months[monthYear].fixed += 1;
-      acc[constituency].fixed += 1;
-    } 
-    else {
-      acc[constituency].months[monthYear].unfixed += 1;
-      acc[constituency].unfixed += 1;
-    }
+        if (properties.FixedOn) {
+          acc[constituency].months[monthYear].fixed += 1;
+          acc[constituency].fixed += 1;
+        } else {
+          acc[constituency].months[monthYear].unfixed += 1;
+          acc[constituency].unfixed += 1;
+        }
 
-    return acc;
-  }, {});
+        return acc;
+      }, {});
 
-  // Get the sorted list of months
-  const labels = [...new Set(Object.values(counts).flatMap(c => Object.keys(c.months)))];
-  labels.sort((a, b) => d3.ascending(d3.timeParse('%b-%y')(a), d3.timeParse('%b-%y')(b))); // Sort months chronologically
+      const processedData = Object.entries(counts).map(([constituency, data]) => ({
+        constituency,
+        months: allMonthYearLabels.map(monthYear => data.months[monthYear] || { fixed: 0, unfixed: 0 }),
+        fixedCounts: allMonthYearLabels.map(monthYear => (data.months[monthYear] ? data.months[monthYear].fixed : 0)),
+        unfixedCounts: allMonthYearLabels.map(monthYear => (data.months[monthYear] ? data.months[monthYear].unfixed : 0)),
+      }));
 
-  const processedData = Object.entries(counts).map(([constituency, data]) => ({
-    constituency,
-    months: labels.map(monthYear => data.months[monthYear] || { fixed: 0, unfixed: 0 }),
-    fixedCounts: labels.map(monthYear => (data.months[monthYear] ? data.months[monthYear].fixed : 0)),
-    unfixedCounts: labels.map(monthYear => (data.months[monthYear] ? data.months[monthYear].unfixed : 0)),
-  }));
-
-  return { labels, processedData };
-};
+      return { labels: allMonthYearLabels, processedData };
+    };
 
 
 
@@ -180,7 +188,7 @@ export default {
 
   const color = d3.scaleOrdinal()
     .domain(['Fixed Complaints', 'Unfixed Complaints'])
-    .range(["#90EE90", "#138808"]);
+    .range(["#4caf50","#2f4550"]);
 
   // Create and position the tooltip
   const tooltip = createTooltip();

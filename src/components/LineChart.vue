@@ -2,6 +2,7 @@
   <div class="card line-chart">
     <!-- Icon with click event to open popup -->
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
+    <h4>Verified Complaints over the year</h4>
     <div ref="lineChartContainer"></div>
 
     <!-- Popup Dialog -->
@@ -18,7 +19,6 @@
     </q-dialog>
   </div>
 </template>
-
 
 <script>
 import { onMounted, watch, ref } from 'vue';
@@ -49,61 +49,78 @@ export default {
       }
     };
 
-    const processGeoJSONData = (geojsonData) => {
-    const counts = geojsonData.features.reduce((acc, feature) => {
-    const properties = feature.properties;
-    const constituency = properties.constituency;
-    const date = new Date(properties.ComplaintReceived);
-    const month = new Date(properties.ComplaintReceived).toLocaleString('default', { month: 'short' }) + ' ' + date.getFullYear(); // Format: "Jan 2023"
+    const getAllMonthYearLabels = (geojsonData) => {
+      const dates = geojsonData.features.map(feature => new Date(feature.properties.ComplaintReceived));
+      const firstDate = d3.min(dates);
+      const lastDate = d3.max(dates);
+      const allMonthYearLabels = [];
 
-    if (!acc[constituency]) {
-      acc[constituency] = { months: {}, fixed: 0, unfixed: 0 };
-    }
+      let currentDate = new Date(firstDate);
+      while (currentDate <= lastDate) {
+        allMonthYearLabels.push(d3.timeFormat("%b %Y")(currentDate));
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
 
-    if (!acc[constituency].months[month]) {
-      acc[constituency].months[month] = { fixed: 0, unfixed: 0 };
-    }
-
-    if (properties.FixedOn) {
-      acc[constituency].months[month].fixed += 1;
-      acc[constituency].fixed += 1;
-    } else {
-      acc[constituency].months[month].unfixed += 1;
-      acc[constituency].unfixed += 1;
-    }
-
-    return acc;
-  }, {});
-
-  // Collect all unique months
-  const labels = [...new Set(Object.values(counts).flatMap(c => Object.keys(c.months)))];
-  const parseDate = d3.timeParse("%b %Y");
-  const sortedLabels = labels.map(d => parseDate(d)).sort((a, b) => a - b);
-  const sortedLabelsFormatted = sortedLabels.map(d => d3.timeFormat("%b %Y")(d));
-
-  // Create processed data with zero values for missing months
-  const processedData = Object.entries(counts).map(([constituency, data]) => {
-    const monthsMap = sortedLabelsFormatted.reduce((acc, month) => {
-      acc[month] = { fixed: 0, unfixed: 0 };
-      return acc;
-    }, {});
-
-    Object.entries(data.months).forEach(([month, values]) => {
-      monthsMap[month] = values;
-    });
-
-    return {
-      constituency,
-      months: sortedLabelsFormatted.map(month => monthsMap[month]),
-      fixedCounts: sortedLabelsFormatted.map(month => monthsMap[month].fixed),
-      unfixedCounts: sortedLabelsFormatted.map(month => monthsMap[month].unfixed),
+      return allMonthYearLabels;
     };
-  });
 
-  return { labels: sortedLabelsFormatted, processedData };
-};
+    const processGeoJSONData = (geojsonData, constituency) => {
+      const allMonthYearLabels = getAllMonthYearLabels(geojsonData);
 
+      const counts = geojsonData.features.reduce((acc, feature) => {
+        const properties = feature.properties;
+        const featureConstituency = properties.constituency;
+        const month = d3.timeFormat("%b %Y")(new Date(properties.ComplaintReceived));
 
+        if (constituency && featureConstituency !== constituency) return acc;
+
+        if (!acc[featureConstituency]) {
+          acc[featureConstituency] = { months: {}, fixed: 0, unfixed: 0 };
+        }
+
+        if (!acc[featureConstituency].months[month]) {
+          acc[featureConstituency].months[month] = { fixed: 0, unfixed: 0, daysToVerify: 0 };
+        }
+
+        if (properties.PWDVerifiedOn) {
+          acc[featureConstituency].months[month].fixed += 1;
+          acc[featureConstituency].fixed += 1;
+
+          // Calculate days to verify
+          const complaintDate = new Date(properties.ComplaintReceived);
+          const fixedDate = new Date(properties.FixedOn);
+          const daysToVerify = Math.ceil((fixedDate - complaintDate) / (1000 * 60 * 60 * 24));
+          acc[featureConstituency].months[month].daysToVerify += daysToVerify;
+        } else {
+          acc[featureConstituency].months[month].unfixed += 1;
+          acc[featureConstituency].unfixed += 1;
+        }
+
+        return acc;
+      }, {});
+
+      // Create processed data with zero values for missing months
+      const processedData = Object.entries(counts).map(([constituency, data]) => {
+        const monthsMap = allMonthYearLabels.reduce((acc, month) => {
+          acc[month] = { fixed: 0, unfixed: 0, daysToVerify: 0 };
+          return acc;
+        }, {});
+
+        Object.entries(data.months).forEach(([month, values]) => {
+          monthsMap[month] = values;
+        });
+
+        return {
+          constituency,
+          months: allMonthYearLabels.map(month => monthsMap[month]),
+          fixedCounts: allMonthYearLabels.map(month => monthsMap[month].fixed),
+          unfixedCounts: allMonthYearLabels.map(month => monthsMap[month].unfixed),
+          daysToVerify: allMonthYearLabels.map(month => monthsMap[month].daysToVerify),
+        };
+      });
+
+      return { labels: allMonthYearLabels, processedData };
+    };
     const createTooltip = () => {
       return d3.select('body').append('div')
         .attr('class', 'tooltip')
@@ -136,177 +153,140 @@ export default {
     };
 
     const createLineChart = (data, container) => {
-  const containerSelection = d3.select(container);
-  containerSelection.html(''); // Clear any existing charts
+      const containerSelection = d3.select(container);
+      containerSelection.html(''); // Clear any existing charts
 
-  const width = container === lineChartContainer.value ? 400 : window.innerWidth * 0.75;
-  const height = container === lineChartContainer.value ? 200 : window.innerHeight * 0.75;
-  const margin = { top: 60, right: 20, bottom: 100, left: 50 }; // Adjusted top margin for legend
+      const width = container === lineChartContainer.value ? 400 : window.innerWidth * 0.75;
+      const height = container === lineChartContainer.value ? 200 : window.innerHeight * 0.75;
+      const margin = { top: 60, right: 20, bottom: 100, left: 50 }; // Adjusted top margin for legend
 
-  const svg = containerSelection.append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .append('g')
-    .attr('transform', `translate(${margin.left},${margin.top})`);
+      const svg = containerSelection.append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
 
-  // Parse the dates from labels and sort them
-  const parseDate = d3.timeParse("%b %Y");
-  const sortedLabels = data.labels.map(d => parseDate(d)).sort((a, b) => a - b);
-  const xScale = d3.scaleTime()
-    .domain(d3.extent(sortedLabels))
-    .range([0, width]);
+      // Parse the dates from labels and sort them
+      const parseDate = d3.timeParse("%b %Y");
+      const sortedLabels = data.labels.map(d => parseDate(d)).sort((a, b) => a - b);
+      const xScale = d3.scaleTime()
+        .domain(d3.extent(sortedLabels))
+        .range([0, width]);
 
-  const yScale = d3.scaleLinear()
-    .domain([0, d3.max(data.processedData.flatMap(d => [...d.fixedCounts, ...d.unfixedCounts]))])
-    .range([height, 0]);
+      const yScale = d3.scaleLinear()
+        .domain([0, d3.max(data.processedData.flatMap(d => d.fixedCounts))])
+        .range([height, 0]);
 
-  const xAxis = d3.axisBottom(xScale).ticks(sortedLabels.length).tickFormat(d3.timeFormat("%b '%y"));
-  const yAxis = d3.axisLeft(yScale);
+      const xAxis = d3.axisBottom(xScale).ticks(sortedLabels.length).tickFormat(d3.timeFormat("%b '%y"));
+      const yAxis = d3.axisLeft(yScale);
 
-  svg.append('g')
-    .attr('transform', `translate(0, ${height})`)
-    .call(xAxis)
-    .selectAll('text')
-    .attr('transform', 'rotate(-45)') // Slant labels by -45 degrees
-    .style('text-anchor', 'end') // Align text to the end
-    .style('font-size', '10px') // Adjust font size if necessary
-    .attr('dx', '-0.8em') // Adjust horizontal position
-    .attr('dy', '0.15em'); // Adjust vertical position
+      svg.append('g')
+        .attr('transform', `translate(0, ${height})`)
+        .call(xAxis)
+        .selectAll('text')
+        .attr('transform', 'rotate(-45)') // Slant labels by -45 degrees
+        .style('text-anchor', 'end') // Align text to the end
+        .style('font-size', '10px') // Adjust font size if necessary
+        .attr('dx', '-0.8em') // Adjust horizontal position
+        .attr('dy', '0.15em'); // Adjust vertical position
 
-  svg.append('g')
-    .call(yAxis)
-    .append('text')
-    .attr('fill', '#000')
-    .attr('transform', 'rotate(-90)')
-    .attr('y', -40)
-    .attr('dy', '0.71em')
-    .attr('text-anchor', 'end')
-    .text('Number of Complaints');
+      svg.append('g')
+        .call(yAxis)
+        .append('text')
+        .attr('fill', '#000')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', -40)
+        .attr('dy', '0.71em')
+        .attr('text-anchor', 'end')
+        .text('Number of Verified Complaints');
 
-  const color = d3.scaleOrdinal()
-    .domain(['Fixed Complaints', 'Unfixed Complaints'])
-    .range(["#90EE90", "#138808"]);
+      const color = d3.scaleOrdinal()
+        .domain(['Verified Complaints'])
+        .range(["#4caf50"]);
 
-  // Create and position the tooltip
-  const tooltip = createTooltip();
+      // Create and position the tooltip
+      const tooltip = createTooltip();
 
-  // Add legend
-  const legend = svg.append('g')
-    .attr('class', 'legend')
-    .attr('transform', `translate(0, ${-margin.top / 2})`); // Adjust vertical position
+      // Add legend
+      const legend = svg.append('g')
+        .attr('class', 'legend')
+        .attr('transform', `translate(0, ${-margin.top / 2})`);
 
-  const legendItems = color.domain().map((d, i) => ({
-    label: d,
-    color: color(d),
-    x: i * 150 // Adjust spacing between legend items
-  }));
+      legend.selectAll('rect')
+        .data(['Verified Complaints'])
+        .enter()
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', (d, i) => i * 20)
+        .attr('width', 18)
+        .attr('height', 18)
+        .style('fill', color);
 
-  legendItems.forEach((item) => {
-    // Add color box
-    legend.append('rect')
-      .attr('x', item.x)
-      .attr('y', 0)
-      .attr('width', 20)
-      .attr('height', 20)
-      .style('fill', item.color);
+      legend.selectAll('text')
+        .data(['Verified Complaints'])
+        .enter()
+        .append('text')
+        .attr('x', 30)
+        .attr('y', (d, i) => i * 20 + 15)
+        .text(d => d);
 
-    // Add text
-    legend.append('text')
-      .attr('x', item.x + 30) // Space between color box and text
-      .attr('y', 15)
-      .text(item.label);
-  });
+      // Define line generator
+      const line = d3.line()
+        .x((d, i) => xScale(sortedLabels[i]))
+        .y(d => yScale(d));
 
-  data.processedData.forEach(d => {
-    const line = d3.line()
-      .x((_, i) => xScale(sortedLabels[i]))
-      .y(d => yScale(d));
+      // Draw lines
+      svg.selectAll('.line')
+        .data(data.processedData)
+        .enter()
+        .append('path')
+        .attr('class', 'line')
+        .attr('d', d => line(d.fixedCounts))
+        .style('fill', 'none')
+        .style('stroke', color('Verified Complaints'))
+        .style('stroke-width', '2px');
 
-    // Create lines for fixed and unfixed complaints
-    svg.append('path')
-      .datum(d.fixedCounts)
-      .attr('class', `line fixed ${d.constituency}`)
-      .attr('d', line)
-      .attr('fill', 'none')
-      .attr('stroke', color('Fixed Complaints'))
-      .on('mouseover', (event) => showTooltip(tooltip, `Fixed Complaints`, event))
-      .on('mouseout', () => hideTooltip(tooltip));
+      // Add points
+      svg.selectAll('.dot')
+        .data(data.processedData.flatMap(d => d.fixedCounts.map((count, i) => ({ count, index: i, constituency: d.constituency }))))
+        .enter()
+        .append('circle')
+        .attr('class', 'dot')
+        .attr('cx', d => xScale(sortedLabels[d.index]))
+        .attr('cy', d => yScale(d.count))
+        .attr('r', 5)
+        .style('fill', color('Verified Complaints'))
+        .style('stroke', '#fff')
+        .style('stroke-width', '1.5px')
+        .on('mouseover', (event, d) => showTooltip(tooltip, `Month: ${data.labels[d.index]}<br>Verified Complaints: ${d.count}`, event))
+        .on('mouseout', () => hideTooltip(tooltip));
+    };
 
-    svg.append('path')
-      .datum(d.unfixedCounts)
-      .attr('class', `line unfixed ${d.constituency}`)
-      .attr('d', line)
-      .attr('fill', 'none')
-      .attr('stroke', color('Unfixed Complaints'))
-      .on('mouseover', (event) => showTooltip(tooltip, `Unfixed Complaints`, event))
-      .on('mouseout', () => hideTooltip(tooltip));
-
-    // Add points to the lines
-    svg.selectAll(`.dot-${d.constituency}-fixed`)
-      .data(d.fixedCounts)
-      .enter().append('circle')
-      .attr('class', `dot fixed ${d.constituency}`)
-      .attr('cx', (_, i) => xScale(sortedLabels[i]))
-      .attr('cy', d => yScale(d))
-      .attr('r', 3)
-      .attr('fill', color('Fixed Complaints'))
-      .on('mouseover', (event, value) => showTooltip(tooltip, `Fixed Complaints: ${value}`, event))
-      .on('mouseout', () => hideTooltip(tooltip));
-
-    svg.selectAll(`.dot-${d.constituency}-unfixed`)
-      .data(d.unfixedCounts)
-      .enter().append('circle')
-      .attr('class', `dot unfixed ${d.constituency}`)
-      .attr('cx', (_, i) => xScale(sortedLabels[i]))
-      .attr('cy', d => yScale(d))
-      .attr('r', 3)
-      .attr('fill', color('Unfixed Complaints'))
-      .on('mouseover', (event, value) => showTooltip(tooltip, `Unfixed Complaints: ${value}`, event))
-      .on('mouseout', () => hideTooltip(tooltip));
-  });
-};
-
-
-
-
-    const updateChart = async () => {
-    const geojsonData = await fetchGeoJSONData();
-    if (geojsonData) {
-      // Define a subset of constituencies to show initially
-      const initialConstituencies = ['Constituency1', 'Constituency2', 'Constituency3']; // Replace with actual names or IDs
-
-      // Filter data based on the selected constituency or use the initial subset
-      const filteredData = props.selectedConstituency
-        ? geojsonData.features.filter(feature => feature.properties.constituency === props.selectedConstituency)
-        : geojsonData.features.filter(feature => initialConstituencies.includes(feature.properties.constituency));
-
-      const processedData = processGeoJSONData({ features: filteredData });
-      createLineChart(processedData, lineChartContainer.value);
-    }
-  };
-
-
-    const openPopup = async () => {
+    const openPopup = () => {
       dialog.value = true;
-      // Ensure the popup chart is drawn after the dialog opens
-      await updateChart(); // Optional: Fetch and process data again for the popup
-      createLineChart(await fetchGeoJSONData().then(data => processGeoJSONData({ features: props.selectedConstituency ? data.features.filter(feature => feature.properties.constituency === props.selectedConstituency) : data.features })), popupLineChartContainer.value);
+      fetchGeoJSONData().then(data => {
+        const processedData = processGeoJSONData(data, props.selectedConstituency);
+        createLineChart(processedData, popupLineChartContainer.value);
+      });
     };
 
-    onMounted(() => {
-      updateChart();
+  onMounted(() => {
+      // Initially render an empty chart or placeholder
+      createLineChart({ processedData: [], labels: [] }, lineChartContainer.value);
     });
 
-    watch(() => props.selectedConstituency, () => {
-      updateChart();
+    watch(() => props.selectedConstituency, async () => {
+      const geojsonData = await fetchGeoJSONData();
+      if (geojsonData) {
+        const { processedData, labels } = processGeoJSONData(geojsonData, props.selectedConstituency);
+        createLineChart({ processedData, labels }, lineChartContainer.value);
+        if (dialog.value) {
+          createLineChart({ processedData, labels }, popupLineChartContainer.value);
+        }
+      }
     });
 
-    return {
-      lineChartContainer,
-      popupLineChartContainer,
-      dialog,
-      openPopup
-    };
+    return { dialog, lineChartContainer, popupLineChartContainer, openPopup };
   }
 };
 </script>

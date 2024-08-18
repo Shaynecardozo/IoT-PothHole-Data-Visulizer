@@ -42,7 +42,7 @@ export default {
 }
 
 .card {
-  background: linear-gradient(to right, #138808, #90EE90); /* Gradient background */
+  background: linear-gradient(to right, #2f4550,#4caf50); /* Gradient background */
   color: white;
   padding: 20px; /* Increase padding */
   border-radius: 15px; /* Increase border-radius for more rounded corners */
