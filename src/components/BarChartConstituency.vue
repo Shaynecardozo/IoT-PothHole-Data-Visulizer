@@ -1,6 +1,9 @@
 <template>
   <div class="bar-chart-card">
     <!-- Icon with click event to open popup -->
+    <span class="q-ml-xl" style="font-size: 20px; font-weight:500;color:green;">
+      Number Of Fixed And Unfixed Complaints in Each Constituency
+     </span>
     <q-icon name="open_in_full" class="popup-icon" @click="openPopup"></q-icon>
     <div ref="barChartContainer" class="bar-chart-container"></div>
 
@@ -39,7 +42,9 @@ export default {
     const dialog = ref(false);
 
     // Tooltip div
-    const tooltip = d3.select("body").append("div")
+    const tooltip = d3
+      .select("body")
+      .append("div")
       .attr("class", "bar-chart-tooltip")
       .style("position", "absolute")
       .style("visibility", "hidden")
@@ -52,7 +57,9 @@ export default {
 
     const fetchGeoJSONData = async () => {
       try {
-        const response = await fetch("/path/to/PotholeData for analysis_fileForInterns.geojson");
+        const response = await fetch(
+          "/path/to/PotholeData for analysis_fileForInterns.geojson"
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -97,8 +104,10 @@ export default {
       const containerSelection = d3.select(container);
       containerSelection.html(""); // Clear any existing charts
 
-      const width = container === barChartContainer.value ? 600 : window.innerWidth * 0.75;
-      const height = container === barChartContainer.value ? 200 : window.innerHeight * 0.75;
+      const width =
+        container === barChartContainer.value ? 600 : window.innerWidth * 0.75;
+      const height =
+        container === barChartContainer.value ? 200 : window.innerHeight * 0.75;
       const margin = { top: 80, right: 20, bottom: 80, left: 50 };
 
       const svg = containerSelection
@@ -134,15 +143,32 @@ export default {
         .style("text-anchor", "end");
 
       svg
-        .append("g")
-        .call(d3.axisLeft(yScale))
         .append("text")
         .attr("fill", "#000")
-        .attr("transform", "rotate(-90)")
-        .attr("y", -40)
-        .attr("dy", "0.71em")
-        .attr("text-anchor", "end")
-        .text("Number of Complaints");
+        .attr("x", width / 2) // Position in the middle of the x-axis
+        .attr("y", height + margin.bottom-10) // Adjust position below the axis
+        .attr("text-anchor", "middle")
+        .text("Constituencies");
+
+      // svg
+      //   .append("g")
+      //   .call(d3.axisLeft(yScale))
+      //   .append("text")
+      //   .attr("fill", "#000")
+      //   .attr("transform", "rotate(-90)")
+      //   .attr("y", -40)
+      //   .attr("dy", "0.71em")
+      //   .attr("text-anchor", "end")
+      //   .text("Number of Complaints");
+
+        svg.append('g')
+    .call(d3.axisLeft(yScale))
+    .append('text')
+    .attr('fill', '#000')
+    .attr('transform', `translate(-${margin.left - 10}, ${height / 2}) rotate(-90)`)
+    .attr('dy', '0.71em')
+    .attr('text-anchor', 'middle')
+    .text('Number of Complaints');
 
       const bars = svg.selectAll(".bar").data(data).enter().append("g");
 

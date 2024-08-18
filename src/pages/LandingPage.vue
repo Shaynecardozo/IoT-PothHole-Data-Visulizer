@@ -1,4 +1,4 @@
-<template>
+<template height="90vh">
   <div class="landing-page">
     <div class="card-container top-cards">
       <div class="card small-card" @click="navigateTo('/map')" style="cursor: pointer;">
@@ -186,6 +186,7 @@ export default {
 .landing-page {
   display: flex;
   flex-direction: column;
+  height: fit-content;
   gap: 25px; /* Adjust as needed */
   padding: 20px; /* Padding around the page */
 }
