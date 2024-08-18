@@ -60,6 +60,7 @@ export default {
         allMonthYearLabels.push(d3.timeFormat("%b %Y")(currentDate));
         currentDate.setMonth(currentDate.getMonth() + 1);
       }
+      allMonthYearLabels.push(d3.timeFormat("%b %Y")(lastDate));
 
       return allMonthYearLabels;
     };

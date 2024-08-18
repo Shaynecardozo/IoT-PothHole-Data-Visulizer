@@ -48,7 +48,8 @@ export default {
       }
     };
 
-     const formatMonthYear = (date) => {
+     
+    const formatMonthYear = (date) => {
       const formatMonth = d3.timeFormat('%b'); // e.g., Jan, Feb
       const formatYear = d3.timeFormat('%y');  // e.g., 21
 
@@ -69,6 +70,7 @@ export default {
         allMonthYearLabels.push(formatMonthYear(currentDate));
         currentDate.setMonth(currentDate.getMonth() + 1);
       }
+      allMonthYearLabels.push(formatMonthYear(new Date(lastDate)));
 
       return allMonthYearLabels;
     };
@@ -109,7 +111,6 @@ export default {
 
       return { labels: allMonthYearLabels, processedData };
     };
-
 
 
     const createTooltip = () => {
