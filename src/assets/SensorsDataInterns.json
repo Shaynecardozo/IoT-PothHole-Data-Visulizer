@@ -333,14 +333,84 @@
         "name": "Vela",
         "location": "Tivim",
         "type": "flowmeter",
-        "position": "1.4.6"
+        "position": "4"
     },
     {
         "id": 49,
-        "name": "Vela",
+        "name": "Chi",
         "location": "Tivim",
         "type": "flowmeter",
         "position": "3"
+    },
+    {
+        "id": 50,
+        "name": "Alpha",
+        "location": "Tivim",
+        "type": "flowmeter",
+        "position": "4.1"
+    },
+    {
+        "id": 51,
+        "name": "Capricorn",
+        "location": "Chorao",
+        "type": "flowmeter",
+        "position": "4.2"
+    },
+    {
+        "id": 52,
+        "name": "Lyra",
+        "location": "Divar",
+        "type": "flowmeter",
+        "position": "4.2.1"
+    },
+    {
+        "id": 53,
+        "name": "Cassiopeia",
+        "location": "Betalbatim",
+        "type": "flowmeter",
+        "position": "4.1.1"
+    },
+    {
+        "id": 54,
+        "name": "Lambda",
+        "location": "Candolim",
+        "type": "flowmeter",
+        "position": "4.2.2"
+    },
+    {
+        "id": 55,
+        "name": "Aquila",
+        "location": "Calangute",
+        "type": "flowmeter",
+        "position": "4.2.3"
+    },
+    {
+        "id": 56,
+        "name": "Beta",
+        "location": "Cansaulim",
+        "type": "flowmeter",
+        "position": "4.2.4"
+    },
+    {
+        "id": 57,
+        "name": "Sagittarius",
+        "location": "Saligao",
+        "type": "flowmeter",
+        "position": "4.1.2"
+    },
+    {
+        "id": 58,
+        "name": "Eta",
+        "location": "Assagao",
+        "type": "flowmeter",
+        "position": "4.1.3"
+    },
+    {
+        "id": 58,
+        "name": "Andromeda",
+        "location": "Majorda",
+        "type": "flowmeter",
+        "position": "4.3"
     }
 ]
     
