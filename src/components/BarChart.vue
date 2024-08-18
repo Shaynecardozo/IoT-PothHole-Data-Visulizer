@@ -193,7 +193,7 @@ svg.append('text')
 
   const color = d3.scaleOrdinal()
     .domain(['Fixed Complaints', 'Unfixed Complaints'])
-    .range(["#90EE90", "#138808"]);
+    .range(["#4caf50","#2f4550"]);
 
   // Create and position the tooltip
   const tooltip = createTooltip();
@@ -317,13 +317,14 @@ svg.append('text')
 };
 </script>
 
-<style>
+
+<style scoped>
 .card {
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 16px;
   margin: 16px;
-  width: fit-content;/* Adjust width to fit side by side */
+  width: fit-content;
   height: fit-content;
   position: relative;
 }
@@ -350,31 +351,34 @@ svg.append('text')
 }
 
 /* Style for the popup card */
-.popup-card {
-  width: 100vw; /* Full viewport width */
-  height: 90vh; /* 90% of viewport height */
-  position: relative;
+.q-dialog__inner {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  padding: 0 !important;
 }
 
+.popup-card {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Adjust the container for the chart within the popup */
 .popup-chart-container {
+  flex-grow: 1;
   width: 100%;
   height: 100%;
 }
-
-/* Ensure the q-dialog takes full width and height */
-.q-dialog__inner {
-  width: 100vw;
-  height: 90vh;
-}
-
-.legend rect {
-  stroke-width: 0.2px;
-  stroke: #000;
-}
-
-.legend text {
-  font-size: 12px;
-  /* alignment-baseline: middle; */
+@media (min-width: 600px) {
+  .q-dialog__inner--minimized > div {
+    width: 100vw !important;
+    height: 100vh !important;
+  }
 }
 
 </style>

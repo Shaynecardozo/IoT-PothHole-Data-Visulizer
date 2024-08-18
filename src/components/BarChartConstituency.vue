@@ -132,7 +132,7 @@ export default {
       const color = d3
         .scaleOrdinal()
         .domain(["Fixed Complaints", "Unfixed Complaints"])
-        .range(["#90EE90", "#138808"]);
+        .range(["#4caf50","#2f4550"]);
 
       svg
         .append("g")
@@ -275,10 +275,9 @@ export default {
 };
 </script>
 
-<style scoped>
+<!-- <style scoped>
 .bar-chart-card {
   border-radius: 4px;
-
   margin: 16px;
   width: fit-content;
   height: fit-content;
@@ -341,4 +340,66 @@ export default {
   font-size: 12px;
   color: #000;
 }
+</style> -->
+<style scoped>
+.bar-chart-card {
+  border-radius: 4px;
+  margin: 16px;
+  width: fit-content;
+  height: fit-content;
+  position: relative;
+}
+
+.icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+}
+
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 120px;
+  height: auto;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Style for the popup card */
+.q-dialog__inner {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  padding: 0 !important;
+}
+
+.popup-card {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Adjust the container for the chart within the popup */
+.popup-chart-container {
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+}
+@media (min-width: 600px) {
+  .q-dialog__inner--minimized > div {
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+}
+
 </style>
