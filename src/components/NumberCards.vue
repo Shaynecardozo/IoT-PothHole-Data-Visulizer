@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard shadow-1 q-mx-auto q-px-md">
+  <div class="dashboard q-mx-auto q-px-md">
     <div class="card">
       <q-icon name="note_alt" class="icon"></q-icon>
       <p>Total Complaints</p>

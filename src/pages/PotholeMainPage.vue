@@ -62,7 +62,7 @@ export default {
       pwdVerifications: 0,
       data: [],
       constituencies: [],
-      selectedConstituency: "",
+      selectedConstituency: "Calangute",
       MaxFixed:0,
       MaxPending:0,
 
