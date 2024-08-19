@@ -1,8 +1,11 @@
 <template>
   <div class="card line-chart">
     <!-- Icon with click event to open popup -->
+    <span style="font-size: 20px; font-weight:500;color:green;">
+      Number Of Fixed And Unfixed Complaints
+     </span>
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
-    <h4>Verified Complaints over the year</h4>
+
     <div ref="lineChartContainer"></div>
 
     <!-- Popup Dialog -->
@@ -192,15 +195,20 @@ export default {
     .attr('dx', '-0.8em') // Adjust horizontal position
     .attr('dy', '0.15em'); // Adjust vertical position
 
-  svg.append('g')
+  svg.append('text')
+    .attr('fill', '#000')
+    .attr('transform', `translate(${width / 2}, ${height + margin.bottom - 20})`)
+    .attr('text-anchor', 'middle')
+    .text('Months'); // X-axis label
+
+    svg.append('g')
     .call(yAxis)
     .append('text')
     .attr('fill', '#000')
-    .attr('transform', 'rotate(-90)')
-    .attr('y', -40)
+    .attr('transform', `translate(-40, ${height / 2}) rotate(-90)`)
     .attr('dy', '0.71em')
-    .attr('text-anchor', 'end')
-    .text('Number of Verified Complaints');
+    .attr('text-anchor', 'middle')
+    .text('Number of PWD Verifications'); // Y-axis label
 
   const color = d3.scaleOrdinal()
     .domain(['Verified Complaints'])
@@ -212,7 +220,9 @@ export default {
   // Add legend
   const legend = svg.append('g')
     .attr('class', 'legend')
-    .attr('transform', `translate(0, ${-margin.top / 2})`);
+    .attr('transform', `translate(0, ${(-margin.top) / 2})`)
+    .attr('transform', `translate(0, ${(-margin.bottom) / 2})`);
+    ;
 
   legend.selectAll('rect')
     .data(['Verified Complaints'])
@@ -220,8 +230,8 @@ export default {
     .append('rect')
     .attr('x', 0)
     .attr('y', (d, i) => i * 20)
-    .attr('width', 18)
-    .attr('height', 18)
+    .attr('width', 20)
+    .attr('height', 20)
     .style('fill', color);
 
   legend.selectAll('text')
@@ -283,9 +293,15 @@ export default {
       });
     };
 
-  onMounted(() => {
-      // Initially render an empty chart or placeholder
-      createLineChart({ processedData: [], labels: [] }, lineChartContainer.value);
+  onMounted(async () => {
+      const geojsonData = await fetchGeoJSONData();
+      if (geojsonData) {
+        const { processedData, labels } = processGeoJSONData(geojsonData, props.selectedConstituency);
+        createLineChart({ processedData, labels }, lineChartContainer.value);
+        if (dialog.value) {
+          createLineChart({ processedData, labels }, popupLineChartContainer.value);
+        }
+      }
     });
 
     watch(() => props.selectedConstituency, async () => {

@@ -5,7 +5,7 @@
       class="q-gutter-md"
 
      >
-     <q-select clearable v-model="internalSelectedConstituency" style="width:80vw" :options="constituencies" label="Filter By Constituency" @update:model-value="emitUpdateCounts" filled />
+     <q-select v-model="internalSelectedConstituency" style="width:80vw" :options="constituencies" label="Filter By Constituency" @update:model-value="emitUpdateCounts" filled />
 
      </q-form>
     <!-- <select v-model="internalSelectedConstituency" @change="emitUpdateCounts">
