@@ -6,6 +6,7 @@
       animated
       autoplay
       swipeable
+      arrows
       navigation
       control-color="green"
       padding

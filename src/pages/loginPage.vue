@@ -3,11 +3,11 @@
     <q-card class="row fullLogin">
       <q-card-section class="col-12 col-md-6 column items-center q-mt-md">
         <q-icon
-          name="leaderboard"
+          name="troubleshoot"
           size="xl"
           style="border: 6px solid; border-radius: 50%; padding: 8px; color: #1d6e34;"
         />
-        <h3 class="text-center text-bold" style="color: #1d6e34;">Login Here</h3>
+        <h3 class="text-center text-bold q-ma-md" style="color: #1d6e34;">Login Here</h3>
         <q-form
           @submit.prevent="submitForm"
           class="q-gutter-md q-mb-lg"
@@ -57,10 +57,12 @@ export default {
     const submitForm = () => {
       if (store.checkUser(username.value, password.value)) {
         console.log('details matched')
+        alert("LoggedIn Successfully!")
         router.push("/landing");
         store.updateLogin;
         return;
       }
+      alert("Invalid Details!")
     };
     return {
       username,

@@ -25,67 +25,69 @@ export default {
   },
   methods: {
     createGauge() {
-      const width = 300;  // Adjusted width
-      const height = 200; // Adjusted height
-      const margin = 10;  // Adjusted margin
-      const radius = Math.min(width, height) / 2 - margin;
+    const width = 300;  // Adjusted width
+    const height = 200; // Adjusted height
+    const margin = 10;  // Adjusted margin
+    const radius = Math.min(width, height) / 2 - margin;
 
-      // Clear any existing gauge
-      d3.select(this.$refs.gauge).selectAll("*").remove();
+    // Clear any existing gauge
+    d3.select(this.$refs.gauge).selectAll("*").remove();
 
-      // Append the SVG element
-      const svg = d3.select(this.$refs.gauge)
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", `translate(${width / 2}, ${height -30})`);
+    // Append the SVG element
+    const svg = d3.select(this.$refs.gauge)
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform", `translate(${width / 2}, ${height - 30})`);
 
-      // Define the scale
-      this.scale = d3.scaleLinear()
-        .domain([0, this.maxValue])
-        .range([-Math.PI / 2, Math.PI / 2]);
+    // Define the scale
+    this.scale = d3.scaleLinear()
+      .domain([0, this.maxValue])
+      .range([-Math.PI / 2, Math.PI / 2]);
 
-      // Define gradient
-      const gradient = svg.append("defs")
-        .append("linearGradient")
-        .attr("id", "gauge-gradient")
-        .attr("x1", "0%")
-        .attr("y1", "0%")
-        .attr("x2", "100%")
-        .attr("y2", "0%");
+    // Define gradient
+    const gradient = svg.append("defs")
+      .append("linearGradient")
+      .attr("id", "gauge-gradient")
+      .attr("x1", "0%")
+      .attr("y1", "0%")
+      .attr("x2", "100%")
+      .attr("y2", "0%");
 
-      gradient.append("stop")
-        .attr("offset", "0%")
-        .attr("stop-color", "#a0eab6");
-      gradient.append("stop")
-        .attr("offset", "100%")
-        .attr("stop-color", "#0a6a27");
+    gradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#a0eab6");
+    gradient.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#0a6a27");
 
-      // Foreground arc for the animated border
-      this.foregroundArc = d3.arc()
-        .innerRadius(radius * 0.7)
-        .outerRadius(radius * 0.9)
-        .startAngle(-Math.PI / 2);
+   
 
-      this.foreground = svg.append("path")
-        .datum({ endAngle: -Math.PI / 2 })
-        .attr("d", this.foregroundArc)
-        .style("fill", "none")
-        .style("stroke", "url(#gauge-gradient)")
-        .style("stroke-width", 4);
+    // Draw the gradient arc with curvy edges
+    const arc = d3.arc()
+      .innerRadius(radius * 0.7)
+      .outerRadius(radius * 0.9)
+      .cornerRadius(10)  // Adds rounded corners
+      .startAngle(this.scale(0))
+      .endAngle(this.scale(this.maxValue));
 
-      // Draw the gradient arc
-      const arc = d3.arc()
-        .innerRadius(radius * 0.7)
-        .outerRadius(radius * 0.9)
-        .startAngle(this.scale(0))
-        .endAngle(this.scale(this.maxValue));
+    svg.append("path")
+      .attr("d", arc)
+      .style("fill", "url(#gauge-gradient)");
+ // Foreground arc for the animated border with curvy edges
+ this.foregroundArc = d3.arc()
+      .innerRadius(radius * 0.7)
+      .outerRadius(radius * 0.9)
+      .cornerRadius(10)  // Adds rounded corners
+      .startAngle(-Math.PI / 2);
 
-      svg.append("path")
-        .attr("d", arc)
-        .style("fill", "url(#gauge-gradient)");
-
+    this.foreground = svg.append("path")
+      .datum({ endAngle: -Math.PI / 2 })
+      .attr("d", this.foregroundArc)
+      .style("fill", "none")
+      .style("stroke", "url(#gauge-gradient)")
+      .style("stroke-width", 2);
       // Place "Flow Avg" label above the gauge
       svg.append("text")
         .attr("x", 0)
