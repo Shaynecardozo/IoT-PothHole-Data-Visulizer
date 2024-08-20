@@ -1,8 +1,9 @@
 <template>
   <q-layout  view="hHh lpR fFf">
     <!-- Header with Three-Dot Button -->
-    <q-header style="height: 50px;" class="bg-drawer text-white row items-center">
+    <q-header style="height: 50px; padding-right: 16px;" class="bg-drawer text-white row items-center">
       <q-btn v-if="checklogin" flat dense round icon="menu" @click="drawer = !drawer" class="text-white" />
+      <q-space></q-space>
       <div class="q-ml-xl text-h6 ">FlowTrack Analytics</div>
     </q-header>
 
@@ -26,7 +27,7 @@
 
         <!-- Flowmeter Section with Dropdown -->
         <q-expansion-item
-          label="Flowmeter"
+          label="IOT"
           icon="water"
           :default-opened="false"
           class="text-bold"
