@@ -25,9 +25,8 @@
         <div class="card-content">
           <q-icon name="sensors" class="icon1"></q-icon>
           <div class="text-content">
-            <p> Name: {{ currentFlowmeter.name }}</p>
-            <h4>Flowmeter {{ currentFlowmeter.number }}</h4>
             <p>Location: {{ currentFlowmeter.location }}</p>
+            <h4>Flowmeter {{ currentFlowmeter.number }}</h4>
             <p>Position: {{ currentFlowmeter.position }}</p>
           </div>
         </div>
