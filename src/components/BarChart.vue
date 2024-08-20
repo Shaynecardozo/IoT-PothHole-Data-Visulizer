@@ -9,13 +9,16 @@
     <!-- Popup Dialog -->
     <q-dialog v-model="dialog" persistent>
       <q-card class="popup-card">
+        <q-card-actions>
+          <q-btn flat  @click="dialog = false">
+            <q-icon name="close"></q-icon>
+          </q-btn>
+        </q-card-actions>
         <q-card-section>
           <!-- Larger version of the bar chart -->
           <div ref="popupBarChartContainer" class="popup-chart-container"></div>
         </q-card-section>
-        <q-card-actions>
-          <q-btn flat label="Close" @click="dialog = false"></q-btn>
-        </q-card-actions>
+
       </q-card>
     </q-dialog>
   </div>
@@ -150,8 +153,8 @@ export default {
   const containerSelection = d3.select(container);
   containerSelection.html(''); // Clear any existing charts
 
-  const width = container === barChartContainer.value ? 400 : window.innerWidth * 0.75;
-  const height = container === barChartContainer.value ? 200 : window.innerHeight * 0.75;
+  const width = container === barChartContainer.value ? 400 : window.innerWidth * 0.85;
+  const height = container === barChartContainer.value ? 200 : window.innerHeight * 0.60;
   const margin = { top: 80, right: 20, bottom: 100, left: 50 }; // Increase top margin for legend
 
   const svg = containerSelection.append('svg')
@@ -324,7 +327,7 @@ svg.append('text')
 };
 </script>
 
-<style>
+<style scoped>
 .card {
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -357,21 +360,34 @@ svg.append('text')
 }
 
 /* Style for the popup card */
-.popup-card {
-  width: 100vw; /* Full viewport width */
-  height: 90vh; /* 90% of viewport height */
-  position: relative;
+.q-dialog__inner {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  padding: 0 !important;
 }
 
+.popup-card {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Adjust the container for the chart within the popup */
 .popup-chart-container {
+  flex-grow: 1;
   width: 100%;
   height: 100%;
 }
-
-/* Ensure the q-dialog takes full width and height */
-.q-dialog__inner {
-  width: 100vw;
-  height: 90vh;
+@media (min-width: 600px) {
+  .q-dialog__inner--minimized > div {
+    width: 100vw !important;
+    height: 100vh !important;
+  }
 }
 
 .legend rect {

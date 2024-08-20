@@ -1,24 +1,24 @@
 <template>
-  <div class="dashboard shadow-1 q-mx-auto q-px-md">
+  <div class="dashboard q-mx-auto q-px-md">
     <div class="card">
       <q-icon name="note_alt" class="icon"></q-icon>
-      <p>Total Complaints</p>
       <h3>{{ totalComplaints }}</h3>
+      <p>Total Complaints</p>
     </div>
     <div class="card">
       <q-icon name="construction" class="icon"></q-icon>
-      <p>Fixed Complaints</p>
       <h3>{{ fixedComplaints }}</h3>
+      <p>Fixed Complaints</p>
     </div>
     <div class="card">
       <q-icon name="warning" class="icon"></q-icon>
-      <p>Unfixed Complaints</p>
       <h3>{{ unfixedComplaints }}</h3>
+      <p>Unfixed Complaints</p>
     </div>
     <div class="card">
       <q-icon name="verified" class="icon"></q-icon>
-      <p>PWD Verifications</p>
       <h3>{{ pwdVerifications }}</h3>
+      <p>PWD Verifications</p>
     </div>
   </div>
 </template>
@@ -47,7 +47,7 @@ export default {
 }
 
 .card {
-  background: linear-gradient(to right, #138808, #56e556); /* Gradient background */
+  background: linear-gradient(135deg, #2f4550, #4caf50);
   color: white;
   padding: 10px; /* Increase padding */
   border-radius: 15px; /* Increase border-radius for more rounded corners */
@@ -65,7 +65,8 @@ export default {
 .card:hover {
   transform: scale(1.05); /* Slightly increase size on hover */
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  background: linear-gradient(to right, #2d2e2d, #8c8b8b); /* Add shadow for a popping effect */
+  background: linear-gradient(135deg,#4caf50, #2f4550 );
+
   color:azure;
 }
 

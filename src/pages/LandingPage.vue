@@ -1,7 +1,7 @@
 <template height="90vh">
   <div class="landing-page">
     <div class="card-container top-cards">
-      <div class="card small-card" @click="navigateTo('/map')" style="cursor: pointer;">
+      <div class="card small-card" @click="navigateTo('/potholes')" style="cursor: pointer;">
         <div class="card-content">
           <q-icon name="location_city" class="icon1"></q-icon>
           <div class="text-content">
@@ -13,7 +13,7 @@
       </div>
       <div class="card small-card" @click="navigateTo('/Gauges')" style="cursor: pointer;">
         <div class="card-content">
-          <q-icon name="sensors" class="icon1"></q-icon>
+          <q-icon name="speed" class="icon1"></q-icon>
           <div class="text-content">
             <p>Number of Sensors</p>
             <h4>6 Sensors</h4>
@@ -21,12 +21,14 @@
           </div>
         </div>
       </div>
-      <div class="card small-card">
+      <div class="card small-card" @click="navigateTo('/Hierarchy')" style="cursor: pointer;">
         <div class="card-content">
-          <q-icon name="verified" class="icon1"></q-icon>
+          <q-icon name="sensors" class="icon1"></q-icon>
           <div class="text-content">
-            <p>Top Card 3</p>
-            <h4>Content</h4>
+            <p> Name: {{ currentFlowmeter.name }}</p>
+            <h4>Flowmeter {{ currentFlowmeter.number }}</h4>
+            <p>Location: {{ currentFlowmeter.location }}</p>
+            <p>Position: {{ currentFlowmeter.position }}</p>
           </div>
         </div>
       </div>
@@ -36,7 +38,7 @@
         <GaugeCarousel1 />
       </div>
       <div class="card big-card">
-        <BarChartConstituency/>
+        <BarChartConstituency />
       </div>
     </div>
   </div>
@@ -49,13 +51,16 @@ import * as d3 from 'd3';
 import GaugeCarousel1 from 'src/components/GaugeCarousel1.vue';
 import BarChartConstituency from 'src/components/BarChartConstituency.vue';
 
+
 export default {
   components: {
      GaugeCarousel1,
-    BarChartConstituency
+     BarChartConstituency,
   },
   data() {
     return {
+      flowmeters: [],
+      flowmeterIndex: 0,
       constituenciesCount: 0,
       constituencies: [],
       currentConstituency: '',
@@ -69,14 +74,45 @@ export default {
       averageValues: [],
       averageNames: [],
       averageIndex: 0,
-      Unit: []
+      Unit: [],
     };
   },
   mounted() {
     this.loadData();
     this.fetchConstituencies();
+    this.loadSensorData();
   },
   methods: {
+    async loadSensorData() {
+    try {
+      const response = await axios.get('src/assets/SensorsDataInterns.json');  // Adjust the path accordingly
+      const sensorData = response.data;
+
+      this.processSensorData(sensorData);
+    } catch (error) {
+      console.error('Error loading sensor data:', error);
+    }
+  },
+  processSensorData(sensorData) {
+    this.flowmeters = sensorData.map(sensor => {
+      const positionDigit = sensor.position[0];  // Extract the first digit of the position
+      return {
+        number: positionDigit,
+        name: sensor.name,
+        location: sensor.location,
+        position: sensor.position
+      };
+    });
+
+    this.cycleFlowmeterInfo();
+  },
+  cycleFlowmeterInfo() {
+    if (this.flowmeters.length > 0) {
+      setInterval(() => {
+        this.flowmeterIndex = (this.flowmeterIndex + 1) % this.flowmeters.length;
+      }, 2000);  // Cycle every 2 seconds
+    }
+  },
     async loadData() {
       try {
         const response = await axios.get('/IOTData for analysis_fileForInterns.ods', { responseType: 'arraybuffer' });
@@ -166,7 +202,7 @@ export default {
           this.averageIndex = (this.averageIndex + 1) % this.averageValues.length;
         }, 2000); // Update every 2 seconds
       }
-    }
+    },
   },
   computed: {
     currentAverage() {
@@ -177,7 +213,11 @@ export default {
     },
     currentUnit() {
       return this.Unit[this.averageIndex] || "";
-    }
+    },
+    currentFlowmeter() {
+    return this.flowmeters[this.flowmeterIndex] || { number: '', name: '', location: '' };
+  },
+
   }
 };
 </script>

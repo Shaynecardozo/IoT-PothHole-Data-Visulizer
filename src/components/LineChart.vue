@@ -11,13 +11,16 @@
     <!-- Popup Dialog -->
     <q-dialog v-model="dialog" persistent>
       <q-card class="popup-card">
+        <q-card-actions>
+          <q-btn flat  @click="dialog = false">
+            <q-icon name="close"></q-icon>
+          </q-btn>
+        </q-card-actions>
         <q-card-section>
           <!-- Larger version of the line chart -->
           <div ref="popupLineChartContainer" class="popup-chart-container"></div>
         </q-card-section>
-        <q-card-actions class="popup-actions">
-          <q-btn flat label="Close" @click="dialog = false"></q-btn>
-        </q-card-actions>
+
       </q-card>
     </q-dialog>
   </div>
@@ -161,8 +164,8 @@ export default {
   const containerSelection = d3.select(container);
   containerSelection.html(''); // Clear any existing charts
 
-  const width = container === lineChartContainer.value ? 400 : window.innerWidth * 0.75;
-  const height = container === lineChartContainer.value ? 200 : window.innerHeight * 0.75;
+  const width = container === lineChartContainer.value ? 400 : window.innerWidth * 0.85;
+  const height = container === lineChartContainer.value ? 200 : window.innerHeight * 0.60;
   const margin = { top: 60, right: 20, bottom: 100, left: 50 }; // Adjusted top margin for legend
 
   const svg = containerSelection.append('svg')

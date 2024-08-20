@@ -1,6 +1,5 @@
 <template>
   <div @click="emitClick">
-    <!-- Existing gauge display code -->
     <div ref="gauge" class="gauge-container"></div>
   </div>
 </template>
@@ -25,9 +24,9 @@ export default {
   },
   methods: {
     createGauge() {
-      const width = 300; // Reduced width
-      const height = 200; // Reduced height
-      const margin = 10;  // Reduced margin
+      const width = 300; // Adjusted width for smaller gauge
+      const height = 200; // Adjusted height for smaller gauge
+      const margin = 10;  // Adjusted margin
       const radius = Math.min(width, height) / 2 - margin;
 
       // Clear any existing gauge
@@ -63,23 +62,11 @@ export default {
         .attr("offset", "100%")
         .attr("stop-color", "#0a6a27");
 
-      // Foreground arc
-      this.foregroundArc = d3.arc()
-        .innerRadius(radius * 0.7)
-        .outerRadius(radius * 0.9)
-        .startAngle(-Math.PI / 2);
-
-      this.foreground = svg.append("path")
-        .datum({ endAngle: -Math.PI / 2 })
-        .attr("d", this.foregroundArc)
-        .style("fill", "none")
-        .style("stroke", "url(#gauge-gradient)")
-        .style("stroke-width", 4);
-
-      // Draw the gradient arc
+      // Draw the gradient arc with rounded corners
       const arc = d3.arc()
         .innerRadius(radius * 0.7)
         .outerRadius(radius * 0.9)
+        .cornerRadius(10) // Adds rounded corners
         .startAngle(this.scale(0))
         .endAngle(this.scale(45));
 
@@ -87,10 +74,24 @@ export default {
         .attr("d", arc)
         .style("fill", "url(#gauge-gradient)");
 
+      // Foreground arc with rounded corners
+      this.foregroundArc = d3.arc()
+        .innerRadius(radius * 0.7)
+        .outerRadius(radius * 0.9)
+        .cornerRadius(10) // Adds rounded corners
+        .startAngle(-Math.PI / 2);
+
+      this.foreground = svg.append("path")
+        .datum({ endAngle: -Math.PI / 2 })
+        .attr("d", this.foregroundArc)
+        .style("fill", "none")
+        .style("stroke", "url(#gauge-gradient)")
+        .style("stroke-width", 2);
+
       // Arrow
-      const pointerWidth = 8; // Adjusted width
+      const pointerWidth = 8; // Adjusted width for smaller gauge
       const pointerHeadLengthPercent = 0.9;
-      const pointerTailLength = 4; // Adjusted tail length
+      const pointerTailLength = 4; // Adjusted tail length for smaller gauge
       const pointerHeadLength = Math.round(radius * pointerHeadLengthPercent);
 
       const lineData = [
@@ -109,12 +110,13 @@ export default {
         .attr("d", pointerLine)
         .attr("transform", `rotate(-90)`);
 
+      // Text label (initially set to "Pressure Avg")
       svg.append("text")
         .attr("x", 0)
         .attr("y", -radius - 40) // Positioned above the gauge
         .attr("text-anchor", "middle")
-        .attr("fill",'green')
         .attr("font-size", "30px")
+        .attr("fill", "green")
         .text("Pressure Avg");
 
       // Place the value of pressureAvg below the gauge
@@ -123,8 +125,8 @@ export default {
         .attr("y", 26) // Positioned below the gauge
         .attr("text-anchor", "middle")
         .attr("font-size", "18px")
-        .attr("font-weight",'800')
-        .attr("fill","green")
+        .attr("font-weight", '800')
+        .attr("fill", "green")
         .text(`${this.displayedValue.toFixed(2)} Kg/cm²`);
 
       // Reading labels every 5 units
@@ -196,10 +198,8 @@ export default {
 .gauge-container {
   display: flex;
   margin-top: -20px;
-
   justify-content: center;
   align-items: center;
   max-width: 100%; /* Ensure it fits within its container */
-  /* height: auto;    Allow height to adjust based on content */
 }
 </style>

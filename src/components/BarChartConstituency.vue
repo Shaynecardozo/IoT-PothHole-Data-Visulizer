@@ -10,13 +10,16 @@
     <!-- Popup Dialog -->
     <q-dialog v-model="dialog" persistent>
       <q-card class="popup-card">
+        <q-card-actions>
+          <q-btn flat  @click="dialog = false">
+            <q-icon name="close"></q-icon>
+          </q-btn>
+        </q-card-actions>
         <q-card-section>
           <!-- Larger version of the bar chart -->
           <div ref="popupBarChartContainer" class="popup-chart-container"></div>
         </q-card-section>
-        <q-card-actions>
-          <q-btn flat label="Close" @click="dialog = false"></q-btn>
-        </q-card-actions>
+
       </q-card>
     </q-dialog>
   </div>
@@ -105,9 +108,9 @@ export default {
       containerSelection.html(""); // Clear any existing charts
 
       const width =
-        container === barChartContainer.value ? 600 : window.innerWidth * 0.75;
+        container === barChartContainer.value ? 600 : window.innerWidth * 0.85;
       const height =
-        container === barChartContainer.value ? 200 : window.innerHeight * 0.75;
+        container === barChartContainer.value ? 200 : window.innerHeight * 0.60;
       const margin = { top: 80, right: 20, bottom: 80, left: 50 };
 
       const svg = containerSelection

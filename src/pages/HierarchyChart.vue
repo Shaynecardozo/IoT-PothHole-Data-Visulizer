@@ -1,20 +1,13 @@
 <template>
-  <q-page >
-    <main style="border:1px solid gainsboro; border-radius: 5px;" class="q-ma-lg q-pa-md">
+  <q-page>
+    <main
+      style="border: 1px solid gainsboro; border-radius: 5px"
+      class="q-ma-lg q-pa-md"
+    >
       <h3 class="q-ma-none q-mb-lg row items-center" style="color: green">
         <q-icon name="water_drop" class="q-mr-md" /> <span> Flowmeters</span>
       </h3>
-      <q-expansion-item
-        v-for="(tree, index) in trees"
-        :key="index"
-        class="tree-expansion"
-        expand-separator
-        :default-opened="index === 0"
-        :label="tree.data.name"
-        icon="gas_meter"
-      >
-        <div :id="'tree-' + index" class="chart-container"></div>
-      </q-expansion-item>
+      <div id="chart-container" class="chart-container"></div>
 
       <!-- Popup Dialog -->
       <q-dialog v-model="showPopup">
@@ -27,7 +20,6 @@
               Flowmeter Details
             </div>
           </q-card-section>
-
           <q-card-section
             class="q-mx-sm"
             style="border: 2px solid black; border-radius: 10px"
@@ -81,7 +73,6 @@ export default {
   data() {
     return {
       sensorsData: null,
-      trees: [], // Array to store tree data for each card
       showPopup: false, // State for controlling the popup
       popupNode: {}, // Data for the clicked node
     };
@@ -91,50 +82,42 @@ export default {
       try {
         const response = await axios.get("src/assets/SensorsDataInterns.json");
         this.sensorsData = response.data;
-        this.drawCharts();
+        this.drawChart();
       } catch (error) {
         console.error("Error fetching the data:", error);
       }
     },
-    drawCharts() {
+    drawChart() {
       const processedData = this.processData(this.sensorsData);
-      this.trees = Object.keys(processedData).map((key, index) => {
-        const treeData = processedData[key];
-        return {
-          key,
-          svgId: `tree-${index}`,
-          data: treeData,
-        };
-      });
-
-      this.$nextTick(() => {
-        this.trees.forEach((tree) => {
-          this.drawTree(tree);
-        });
-      });
-    },
-    drawTree(tree) {
+      const flowmeterCount = Object.keys(processedData).length;
+      const heightPerFlowmeter = 600; // Adjust as needed
+      const chartHeight = Math.max(flowmeterCount * heightPerFlowmeter, 600); // Minimum height is 600px
       const width = 1280;
-      const height = 600;
 
       const svg = d3
-        .select(`#${tree.svgId}`)
+        .select("#chart-container")
         .append("svg")
         .attr("width", width)
-        .attr("height", height)
+        .attr("height", chartHeight)
         .append("g")
         .attr("transform", "translate(50,50)");
 
-      const root = d3.hierarchy(tree.data);
+      // Main Flowmeter Node
+      const mainNode = {
+        name: "Flowmeters", // Principal root node label
+        children: Object.values(processedData),
+      };
+
+      const root = d3.hierarchy(mainNode);
       const treeLayout = d3
         .tree()
-        .size([width - 100, height - 100])
-        .separation((a, b) => (a.parent === b.parent ? 1.55 : 2));
+        .size([chartHeight - 100, width - 200]) // Swapping width and height for horizontal layout
+        .separation((a, b) => (a.parent === b.parent ? 2 : 3));
 
       treeLayout(root);
 
-      // Draw the links
-      svg
+      // Add links with animation
+      const links = svg
         .selectAll("path.link")
         .data(root.links())
         .enter()
@@ -144,52 +127,77 @@ export default {
           "d",
           d3
             .linkHorizontal()
-            .x((d) => d.x)
-            .y((d) => d.y)
+            .x((d) => d.y)
+            .y((d) => d.x)
         )
         .attr("stroke", "darkgreen")
         .attr("stroke-width", 1)
-        .attr("fill", "none");
+        .attr("fill", "none")
+        .style("opacity", 0);
 
-      // Draw the nodes as rectangles
-      svg
+      // Add nodes with animation
+      const nodes = svg
         .selectAll("rect.node")
         .data(root.descendants())
         .enter()
         .append("rect")
         .attr("class", "node")
-        .attr("x", (d) => d.x - 37)
-        .attr("y", (d) => d.y - 20)
+        .attr("x", (d) => d.y - 37)
+        .attr("y", (d) => d.x - 20)
         .attr("width", 75)
         .attr("height", 40)
-        .attr("fill", "green")
+        .attr("fill", (d) => (d.depth === 0 ? "blue" : "green")) // Color the main root node differently
         .attr("stroke", "black")
-        .attr("stroke-width", 2)
+        .attr("stroke-width", 1)
+        .attr("rx", "15")
+        .attr("ry", "15")
         .style("cursor", "pointer")
+        .style("opacity", 0)
         .on("click", (event, d) => {
-          this.popupNode = d.data; // Set the node data for the popup
-          this.showPopup = true; // Show the popup dialog
+          if (d.depth > 0) {
+            // Only show popup for non-main nodes
+            this.popupNode = d.data;
+            this.showPopup = true;
+          }
         });
 
-      // Add labels to the nodes
-      svg
+      // Add labels to the nodes with animation
+      const labels = svg
         .selectAll("text.label")
         .data(root.descendants())
         .enter()
         .append("text")
         .attr("class", "label")
-        .attr("x", (d) => d.x)
-        .attr("y", (d) => d.y + 10)
+        .attr("x", (d) => d.y)
+        .attr("y", (d) => d.x + 10)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "azure")
         .style("cursor", "pointer")
-        .text((d) => (d.parent === null ? d.data.name : d.data.id))
+        .style("opacity", 0)
+        .text((d) => {
+          if (d.depth === 0) {
+            return d.data.name; // Principal root node (Flowmeter)
+          } else if (d.depth === 1) {
+            return d.data.name; // Root nodes of each flowmeter
+          } else {
+            return d.data.position.split(".").pop(); // Other nodes show their level
+          }
+        })
         .on("click", (event, d) => {
-          this.popupNode = d.data; // Set the node data for the popup
-          this.showPopup = true; // Show the popup dialog
+          if (d.depth > 0) {
+            // Only show popup for non-main nodes
+            this.popupNode = d.data;
+            this.showPopup = true;
+          }
         });
-      // Display name if root node, otherwise display id
+
+      // Animation
+      nodes.transition().duration(1000).style("opacity", 1);
+
+      labels.transition().duration(1000).style("opacity", 1);
+
+      links.transition().duration(1000).delay(500).style("opacity", 1);
     },
 
     processData(data) {
@@ -244,27 +252,9 @@ export default {
 </script>
 
 <style scoped>
-.tree-expansion {
-  margin-bottom: 20px;
-  box-shadow: 2px 2px 8px rgba(57, 179, 71, 0.837);
-  font-size: 30px;
-  font-weight: bold;
-  color: green;
-}
-
-.rootname {
-  font-weight: bold;
-  font-size: 3rem;
-  display: flex;
-  margin: 10px 10px;
-  gap: 10px;
-  align-items: center;
-  color: green;
-}
-
 .chart-container {
   width: 100%;
-  height: 600px; /* Adjust height as needed */
+  height: fit-content; /* Adjust height as needed */
   overflow: hidden; /* Prevents overflow issues */
   display: flex;
   justify-content: center;
@@ -272,11 +262,6 @@ export default {
 
 svg {
   background-color: #f9f9f9;
-}
-
-.popup-details h4 {
-  color: #146c2de7;
-  font-weight: bold;
 }
 
 .custom-dialog {

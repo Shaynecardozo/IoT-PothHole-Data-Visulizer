@@ -1,13 +1,14 @@
 <template>
-  <q-layout view="hHh lpR fFf">
+  <q-layout  view="hHh lpR fFf">
     <!-- Header with Three-Dot Button -->
-    <q-header style="height: 50px;" class="bg-drawer text-white row items-center">
+    <q-header style="height: 50px; padding-right: 16px;" class="bg-drawer text-white row items-center">
       <q-btn v-if="checklogin" flat dense round icon="menu" @click="drawer = !drawer" class="text-white" />
-      <div class="q-ml-xl text-h6">Iot Pothole</div>
+      <q-space></q-space>
+      <div class="q-ml-xl text-h6 ">FlowTrack Analytics</div>
     </q-header>
 
     <!-- Drawer/Sidebar -->
-    <q-drawer bordered v-if="checklogin" v-model="drawer" :width="220" side="left"   content-class="bg-drawer" class="q-mt-md">
+    <q-drawer v-if="checklogin" v-model="drawer" :width="220" side="left" bordered  content-class="bg-drawer" class="q-mt-md">
       <q-list>
         <!-- Landing Section with Dropdown -->
 
@@ -26,7 +27,7 @@
 
         <!-- Flowmeter Section with Dropdown -->
         <q-expansion-item
-          label="Flowmeter"
+          label="IOT"
           icon="water"
           :default-opened="false"
           class="text-bold"
@@ -75,7 +76,7 @@
                   style="gap:10px"
               class="rounded-item row q-ml-md row justify-start items-center"
             >
-              <q-icon name="stacked_bar_chart" size="xs" :color="isActiveRoute('/Hierarchy') ? 'white' : 'black'" />
+              <q-icon name="account_tree" size="xs" :color="isActiveRoute('/Hierarchy') ? 'white' : 'black'" />
               <q-item-section>Hierarchy Chart</q-item-section>
             </q-item>
           </q-list>
@@ -120,6 +121,17 @@
           </q-list>
         </q-expansion-item>
       </q-list>
+      <q-list>
+            <q-item
+              clickable
+              style="gap:32px; font-weight: bold"
+              class="rounded-item row justify-start items-center"
+              @click="navigateTo('/')"
+            >
+              <q-icon name="logout" size="sm"  />
+              <q-item-section >Logout</q-item-section>
+            </q-item>
+          </q-list>
     </q-drawer>
 
     <!-- Page Content -->
@@ -155,6 +167,9 @@ export default {
     };
 
     const navigateTo = (path) => {
+      if(path==='/'){
+        store.updateLogin;
+      }
       router.push(path);
     };
 
@@ -204,9 +219,7 @@ export default {
 }
 
 .q-item:hover {
-  background-color: rgb(69, 255, 85) !important; /* Highlight background on hover */
-  /* color: rgb(248, 248, 248) !important; Highlight background on hover */
-
+  background-color: rgb(114, 171, 140) !important; /* Highlight background on hover */
 }
 
 </style>

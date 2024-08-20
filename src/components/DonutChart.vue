@@ -14,6 +14,11 @@
     <!-- Popup Dialog -->
     <q-dialog v-model="dialog" persistent>
       <q-card class="popup-card">
+        <q-card-actions>
+          <q-btn flat  @click="dialog = false">
+            <q-icon name="close"></q-icon>
+          </q-btn>
+        </q-card-actions>
         <q-card-section>
           <!-- Larger version of the donut chart -->
           <div class="legend q-mb-md">
@@ -22,9 +27,7 @@
           </div>
           <svg ref="popupDonutChart" class="popup-donut-chart"></svg>
         </q-card-section>
-        <q-card-actions>
-          <q-btn flat label="Close" @click="dialog = false"></q-btn>
-        </q-card-actions>
+
       </q-card>
     </q-dialog>
   </div>
@@ -57,8 +60,8 @@ export default {
       const svg = d3.select(container);
       svg.selectAll("*").remove(); // Clear previous chart
 
-      const width = container === popupDonutChart.value ? 500 : 335; // Larger size for popup
-      const height = container === popupDonutChart.value ? 500 : 335; // Larger size for popup
+      const width = container === popupDonutChart.value ? 450 : 335; // Larger size for popup
+      const height = container === popupDonutChart.value ? 350 : 335; // Larger size for popup
       const radius = Math.min(width, height) / 2;
       const innerRadius = radius * 0.4; // Inner radius for donut effect
 
@@ -182,8 +185,8 @@ export default {
   text-align: center;
 }
 .popup-card {
-  width: 80vw;
-  height: 80vh;
+  width:fit-content;
+  height:fit-content;
 }
 .popup-donut-chart {
   width: 100%;
@@ -206,10 +209,10 @@ export default {
   margin-right: 10px;
 }
 .fixed {
-  background-color: #90ee90; /* Fixed color */
+  background-color: #4caf50; /* Fixed color */
   position: relative;
 }
 .unfixed {
-  background-color: #138808; /* Unfixed color */
+  background-color:#2f4550; /* Unfixed color */
 }
 </style>
