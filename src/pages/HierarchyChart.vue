@@ -225,7 +225,7 @@ export default {
           } else if (d.depth === 1) {
             return d.data.name; // Root nodes of each flowmeter
           } else {
-            return d.data.id; // Other nodes show their level
+            return d.data.id; // Other nodes show their id
           }
         })
         .on("click", (event, d) => {
