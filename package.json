@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "name": "example-grp",
   "version": "0.0.1",
@@ -33,3 +34,40 @@
     "yarn": ">= 1.21.1"
   }
 }
+=======
+{
+  "name": "example-grp",
+  "version": "0.0.1",
+  "description": "A Quasar Project",
+  "productName": "Quasar App",
+  "author": "Nemofiii <namrahjuweriasayed@gmail.com>",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 0",
+    "dev": "quasar dev",
+    "build": "quasar build"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.16.12",
+    "axios": "^1.2.1",
+    "d3": "^7.9.0",
+    "leaflet": "^1.9.4",
+    "leaflet.heat": "^0.2.0",
+    "pinia": "^2.0.11",
+    "quasar": "^2.16.8",
+    "vue": "^3.4.18",
+    "vue-router": "^4.0.12",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@quasar/app-vite": "^1.9.0",
+    "autoprefixer": "^10.4.2",
+    "postcss": "^8.4.14"
+  },
+  "engines": {
+    "node": "^20 || ^18 || ^16",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  }
+}
+>>>>>>> 705830440d4df675cf602c678e3d184c68ab2c17
