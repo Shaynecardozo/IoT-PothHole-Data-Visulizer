@@ -55,8 +55,8 @@ export default {
       "#8FBC8F", // DarkSeaGreen
       "#ADFF2F", // GreenYellow
     ]);
-    const startDate1 = ref(new Date(-8640000000000000));
-    const endDate1 = ref(new Date(8640000000000000));
+    const startDate = ref(new Date(-8640000000000000));
+    const endDate = ref(new Date(8640000000000000));
     
     const loadData = async () => {
       try {
@@ -87,8 +87,8 @@ export default {
       sensors,
       colors,
       loadData,
-      startDate1,
-      endDate1
+      startDate,
+      endDate
     };
   }
 };
