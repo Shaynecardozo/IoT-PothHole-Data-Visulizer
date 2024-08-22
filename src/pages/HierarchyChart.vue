@@ -326,7 +326,6 @@ export default {
       this.showAddNodeDialog = false;
       this.newNode = { id: '', name: '', location: '' };
     },
-
     getChildCount(node) {
       return this.sensorsData.filter(item =>
         item.position.startsWith(node.position + '.') &&
@@ -369,7 +368,7 @@ export default {
       return !this.popupNode.children || this.popupNode.children.length === 0;
     }
   },
-  mounted() {
+  mounted() {  //lifecycle hook
     this.fetchData();
   },
 };
