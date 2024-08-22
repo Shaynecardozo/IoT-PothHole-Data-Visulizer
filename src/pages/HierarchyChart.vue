@@ -81,7 +81,7 @@ export default {
       sensorsData: null,
       showPopup: false, // State for controlling the popup
       popupNode: {}, // Data for the clicked node
-      showAddNodeDialog: false,
+      showAddNodeDialog: false,  //add node dialogue
       newNode: {
         id: '',
         name: '',
