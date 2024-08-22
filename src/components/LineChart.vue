@@ -1,8 +1,8 @@
 <template>
   <div class="card line-chart">
     <!-- Icon with click event to open popup -->
-    <span style="font-size: 20px; font-weight:500;color:green;">
-      Number Of Fixed And Unfixed Complaints
+    <span class="q-ml-xl" style="font-size: 20px; font-weight:500;color:green;">
+      Number Of Verified Complaints
      </span>
     <q-icon name="open_in_full" class="icon" @click="openPopup"></q-icon>
 

@@ -314,14 +314,40 @@ export default {
         return;
       }
 
-      const newPosition = this.popupNode.position + '.' + (this.getChildCount(this.popupNode) + 1);
+      console.log("Adding new node:");
+      console.log("Parent node:", this.popupNode);
+
+      // Find the maximum child number for the current parent
+      const childrenOfParent = this.sensorsData.filter(item =>
+        item.position.startsWith(this.popupNode.position + '.') &&
+        item.position.split('.').length === this.popupNode.position.split('.').length + 1
+      );
+
+      console.log("Existing children:", childrenOfParent);
+
+      const maxChildNumber = childrenOfParent.reduce((max, child) => {
+        const childNumber = parseInt(child.position.split('.').pop());
+        return childNumber > max ? childNumber : max;
+      }, 0);
+
+      console.log("Max child number:", maxChildNumber);
+
+      // const newPosition = this.popupNode.position + '.' + (this.getChildCount(this.popupNode) + 1);
+      const newPosition = `${this.popupNode.position}.${maxChildNumber + 1}`;
+      console.log("New position:", newPosition);
+
       const newNodeData = {
         ...this.newNode,
         position: newPosition,
       };
 
+      console.log("New node data:", newNodeData);
+
       this.sensorsData.push(newNodeData);
-      this.drawChart();
+      console.log("Updated sensorsData:", this.sensorsData);
+
+      this.refreshTreeStructure();
+      // this.drawChart();
 
       this.showAddNodeDialog = false;
       this.newNode = { id: '', name: '', location: '' };
@@ -338,15 +364,16 @@ export default {
         return;
       }
 
-      const parentPosition = this.popupNode.position.split('.').slice(0, -1).join('.');
-      const parentNode = this.findNodeByPosition(parentPosition);
+      // const parentPosition = this.popupNode.position.split('.').slice(0, -1).join('.');
+      // const parentNode = this.findNodeByPosition(parentPosition);
 
-      if (parentNode) {
-        parentNode.children = parentNode.children.filter(child => child.position !== this.popupNode.position);
-      }
+      // if (parentNode) {
+      //   parentNode.children = parentNode.children.filter(child => child.position !== this.popupNode.position);
+      // }
 
       this.sensorsData = this.sensorsData.filter(node => node.position !== this.popupNode.position);
-
+      this.refreshTreeStructure();
+      
       this.drawChart();
       this.showPopup = false;
     },
@@ -362,10 +389,16 @@ export default {
 
       return currentNode;
     },
+    refreshTreeStructure() {
+      // Re-process the data and redraw the chart
+      console.log("Refreshing tree structure");
+      const processedData = this.processData(this.sensorsData);
+      this.drawChart();
+    },
   },
   computed: {
     isLeafNode() {
-      return !this.popupNode.children || this.popupNode.children.length === 0;
+      return !this.sensorsData.some(node => node.position.startsWith(this.popupNode.position + '.'));
     }
   },
   mounted() {  //lifecycle hook
