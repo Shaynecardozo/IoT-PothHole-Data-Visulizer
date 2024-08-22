@@ -321,6 +321,7 @@ export default {
       };
 
       this.sensorsData.push(newNodeData);
+      this.refreshTreeStructure();
       this.drawChart();
 
       this.showAddNodeDialog = false;
@@ -338,15 +339,16 @@ export default {
         return;
       }
 
-      const parentPosition = this.popupNode.position.split('.').slice(0, -1).join('.');
-      const parentNode = this.findNodeByPosition(parentPosition);
+      // const parentPosition = this.popupNode.position.split('.').slice(0, -1).join('.');
+      // const parentNode = this.findNodeByPosition(parentPosition);
 
-      if (parentNode) {
-        parentNode.children = parentNode.children.filter(child => child.position !== this.popupNode.position);
-      }
+      // if (parentNode) {
+      //   parentNode.children = parentNode.children.filter(child => child.position !== this.popupNode.position);
+      // }
 
       this.sensorsData = this.sensorsData.filter(node => node.position !== this.popupNode.position);
-
+      this.refreshTreeStructure();
+      
       this.drawChart();
       this.showPopup = false;
     },
@@ -362,10 +364,15 @@ export default {
 
       return currentNode;
     },
+    refreshTreeStructure() {
+      // Re-process the data and redraw the chart
+      const processedData = this.processData(this.sensorsData);
+      this.drawChart();
+    },
   },
   computed: {
     isLeafNode() {
-      return !this.popupNode.children || this.popupNode.children.length === 0;
+      return !this.sensorsData.some(node => node.position.startsWith(this.popupNode.position + '.'));
     }
   },
   mounted() {  //lifecycle hook
