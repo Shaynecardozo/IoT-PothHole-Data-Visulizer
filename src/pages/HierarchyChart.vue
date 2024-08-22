@@ -314,15 +314,40 @@ export default {
         return;
       }
 
-      const newPosition = this.popupNode.position + '.' + (this.getChildCount(this.popupNode) + 1);
+      console.log("Adding new node:");
+      console.log("Parent node:", this.popupNode);
+
+      // Find the maximum child number for the current parent
+      const childrenOfParent = this.sensorsData.filter(item =>
+        item.position.startsWith(this.popupNode.position + '.') &&
+        item.position.split('.').length === this.popupNode.position.split('.').length + 1
+      );
+
+      console.log("Existing children:", childrenOfParent);
+
+      const maxChildNumber = childrenOfParent.reduce((max, child) => {
+        const childNumber = parseInt(child.position.split('.').pop());
+        return childNumber > max ? childNumber : max;
+      }, 0);
+
+      console.log("Max child number:", maxChildNumber);
+
+      // const newPosition = this.popupNode.position + '.' + (this.getChildCount(this.popupNode) + 1);
+      const newPosition = `${this.popupNode.position}.${maxChildNumber + 1}`;
+      console.log("New position:", newPosition);
+
       const newNodeData = {
         ...this.newNode,
         position: newPosition,
       };
 
+      console.log("New node data:", newNodeData);
+
       this.sensorsData.push(newNodeData);
+      console.log("Updated sensorsData:", this.sensorsData);
+
       this.refreshTreeStructure();
-      this.drawChart();
+      // this.drawChart();
 
       this.showAddNodeDialog = false;
       this.newNode = { id: '', name: '', location: '' };
@@ -366,6 +391,7 @@ export default {
     },
     refreshTreeStructure() {
       // Re-process the data and redraw the chart
+      console.log("Refreshing tree structure");
       const processedData = this.processData(this.sensorsData);
       this.drawChart();
     },
