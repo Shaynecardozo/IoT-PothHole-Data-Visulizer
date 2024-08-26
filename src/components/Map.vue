@@ -377,22 +377,27 @@ export default {
 </script>
 
 <style scoped>
+
 #map {
   width: 100%;
 }
-.custom-icon {
+
+.custom-icon
+{
   width: 24px;
   height: 24px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .custom-dialog {
   position: absolute;
   max-width: 28rem;
   width: 100%;
   font-size: 15px;
 }
+
 .drawer {
   width: 250px;
   height: calc(100vh - 50px); /* Adjust height to be below the navbar */
